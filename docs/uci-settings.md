@@ -54,9 +54,10 @@ Build Windows: cross-compilado do WSL com `x86_64-w64-mingw32-g++ (GCC) 16-win32
 **Conclusão: paridade.** A diferença fica dentro do ruído de turbo/térmico. Não há ganho
 em rodar nativo no Windows — escolha pela conveniência do árbitro/GUI, não por desempenho.
 
-Binário de entrega: `bin/stockfish.exe` (102 MB). Roda sozinho, sem nenhum arquivo ao lado:
-a rede NNUE está embutida no executável. Validado em diretório vazio:
-`depth 33`, 70,2M nós, 7,02M nps em 10 s.
+O binário PGO medido acima não é mais o de `bin/`. Hoje `bin/stockfish.exe` é o build
+*universal* gerado por `ui/build.sh` (ver `interface.md`): roda sozinho, com a rede NNUE
+embutida, e escolhe a arquitetura da CPU em tempo de execução. Para campeonato, gere o
+build PGO nativo com o comando acima.
 
 ## Regra do Hash
 

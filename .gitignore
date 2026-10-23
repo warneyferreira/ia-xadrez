@@ -1,1 +1,2 @@
-bin/stockfish.exe
+bin/
+ui/node_modules/

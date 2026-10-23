@@ -1,0 +1,143 @@
+import type { Subprocess } from "bun";
+
+export type Score = { unit: "cp" | "mate"; value: number };
+
+/** Resultado de uma busca. `score` é do ponto de vista do lado que move (a engine). */
+export type SearchResult = { bestmove: string; depth: number; score: Score | null };
+
+type Listener = (line: string | null) => void;
+
+/** Processo UCI único. Comandos são serializados; uma nova busca/partida interrompe a anterior. */
+export class Engine {
+  private readonly proc: Subprocess<"pipe", "pipe", "inherit">;
+  private readonly listeners = new Set<Listener>();
+  private queue: Promise<unknown> = Promise.resolve();
+  private searching = false;
+  private dead = false;
+  name = "UCI engine";
+
+  constructor(path: string) {
+    this.proc = Bun.spawn([path], { stdin: "pipe", stdout: "pipe", stderr: "inherit" });
+    void this.readLoop();
+  }
+
+  private async readLoop(): Promise<void> {
+    const decoder = new TextDecoder();
+    let buf = "";
+    for await (const chunk of this.proc.stdout) {
+      buf += decoder.decode(chunk, { stream: true });
+      let nl: number;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl).replace(/\r$/, "");
+        buf = buf.slice(nl + 1);
+        for (const listener of [...this.listeners]) listener(line);
+      }
+    }
+    this.dead = true;
+    for (const listener of [...this.listeners]) listener(null);
+  }
+
+  private send(cmd: string): void {
+    if (this.dead) throw new Error("O motor foi encerrado.");
+    this.proc.stdin.write(cmd + "\n");
+    this.proc.stdin.flush();
+  }
+
+  /** Resolve com a primeira linha que satisfaz `match`; `onLine` vê todas as linhas até lá. */
+  private waitFor(match: (line: string) => boolean, onLine?: (line: string) => void): Promise<string> {
+    const { promise, resolve, reject } = Promise.withResolvers<string>();
+    if (this.dead) {
+      reject(new Error("O motor foi encerrado."));
+      return promise;
+    }
+    const listener: Listener = (line) => {
+      if (line === null) {
+        this.listeners.delete(listener);
+        reject(new Error("O motor foi encerrado."));
+        return;
+      }
+      onLine?.(line);
+      if (match(line)) {
+        this.listeners.delete(listener);
+        resolve(line);
+      }
+    };
+    this.listeners.add(listener);
+    return promise;
+  }
+
+  /** Executa `task` depois de tudo que já está na fila. */
+  private serialize<T>(task: () => Promise<T>): Promise<T> {
+    const result = this.queue.then(task, task);
+    this.queue = result.catch(() => undefined);
+    return result;
+  }
+
+  private async isReady(): Promise<void> {
+    const ready = this.waitFor((l) => l === "readyok");
+    this.send("isready");
+    await ready;
+  }
+
+  init(options: Record<string, string | number>): Promise<void> {
+    return this.serialize(async () => {
+      const uciok = this.waitFor(
+        (l) => l === "uciok",
+        (l) => {
+          if (l.startsWith("id name ")) this.name = l.slice("id name ".length);
+        },
+      );
+      this.send("uci");
+      await uciok;
+      for (const [name, value] of Object.entries(options)) this.send(`setoption name ${name} value ${value}`);
+      await this.isReady();
+    });
+  }
+
+  /** Interrompe a busca em andamento; o `bestmove` dela é descartado por quem a pediu. */
+  private interrupt(): void {
+    if (this.searching) this.send("stop");
+  }
+
+  newGame(): Promise<void> {
+    this.interrupt();
+    return this.serialize(async () => {
+      this.send("ucinewgame");
+      await this.isReady();
+    });
+  }
+
+  /** Busca a partir da posição inicial após `moves` (notação UCI), por `movetime` ms. */
+  search(moves: readonly string[], movetime: number): Promise<SearchResult> {
+    this.interrupt();
+    return this.serialize(async () => {
+      let depth = 0;
+      let score: Score | null = null;
+      const done = this.waitFor(
+        (l) => l.startsWith("bestmove "),
+        (l) => {
+          if (!l.startsWith("info ") || !l.includes(" pv ")) return;
+          const d = /\bdepth (\d+)/.exec(l);
+          const s = /\bscore (cp|mate) (-?\d+)/.exec(l);
+          if (d) depth = Number(d[1]);
+          if (s) score = { unit: s[1] as Score["unit"], value: Number(s[2]) };
+        },
+      );
+      this.send(moves.length ? `position startpos moves ${moves.join(" ")}` : "position startpos");
+      this.send(`go movetime ${movetime}`);
+      this.searching = true;
+      try {
+        const line = await done;
+        return { bestmove: line.split(" ")[1]!, depth, score };
+      } finally {
+        this.searching = false;
+      }
+    });
+  }
+
+  quit(): void {
+    if (this.dead) return;
+    this.send("quit");
+    this.proc.stdin.end();
+  }
+}

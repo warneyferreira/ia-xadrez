@@ -1,0 +1,155 @@
+:root {
+  color-scheme: dark;
+  --bg: #1e1f22;
+  --panel: #2b2d31;
+  --fg: #e8e8e8;
+  --muted: #a0a3a8;
+  --accent: #7fa650;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+}
+
+.board {
+  width: min(86vh, 92vw, 760px);
+  aspect-ratio: 1;
+}
+
+.panel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+p {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+  min-height: 1em;
+}
+
+.status {
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-height: 1.4em;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+select,
+button {
+  font: inherit;
+  color: var(--fg);
+  background: #383a40;
+  border: 1px solid #4a4d55;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #10140c;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row button {
+  flex: 1;
+}
+
+.moves {
+  margin: 0;
+  padding: 8px 8px 8px 2.6em;
+  max-height: 40vh;
+  overflow-y: auto;
+  border-radius: 6px;
+  background: #232428;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.moves:empty {
+  display: none;
+}
+
+dialog {
+  border: 0;
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--panel);
+  color: var(--fg);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+dialog p {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+dialog button {
+  font-size: 2.4rem;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  margin: 0 4px;
+}

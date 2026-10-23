@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IA Xadrez</title>
+  </head>
+  <body>
+    <main>
+      <div id="board" class="board"></div>
+      <aside class="panel">
+        <h1>IA Xadrez</h1>
+        <p id="engine-name" class="muted"></p>
+        <p id="status" class="status"></p>
+        <p id="eval" class="muted"></p>
+        <div class="controls">
+          <label>
+            Jogar de
+            <select id="color">
+              <option value="white">Brancas</option>
+              <option value="black">Pretas</option>
+              <option value="random">Aleatório</option>
+            </select>
+          </label>
+          <label>
+            Tempo da IA por lance
+            <select id="movetime">
+              <option value="500">0,5 s</option>
+              <option value="1000">1 s</option>
+              <option value="3000" selected>3 s</option>
+              <option value="5000">5 s</option>
+              <option value="10000">10 s</option>
+            </select>
+          </label>
+          <button id="new-game" class="primary">Nova partida</button>
+          <div class="row">
+            <button id="undo">Desfazer lance</button>
+            <button id="flip">Virar tabuleiro</button>
+          </div>
+        </div>
+        <ol id="moves" class="moves"></ol>
+      </aside>
+    </main>
+    <dialog id="promotion">
+      <form method="dialog">
+        <p>Promover para</p>
+        <button value="q" title="Dama">♕</button>
+        <button value="r" title="Torre">♖</button>
+        <button value="b" title="Bispo">♗</button>
+        <button value="n" title="Cavalo">♘</button>
+      </form>
+    </dialog>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>
