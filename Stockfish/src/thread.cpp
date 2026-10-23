@@ -55,7 +55,6 @@ Thread::Thread(Search::SharedState&                   sharedState,
     idx(n),
     idxInNuma(numaN),
     totalNuma(totalNumaCount),
-    nthreads(sharedState.options["Threads"]),
     stdThread(
       create_native_thread(NativeThreadOptions{}.setLargeStack(true), &Thread::idle_loop, this)) {
 
@@ -315,7 +314,7 @@ void ThreadPool::start_thinking(const OptionsMap&  options,
     }
 
     if (rootMoves.empty())
-        for (const auto& m : MoveList<LEGAL>(pos))
+        for (const auto& m : MoveList<ALL>(pos))
             rootMoves.emplace_back(m);
 
     Tablebases::Config tbConfig = Tablebases::rank_root_moves(options, pos, rootMoves);

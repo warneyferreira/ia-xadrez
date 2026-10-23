@@ -1,6 +1,7 @@
 # Configuração UCI para o campeonato
 
-Engine: `Stockfish/src/stockfish` — `dev-20260919-17a6c8f1`, arch `x86-64-avxvnni`, build PGO.
+Engine: `Stockfish/src/stockfish` — fork [vondele/Stockfish](https://github.com/vondele/Stockfish) commit `effdc3fd3`
+(rede `nn-c9e480e92425.nnue`, SFNNv18), arch `x86-64-avxvnni`, build PGO. Bench de assinatura: `1559611`.
 Máquina: Intel Core Ultra X7 358H (16 threads lógicas, híbrido P-core/E-core), 15 GB RAM, sem AVX-512, com AVX-VNNI + BMI2.
 
 ## Valores recomendados
@@ -23,14 +24,14 @@ Comando: `./stockfish bench 1024 <threads> 16 default depth`
 
 | Threads | nps | Escala |
 |---|---|---|
-| 1 | 1.097.952 | 1,00× |
-| 4 | 3.789.499 | 3,45× |
-| 6 | 4.323.140 | 3,94× |
-| 8 | 5.479.078 | 4,99× |
-| 12 | 5.974.922 | 5,44× |
-| **16** | **6.686.693** | **6,09×** |
+| 1 | 1.289.376 | 1,00× |
+| 4 | 4.838.519 | 3,75× |
+| 6 | 5.861.381 | 4,55× |
+| 8 | 7.205.684 | 5,59× |
+| 12 | 8.246.245 | 6,40× |
+| **16** | **9.520.798** | **7,38×** |
 
-Conclusão: apesar dos E-cores serem mais lentos, 16 threads ainda supera 12 em ~12%. Use 16.
+Conclusão: apesar dos E-cores serem mais lentos, 16 threads ainda supera 12 em ~15%. Use 16.
 
 Comparação de arquitetura de compilação (1 thread, média de 3 benches):
 
@@ -39,7 +40,7 @@ Comparação de arquitetura de compilação (1 thread, média de 3 benches):
 | `x86-64-avx2` | ~1.189.000 |
 | `x86-64-avxvnni` | ~1.233.000 (**+3%**) |
 
-## Windows nativo vs WSL (medido)
+## Windows nativo vs WSL (medido no motor anterior, `dev-20260919-17a6c8f1`)
 
 Build Windows: cross-compilado do WSL com `x86_64-w64-mingw32-g++ (GCC) 16-win32`,
 `make -j16 profile-build ARCH=x86-64-avxvnni COMP=mingw`. PGO completou as 4 etapas
@@ -96,7 +97,7 @@ setoption name Move Overhead value 10
 Posição: Ruy López após `e4 e5 Nf3 Nc6 Bb5`, 10 s, 16 threads, Hash 4096:
 
 ```
-info depth 33 seldepth 51 score cp -19 nodes 52933500 nps 5293350 hashfull 61
+info depth 34 seldepth 59 score cp -17 nodes 69009599 nps 6900269 hashfull 85
 bestmove g8f6 ponder e1g1
 ```
 
