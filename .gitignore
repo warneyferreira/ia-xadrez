@@ -1,2 +1,17 @@
 bin/
 ui/node_modules/
+
+# Artefatos de execução e dados grandes: versionar somente manifestos/documentação.
+logs/*
+!logs/.gitkeep
+pgn/*
+!pgn/.gitkeep
+results/*
+!results/baseline/
+!results/baseline/.gitkeep
+datasets/*
+!datasets/README.md
+openings/*.bin
+*.nnue
+*.rtbw
+*.rtbz
