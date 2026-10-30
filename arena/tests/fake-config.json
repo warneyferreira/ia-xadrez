@@ -1,0 +1,18 @@
+{
+  "match_id": "arena-fake-smoke",
+  "candidate_a": {
+    "name": "fake-a",
+    "command": ["arena/.venv/Scripts/python.exe", "arena/tests/fake_uci.py"],
+    "options": { "Threads": 1, "Hash": 16, "Ponder": false }
+  },
+  "candidate_b": {
+    "name": "fake-b",
+    "command": ["arena/.venv/Scripts/python.exe", "arena/tests/fake_uci.py"],
+    "options": { "Threads": 1, "Hash": 16, "Ponder": false }
+  },
+  "games": 2,
+  "time_control": { "base_seconds": 2, "increment_seconds": 0 },
+  "openings": { "pgn": null, "seed": 1 },
+  "max_plies": 10,
+  "output_dir": "results/arena/arena-fake-smoke-v3"
+}

@@ -1,5 +1,6 @@
 bin/
 ui/node_modules/
+ui/logs/
 
 # Artefatos de execução e dados grandes: versionar somente manifestos/documentação.
 logs/*
@@ -15,3 +16,5 @@ openings/*.bin
 *.nnue
 *.rtbw
 *.rtbz
+arena/.venv/
+__pycache__/

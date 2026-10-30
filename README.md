@@ -12,8 +12,8 @@ cada mudança deve ser pequena, reproduzível e comparada com o baseline.
 | Motor | Cópia exata de `vondele/Stockfish` no commit `effdc3fd3f6de6e75fe1374a51a7a7eed66f880b` |
 | Licença do motor | GPLv3; atribuições preservadas em `Stockfish/` |
 | Interface local | TypeScript/Bun; joga contra o motor via UCI em `127.0.0.1` |
-| Arena estatística | Ainda não implementada |
-| Controller de competição | Ainda não implementado; a UI atual é para treino, não para comandar uma partida oficial |
+| Arena estatística | Runner UCI sequencial com PGN, logs e resultados; falta confrontá-lo com binários reais |
+| Controller de competição | Modo separado com posição canônica, relógio espelhado, validação e log; requer ensaio com engine/binário reais |
 | Baseline de hardware | Pendente de protocolo reproduzível e de execução na máquina de competição |
 
 ## Como se orientar
@@ -23,6 +23,7 @@ cada mudança deve ser pequena, reproduzível e comparada com o baseline.
 - [Baseline e medição](docs/BASELINE.md) — o que registrar antes de experimentar.
 - [Autoria, origem e licença](docs/authorship/ORIGINS.md) — separação explícita do código herdado e do código da equipe.
 - [Modelo de experimento](docs/EXPERIMENT_TEMPLATE.md) — requisito para qualquer mudança de força.
+- [Procedimento de operação](docs/TOURNAMENT_RUNBOOK.md) — papéis e fluxo com tabuleiro físico.
 - [Riscos de competição](docs/RISKS_AND_GAPS.md) — lacunas que impedem usar isto como release de torneio hoje.
 
 ## Estrutura

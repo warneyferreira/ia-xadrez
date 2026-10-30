@@ -153,3 +153,155 @@ dialog button {
   padding: 0;
   margin: 0 4px;
 }
+
+.text-link {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.tournament-shell {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.tournament-header,
+.history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tournament-header h1,
+.operation-card h2,
+.history-card h2 {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.clock-grid,
+.operation-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.clock-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.clock-card,
+.operation-card,
+.status-card,
+.history-card {
+  border: 1px solid #4a4d55;
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.clock-card {
+  padding: 18px;
+}
+
+.clock-card span,
+.clock-card strong {
+  display: block;
+}
+
+.clock-card span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.clock-card strong {
+  margin-top: 4px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(2.25rem, 8vw, 4.5rem);
+  line-height: 1;
+}
+
+.clock-card[data-color="black"] {
+  background: #17181b;
+}
+
+.operation-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.operation-card,
+.status-card,
+.history-card {
+  padding: 18px;
+}
+
+.operation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.move-form {
+  display: flex;
+  gap: 8px;
+}
+
+.move-form input {
+  min-width: 0;
+  flex: 1;
+  font: 700 1.15rem ui-monospace, Consolas, monospace;
+  text-transform: lowercase;
+}
+
+.engine-card {
+  border-color: var(--accent);
+}
+
+.engine-move {
+  margin: auto 0 0;
+  font: 800 clamp(1.7rem, 4vw, 2.8rem) ui-monospace, Consolas, monospace;
+  color: var(--accent);
+}
+
+.status-card,
+.history-card {
+  margin-top: 16px;
+}
+
+.error {
+  margin-top: 8px;
+  color: #ff8585;
+  font-weight: 700;
+}
+
+.mono {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.badge {
+  border: 1px solid #4a4d55;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.operator-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 760px) {
+  .tournament-shell { padding: 16px; }
+  .operation-grid { grid-template-columns: 1fr; }
+  .move-form { flex-direction: column; }
+  .move-form button { min-height: 44px; }
+}

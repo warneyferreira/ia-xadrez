@@ -4,6 +4,7 @@ export type Score = { unit: "cp" | "mate"; value: number };
 
 /** Resultado de uma busca. `score` é do ponto de vista do lado que move (a engine). */
 export type SearchResult = { bestmove: string; depth: number; score: Score | null };
+export type ClockSearch = { whiteMillis: number; blackMillis: number; incrementMillis?: number };
 
 type Listener = (line: string | null) => void;
 
@@ -125,6 +126,37 @@ export class Engine {
       );
       this.send(moves.length ? `position startpos moves ${moves.join(" ")}` : "position startpos");
       this.send(`go movetime ${movetime}`);
+      this.searching = true;
+      try {
+        const line = await done;
+        return { bestmove: line.split(" ")[1]!, depth, score };
+      } finally {
+        this.searching = false;
+      }
+    });
+  }
+
+  /** Busca usando os relógios reais da partida, no formato UCI `go wtime/btime`. */
+  searchWithClocks(moves: readonly string[], clocks: ClockSearch): Promise<SearchResult> {
+    this.interrupt();
+    return this.serialize(async () => {
+      let depth = 0;
+      let score: Score | null = null;
+      const done = this.waitFor(
+        (l) => l.startsWith("bestmove "),
+        (l) => {
+          if (!l.startsWith("info ") || !l.includes(" pv ")) return;
+          const d = /\bdepth (\d+)/.exec(l);
+          const s = /\bscore (cp|mate) (-?\d+)/.exec(l);
+          if (d) depth = Number(d[1]);
+          if (s) score = { unit: s[1] as Score["unit"], value: Number(s[2]) };
+        },
+      );
+      const white = Math.max(0, Math.floor(clocks.whiteMillis));
+      const black = Math.max(0, Math.floor(clocks.blackMillis));
+      const increment = Math.max(0, Math.floor(clocks.incrementMillis ?? 0));
+      this.send(moves.length ? `position startpos moves ${moves.join(" ")}` : "position startpos");
+      this.send(`go wtime ${white} btime ${black} winc ${increment} binc ${increment}`);
       this.searching = true;
       try {
         const line = await done;

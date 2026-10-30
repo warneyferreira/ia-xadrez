@@ -1,0 +1,18 @@
+{
+  "match_id": "arthur-vs-vanderlei-smoke",
+  "candidate_a": {
+    "name": "arthur-time-v1",
+    "command": ["bin/arthur-time-v1/stockfish.exe"],
+    "options": { "Threads": 4, "Hash": 1024, "Ponder": false }
+  },
+  "candidate_b": {
+    "name": "vanderlei-book-v1",
+    "command": ["bin/vanderlei-book-v1/stockfish.exe"],
+    "options": { "Threads": 4, "Hash": 1024, "Ponder": false }
+  },
+  "games": 20,
+  "time_control": { "base_seconds": 60, "increment_seconds": 0.6 },
+  "openings": { "pgn": null, "seed": 20261029 },
+  "max_plies": 512,
+  "output_dir": "results/arena/arthur-vs-vanderlei-smoke"
+}
