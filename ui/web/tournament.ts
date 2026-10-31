@@ -1,143 +1,243 @@
-import "./style.css";
+import './style.css';
+import { Chess } from 'chess.js';
+import { Chessground } from 'chessground';
+import type { Key } from 'chessground/types';
+import 'chessground/assets/chessground.base.css';
+import 'chessground/assets/chessground.brown.css';
+import 'chessground/assets/chessground.cburnett.css';
+import { ChessSounds } from './sounds.ts';
 
-type Color = "white" | "black";
-type Phase = "idle" | "ready" | "engine-thinking" | "awaiting-engine-confirmation" | "awaiting-opponent" | "finished" | "error";
-type Score = { unit: "cp" | "mate"; value: number };
-type Pending = { bestmove: string; depth: number; score: Score | null } | null;
-type TournamentState = {
-  phase: Phase;
-  engineColor: Color | null;
-  turn: Color;
+type State = {
+  phase: string;
+  engineColor: 'white' | 'black' | null;
+  turn: string;
   fen: string;
   moves: string[];
+  san: string[];
   whiteMillis: number;
   blackMillis: number;
-  running: Color | null;
-  pending: Pending;
-  gameOver: boolean;
+  elapsedMillis: number;
+  initialMillis: number;
+  running: string | null;
+  pending: {
+    bestmove: string;
+    depth: number;
+    score: { unit: string; value: number } | null;
+    nps?: number;
+  } | null;
   error: string | null;
+  outcome: string | null;
+  pgn: string;
+};
+const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+const sounds = new ChessSounds(el<HTMLButtonElement>('sound-toggle'));
+const board = Chessground(el('physical-board'), {
+  viewOnly: true,
+  animation: { enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches, duration: 160 },
+});
+let state: State | null = null;
+let actionPending = false,
+  refreshing = false,
+  revision = 0;
+let localError = '';
+const clock = (ms: number) =>
+  `${Math.floor(Math.max(0, ms) / 60000)
+    .toString()
+    .padStart(2, '0')}:${Math.floor((Math.max(0, ms) / 1000) % 60)
+    .toString()
+    .padStart(2, '0')}`;
+const instructions: Record<string, string> = {
+  idle: '1. Prepare a cor e o tempo da nossa IA.',
+  ready: 'Partida preparada. Inicie junto com o relógio físico.',
+  'engine-thinking': 'Calculando a nossa resposta. Aguarde.',
+  'awaiting-engine-confirmation': 'Mova a peça indicada, pressione o relógio físico e confirme na tela.',
+  'awaiting-opponent': 'É a vez do adversário. Registre o lance quando ele jogar.',
+  finished: 'Sessão encerrada. Salve o PGN antes de preparar outra rodada.',
+  error: 'Falha operacional. Confira o tabuleiro e siga a orientação do árbitro.',
 };
 
-const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const els = {
-  color: byId<HTMLSelectElement>("engine-color"),
-  initialTime: byId<HTMLSelectElement>("initial-time"),
-  newGame: byId<HTMLButtonElement>("new-game"),
-  startGame: byId<HTMLButtonElement>("start-game"),
-  opponentForm: byId<HTMLFormElement>("opponent-form"),
-  opponentMove: byId<HTMLInputElement>("opponent-move"),
-  sendOpponent: byId<HTMLButtonElement>("send-opponent"),
-  engineMove: byId<HTMLParagraphElement>("engine-move"),
-  engineDetail: byId<HTMLParagraphElement>("engine-detail"),
-  confirmEngine: byId<HTMLButtonElement>("confirm-engine"),
-  whiteClock: byId<HTMLElement>("white-clock"),
-  blackClock: byId<HTMLElement>("black-clock"),
-  phase: byId<HTMLParagraphElement>("phase"),
-  error: byId<HTMLParagraphElement>("error"),
-  fen: byId<HTMLParagraphElement>("fen"),
-  moves: byId<HTMLOListElement>("moves"),
-  runningSide: byId<HTMLElement>("running-side"),
-};
-
-let state: TournamentState | null = null;
-let requestInFlight = false;
-
-function formatClock(milliseconds: number): string {
-  const total = Math.max(0, Math.ceil(milliseconds / 1000));
-  return `${Math.floor(total / 60).toString().padStart(2, "0")}:${(total % 60).toString().padStart(2, "0")}`;
-}
-
-function describePhase(next: TournamentState): string {
-  if (next.phase === "ready") return "Partida preparada. Inicie junto com o relógio físico.";
-  if (next.phase === "engine-thinking") return "Engine calculando. Aguarde a nossa jogada.";
-  if (next.phase === "awaiting-engine-confirmation") return "Faça a jogada da engine no tabuleiro, pressione o relógio físico e confirme aqui.";
-  if (next.phase === "awaiting-opponent") return "Aguardando a jogada do adversário.";
-  if (next.phase === "finished") return "Partida encerrada.";
-  if (next.phase === "error") return "ERRO OPERACIONAL: não prossiga antes de conferir posição e relógio.";
-  return "Aguardando nova partida.";
-}
-
-function engineMoveText(pending: Pending): string {
-  if (!pending) return "—";
-  return `${pending.bestmove.slice(0, 2)} → ${pending.bestmove.slice(2, 4)}${pending.bestmove[4] ? ` = ${pending.bestmove[4].toUpperCase()}` : ""}`;
-}
-
-function sync(next: TournamentState): void {
+function sync(next: State) {
+  const previous = state;
   state = next;
-  els.whiteClock.textContent = formatClock(next.whiteMillis);
-  els.blackClock.textContent = formatClock(next.blackMillis);
-  els.phase.textContent = describePhase(next);
-  els.fen.textContent = next.fen;
-  els.engineMove.textContent = next.phase === "awaiting-engine-confirmation" ? engineMoveText(next.pending) : "—";
-  els.engineDetail.textContent = next.pending ? `Profundidade ${next.pending.depth}${next.pending.score ? ` · avaliação ${next.pending.score.unit} ${next.pending.score.value}` : ""}` : "A posição e os relógios serão enviados ao Stockfish.";
-  els.error.hidden = !next.error;
-  els.error.textContent = next.error ?? "";
-  els.runningSide.textContent = next.running === "white" ? "Relógio: brancas" : next.running === "black" ? "Relógio: pretas" : "Parado";
-  els.moves.replaceChildren(...next.moves.map((move) => {
-    const item = document.createElement("li");
-    item.textContent = move;
-    return item;
-  }));
-
-  els.newGame.disabled = next.phase === "engine-thinking" || next.phase === "awaiting-engine-confirmation";
-  els.startGame.disabled = next.phase !== "ready";
-  els.opponentMove.disabled = next.phase !== "awaiting-opponent";
-  els.sendOpponent.disabled = next.phase !== "awaiting-opponent";
-  els.confirmEngine.disabled = next.phase !== "awaiting-engine-confirmation";
-  if (next.phase === "awaiting-opponent") els.opponentMove.focus();
-}
-
-async function api(path: string, body?: object): Promise<TournamentState> {
-  const response = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : undefined);
-  const data = (await response.json()) as TournamentState | { error: string; state?: TournamentState };
-  if (!response.ok) {
-    if ("state" in data && data.state) sync(data.state);
-    throw new Error("error" in data ? (data.error ?? `HTTP ${response.status}`) : `HTTP ${response.status}`);
+  el('white-clock').textContent = clock(
+    Math.ceil((next.phase === 'idle' ? next.initialMillis : next.whiteMillis) / 1000) * 1000,
+  );
+  el('black-clock').textContent = clock(
+    Math.ceil((next.phase === 'idle' ? next.initialMillis : next.blackMillis) / 1000) * 1000,
+  );
+  el('total-clock').textContent = clock(next.elapsedMillis);
+  const instruction = next.outcome ?? instructions[next.phase] ?? next.phase;
+  if (el('phase').textContent !== instruction) el('phase').textContent = instruction;
+  el('running-side').textContent = next.running
+    ? `Relógio espelhado em andamento: ${next.running === 'white' ? 'brancas' : 'pretas'}`
+    : 'Relógios parados';
+  const error = next.error ?? localError;
+  el('error').hidden = !error;
+  el('error').textContent = error;
+  el('fen').textContent = `FEN: ${next.fen}`;
+  let san = '';
+  if (next.pending) {
+    try {
+      san = new Chess(next.fen).move(next.pending.bestmove).san;
+    } catch {
+      san = next.pending.bestmove;
+    }
   }
-  return data as TournamentState;
+  el('engine-move').textContent = next.pending
+    ? `${next.pending.bestmove.slice(0, 2)} → ${next.pending.bestmove.slice(2, 4)}${next.pending.bestmove[4] ? ` = ${next.pending.bestmove[4].toUpperCase()}` : ''}`
+    : '—';
+  el('engine-detail').textContent = next.pending
+    ? `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}`
+    : 'Aguardando a vez da nossa IA.';
+  board.set({
+    fen: next.fen,
+    orientation: next.engineColor ?? 'white',
+    check: new Chess(next.fen).inCheck(),
+    drawable: {
+      autoShapes: next.pending
+        ? [
+            {
+              orig: next.pending.bestmove.slice(0, 2) as Key,
+              dest: next.pending.bestmove.slice(2, 4) as Key,
+              brush: 'green',
+            },
+          ]
+        : [],
+    },
+  });
+  if (previous && next.moves.length > previous.moves.length) {
+    const history = new Chess();
+    let move;
+    for (const uci of next.moves) move = history.move(uci);
+    if (move)
+      sounds.play(
+        next.outcome
+          ? 'end'
+          : history.inCheck()
+            ? 'check'
+            : move.isKingsideCastle() || move.isQueensideCastle()
+              ? 'castle'
+              : move.promotion
+                ? 'promotion'
+                : move.captured
+                  ? 'capture'
+                  : 'move',
+      );
+  } else if (previous?.phase === 'engine-thinking' && next.phase === 'awaiting-engine-confirmation')
+    sounds.play('move');
+  if (!previous || next.moves.length !== previous.moves.length)
+    el('moves').replaceChildren(
+      ...next.san.map((san, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${Math.floor(i / 2) + 1}${i % 2 ? '…' : '.'} ${san} (${next.moves[i]})`;
+        return li;
+      }),
+    );
+  el<HTMLButtonElement>('new-game').disabled =
+    actionPending || !['idle', 'ready', 'finished'].includes(next.phase);
+  el<HTMLButtonElement>('start-game').disabled = actionPending || next.phase !== 'ready';
+  el<HTMLInputElement>('opponent-move').disabled = actionPending || next.phase !== 'awaiting-opponent';
+  el<HTMLButtonElement>('send-opponent').disabled = actionPending || next.phase !== 'awaiting-opponent';
+  el<HTMLButtonElement>('confirm-engine').disabled =
+    actionPending || next.phase !== 'awaiting-engine-confirmation';
+  el<HTMLButtonElement>('reconcile').disabled = actionPending || next.phase === 'engine-thinking';
+  if (previous?.phase !== next.phase && !['idle', 'ready'].includes(next.phase))
+    el<HTMLDetailsElement>('setup-details').open = false;
+  if (previous?.phase !== 'awaiting-opponent' && next.phase === 'awaiting-opponent')
+    el<HTMLInputElement>('opponent-move').focus();
 }
 
-async function refresh(): Promise<void> {
-  if (requestInFlight) return;
-  requestInFlight = true;
+async function call(path: string, body?: object) {
+  const response = await fetch(
+    path,
+    body === undefined
+      ? undefined
+      : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) },
+  );
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error ?? `HTTP ${response.status}`);
+  return data as State;
+}
+async function command(path: string, body = {}) {
+  if (actionPending) return;
+  actionPending = true;
+  revision++;
+  localError = '';
+  if (state) sync(state);
   try {
-    sync(await api("/api/tournament/status"));
-  } catch (error) {
-    els.error.hidden = false;
-    els.error.textContent = `Falha de comunicação: ${(error as Error).message}`;
+    const next = await call(path, body);
+    actionPending = false;
+    sync(next);
+    return true;
+  } catch (err) {
+    localError = (err as Error).message;
+    return false;
   } finally {
-    requestInFlight = false;
+    actionPending = false;
+    if (state) sync(state);
   }
 }
-
-els.newGame.addEventListener("click", () => void (async () => {
+el('new-game').addEventListener(
+  'click',
+  () =>
+    void command('/api/tournament/newgame', {
+      engineColor: el<HTMLSelectElement>('engine-color').value,
+      initialMillis: Number(el<HTMLSelectElement>('initial-time').value),
+    }),
+);
+el('start-game').addEventListener('click', () => void command('/api/tournament/start'));
+el('confirm-engine').addEventListener('click', () => void command('/api/tournament/confirm-engine-move'));
+el('opponent-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  void (async () => {
+    const ok = await command('/api/tournament/opponent-move', {
+      uci: el<HTMLInputElement>('opponent-move').value.trim(),
+    });
+    if (ok) el<HTMLInputElement>('opponent-move').value = '';
+  })();
+});
+el('end-session').addEventListener('click', () => {
+  if (confirm('Encerrar esta sessão? O histórico ficará no log. Isso não informa um resultado ao árbitro.'))
+    void command('/api/tournament/end');
+});
+el('reconcile').addEventListener('click', () => {
+  const parse = (id: string) => {
+    const match = /^(\d{1,2}):([0-5]\d)$/.exec(el<HTMLInputElement>(id).value.trim());
+    if (!match) throw new Error('Use mm:ss, por exemplo 12:35.');
+    return (Number(match[1]) * 60 + Number(match[2])) * 1000;
+  };
   try {
-    sync(await api("/api/tournament/newgame", { engineColor: els.color.value, initialMillis: Number(els.initialTime.value) }));
-  } catch (error) {
-    els.error.hidden = false;
-    els.error.textContent = (error as Error).message;
+    void command('/api/tournament/reconcile', {
+      whiteMillis: parse('correct-white'),
+      blackMillis: parse('correct-black'),
+    });
+  } catch (err) {
+    localError = (err as Error).message;
+    if (state) sync(state);
   }
-})());
-
-els.startGame.addEventListener("click", () => void (async () => {
-  try { sync(await api("/api/tournament/start", {})); } catch (error) { els.error.hidden = false; els.error.textContent = (error as Error).message; }
-})());
-
-els.opponentForm.addEventListener("submit", (event) => void (async () => {
-  event.preventDefault();
-  const uci = els.opponentMove.value.trim().toLowerCase();
+});
+el('save-physical').addEventListener('click', () => {
+  if (!state) return;
+  const url = URL.createObjectURL(new Blob([state.pgn], { type: 'application/x-chess-pgn' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rodada-fisica.pgn';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+async function refresh() {
+  if (refreshing || actionPending) return;
+  refreshing = true;
+  const version = revision;
   try {
-    sync(await api("/api/tournament/opponent-move", { uci }));
-    els.opponentMove.value = "";
-  } catch (error) {
-    els.error.hidden = false;
-    els.error.textContent = (error as Error).message;
+    const next = await call('/api/tournament/status');
+    if (version === revision && !actionPending) sync(next);
+  } catch (err) {
+    el('error').hidden = false;
+    el('error').textContent = `Sem comunicação: ${(err as Error).message}. Confira o relógio físico.`;
+  } finally {
+    refreshing = false;
   }
-})());
-
-els.confirmEngine.addEventListener("click", () => void (async () => {
-  try { sync(await api("/api/tournament/confirm-engine-move", {})); } catch (error) { els.error.hidden = false; els.error.textContent = (error as Error).message; }
-})());
-
+}
 await refresh();
-setInterval(() => void refresh(), 250);
+setInterval(() => void refresh(), 300);

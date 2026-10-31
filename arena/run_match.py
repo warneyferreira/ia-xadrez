@@ -154,8 +154,8 @@ def run_game(
         for color, candidate in ((chess.WHITE, white), (chess.BLACK, black)):
             starting = (color, candidate)
             engine = chess.engine.SimpleEngine.popen_uci(list(candidate.command), timeout=15)
-            engine.configure(engine_options(candidate))
             engines[color] = engine
+            engine.configure(engine_options(candidate))
             starting = None
         while len(board.move_stack) < max_plies:
             outcome = board.outcome(claim_draw=True)
@@ -193,7 +193,7 @@ def run_game(
             board.push(reply.move)
             remaining[color] += increment_seconds
         else:
-            result = "1/2-1/2"
+            result = "*"
     except (OSError, chess.engine.EngineError, chess.engine.EngineTerminatedError, TimeoutError) as exc:
         if starting is None:
             raise
@@ -260,7 +260,7 @@ def main() -> int:
 
     shuffled = list(openings)
     random.Random(seed).shuffle(shuffled)
-    schedule = [shuffled[index % len(shuffled)] for index in range(games)]
+    schedule = [shuffled[(index // 2) % len(shuffled)] for index in range(games)]
     print(f"Match: {match_id}\nA: {candidate_a.name} | B: {candidate_b.name}")
     print(f"Jogos: {games}; TC: {base_seconds}+{increment_seconds}; openings: {len(openings)}; seed: {seed}")
     for index, opening in enumerate(schedule, start=1):
@@ -279,6 +279,7 @@ def main() -> int:
     (output_dir / "config.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
     scores = {candidate_a.name: {"win": 0, "draw": 0, "loss": 0}, candidate_b.name: {"win": 0, "draw": 0, "loss": 0}}
     crashes = {candidate_a.name: 0, candidate_b.name: 0}
+    unfinished = 0
     with (output_dir / "games.pgn").open("w", encoding="utf-8") as pgn_file, (output_dir / "events.jsonl").open("w", encoding="utf-8") as event_file:
         for index, opening in enumerate(schedule, start=1):
             white, black = (candidate_a, candidate_b) if index % 2 else (candidate_b, candidate_a)
@@ -287,12 +288,15 @@ def main() -> int:
             report["game"] = index
             pgn_file.write(f"{game}\n\n")
             event_file.write(json.dumps(report, ensure_ascii=False) + "\n")
-            for candidate, color in ((white, chess.WHITE), (black, chess.BLACK)):
-                scores[candidate.name][result_for_side(report["result"], color)] += 1
+            if report['result'] == '*':
+                unfinished += 1
+            else:
+                for candidate, color in ((white, chess.WHITE), (black, chess.BLACK)):
+                    scores[candidate.name][result_for_side(report["result"], color)] += 1
             if report["crash"]:
                 crashes[report["crash"]["candidate"]] += 1
     summary = {"finished_at": dt.datetime.now(dt.timezone.utc).isoformat(), "match_id": match_id,
-               "scores": scores, "crashes": crashes, "games": games,
+               "scores": scores, "crashes": crashes, "games": games, "unfinished": unfinished,
                "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."}
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(summary, indent=2, ensure_ascii=False))

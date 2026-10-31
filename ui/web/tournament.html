@@ -3,79 +3,104 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IA Xadrez — Operação de Torneio</title>
+    <title>Torneio físico · Chess Challenge</title>
   </head>
   <body>
-    <main class="tournament-shell">
-      <header class="tournament-header">
-        <div>
-          <p class="eyebrow">CHESS CHALLENGE · OPERAÇÃO OFFLINE</p>
-          <h1>Controle de partida</h1>
+    <header class="app-header">
+      <a class="brand" href="/">CHESS <span>CHALLENGE</span></a>
+      <nav aria-label="Modos">
+        <a href="/">Treinar</a><a href="/duel">Assistir IA × IA</a
+        ><a href="/tournament" aria-current="page">Torneio físico</a
+        ><button id="sound-toggle" class="quiet-button" aria-pressed="false">Som desligado</button>
+      </nav>
+    </header>
+    <main class="study-shell tournament-dashboard">
+      <section class="board-column">
+        <section class="timing-grid physical-clocks" aria-label="Relógios espelhados">
+          <article data-color="white"><span>Brancas</span><strong id="white-clock">25:00</strong></article>
+          <article data-color="black"><span>Pretas</span><strong id="black-clock">25:00</strong></article>
+          <article><span>Duração geral</span><strong id="total-clock">00:00</strong></article>
+        </section>
+        <div id="physical-board" class="board"></div>
+        <section class="board-status" role="status">
+          <p id="phase" class="status">Prepare a partida para começar.</p>
+          <p id="running-side" class="muted">Relógios parados</p>
+          <p id="error" class="error" hidden></p>
+        </section>
+        <p class="operator-note">
+          O relógio físico e as decisões do árbitro são a autoridade. Estes relógios espelham o tempo para a
+          engine.
+        </p>
+      </section>
+      <aside class="panel analysis-panel">
+        <div class="section-heading">
+          <h1>Operação de torneio</h1>
+          <span class="badge">25+0 · OFFLINE</span>
         </div>
-        <a class="text-link" href="/">Voltar ao treino</a>
-      </header>
-
-      <section class="clock-grid" aria-label="Relógios espelhados">
-        <article class="clock-card" data-color="white">
-          <span>Brancas</span>
-          <strong id="white-clock">25:00</strong>
-        </article>
-        <article class="clock-card" data-color="black">
-          <span>Pretas</span>
-          <strong id="black-clock">25:00</strong>
-        </article>
-      </section>
-
-      <section class="operation-grid">
-        <article class="operation-card setup-card">
-          <h2>1. Preparar</h2>
-          <label>
-            A engine joga de
-            <select id="engine-color">
-              <option value="white">Brancas</option>
-              <option value="black">Pretas</option>
-            </select>
-          </label>
-          <label>
-            Tempo oficial por lado
-            <select id="initial-time">
-              <option value="900000">15 minutos</option>
-              <option value="1500000" selected>25 minutos</option>
-            </select>
-          </label>
-          <button id="new-game" class="primary">Preparar nova partida</button>
-          <button id="start-game">Iniciar quando o relógio físico iniciar</button>
-        </article>
-
-        <article class="operation-card move-card">
-          <h2>2. Lance do adversário</h2>
-          <p class="muted">Digite no formato <code>e2e4</code> ou <code>e7e8q</code>.</p>
-          <form id="opponent-form" class="move-form">
-            <input id="opponent-move" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" placeholder="e2e4" aria-label="Lance do adversário" />
-            <button id="send-opponent" type="submit">Validar e calcular</button>
+        <details id="setup-details" open class="game-settings">
+          <summary>1. Preparação da rodada</summary>
+          <div class="controls">
+            <label
+              >A nossa IA joga de<select id="engine-color">
+                <option value="white">Brancas</option>
+                <option value="black">Pretas</option>
+              </select></label
+            >
+            <label
+              >Tempo por equipe<select id="initial-time">
+                <option value="1500000" selected>25 minutos · campeonato</option>
+                <option value="900000">15 minutos · ensaio</option>
+              </select></label
+            >
+            <button id="new-game" class="primary">Preparar nova partida</button
+            ><button id="start-game">Iniciar junto com o relógio físico</button>
+          </div>
+        </details>
+        <section class="metric-section">
+          <h2>2. Registrar lance adversário</h2>
+          <p class="muted">
+            Aceita <strong>e2e4</strong>, <strong>e4</strong>, <strong>Nf3</strong>, <strong>O-O</strong>.
+            Promoção: e7e8q.
+          </p>
+          <form id="opponent-form" class="controls">
+            <label
+              >Lance recebido<input
+                id="opponent-move"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                maxlength="20"
+                placeholder="Ex.: e4" /></label
+            ><button id="send-opponent" type="submit" class="primary">
+              Conferir lance e calcular resposta
+            </button>
           </form>
-        </article>
-
-        <article class="operation-card engine-card">
-          <h2>3. Nossa jogada</h2>
-          <p id="engine-move" class="engine-move">Aguardando preparação</p>
-          <p id="engine-detail" class="muted">A posição e os relógios serão enviados ao Stockfish.</p>
-          <button id="confirm-engine" class="primary">Lance feito no tabuleiro e relógio pressionado</button>
-        </article>
-      </section>
-
-      <section class="status-card" aria-live="polite">
-        <p id="phase">Aguardando nova partida.</p>
-        <p id="error" class="error" hidden></p>
-        <p id="fen" class="muted mono"></p>
-      </section>
-
-      <section class="history-card">
-        <div class="history-heading"><h2>Histórico UCI</h2><span id="running-side" class="badge">Parado</span></div>
-        <ol id="moves" class="moves"></ol>
-      </section>
-
-      <p class="operator-note">O relógio físico do torneio é a autoridade. Esta tela espelha o tempo para a engine e registra a operação; se houver divergência, pare e reconcilie antes do próximo lance.</p>
+        </section>
+        <section class="metric-section engine-instruction">
+          <h2>3. Executar nossa jogada</h2>
+          <p id="engine-move" class="engine-move">—</p>
+          <p id="engine-detail" class="muted">Aguardando a vez da nossa IA.</p>
+          <button id="confirm-engine" class="primary">Fiz o lance e pressionei o relógio físico</button>
+        </section>
+        <section class="metric-section">
+          <div class="section-heading">
+            <h2>Histórico confirmado</h2>
+            <button id="save-physical" class="quiet-button">PGN ↓</button>
+          </div>
+          <ol id="moves" class="moves"></ol>
+        </section>
+        <details class="game-settings">
+          <summary>Conferência e correção de relógios</summary>
+          <div class="controls">
+            <p class="muted">Copie os tempos do relógio físico. A correção fica registrada no log.</p>
+            <label>Brancas (mm:ss)<input id="correct-white" value="25:00" inputmode="numeric" /></label
+            ><label>Pretas (mm:ss)<input id="correct-black" value="25:00" inputmode="numeric" /></label
+            ><button id="reconcile">Sincronizar com o relógio físico</button>
+            <p id="fen" class="mono muted"></p>
+          </div>
+        </details>
+        <button id="end-session" class="quiet-button">Encerrar sessão de operação</button>
+      </aside>
     </main>
     <script type="module" src="./tournament.ts"></script>
   </body>

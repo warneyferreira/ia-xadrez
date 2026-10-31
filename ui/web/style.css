@@ -1,11 +1,65 @@
 :root {
+  accent-color: #7fa650;
   color-scheme: dark;
   --bg: #1e1f22;
   --panel: #2b2d31;
   --fg: #e8e8e8;
   --muted: #a0a3a8;
   --accent: #7fa650;
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+.eval-track {
+  height: 14px;
+  background: #111;
+  border: 1px solid #777;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#eval-fill {
+  width: 50%;
+  height: 100%;
+  background: #f2f2ed;
+  transition: width 160ms ease;
+}
+#score-chart {
+  width: 100%;
+  height: 90px;
+  background: #232428;
+}
+@media (prefers-reduced-motion: reduce) {
+  #eval-fill {
+    transition: none;
+  }
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+#material {
+  line-height: 1.5;
+}
+input {
+  color: var(--fg);
+  background: #232428;
+  border: 1px solid #777;
+  padding: 10px;
+}
+button,
+select {
+  min-height: 42px;
+}
+:focus-visible {
+  outline: 2px solid #b4d68b;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 * {
@@ -227,7 +281,7 @@ dialog button {
   line-height: 1;
 }
 
-.clock-card[data-color="black"] {
+.clock-card[data-color='black'] {
   background: #17181b;
 }
 
@@ -255,7 +309,10 @@ dialog button {
 .move-form input {
   min-width: 0;
   flex: 1;
-  font: 700 1.15rem ui-monospace, Consolas, monospace;
+  font:
+    700 1.15rem ui-monospace,
+    Consolas,
+    monospace;
   text-transform: lowercase;
 }
 
@@ -265,7 +322,10 @@ dialog button {
 
 .engine-move {
   margin: auto 0 0;
-  font: 800 clamp(1.7rem, 4vw, 2.8rem) ui-monospace, Consolas, monospace;
+  font:
+    800 clamp(1.7rem, 4vw, 2.8rem) ui-monospace,
+    Consolas,
+    monospace;
   color: var(--accent);
 }
 
@@ -300,8 +360,452 @@ dialog button {
 }
 
 @media (max-width: 760px) {
-  .tournament-shell { padding: 16px; }
-  .operation-grid { grid-template-columns: 1fr; }
-  .move-form { flex-direction: column; }
-  .move-form button { min-height: 44px; }
+  .tournament-shell {
+    padding: 16px;
+  }
+  .operation-grid {
+    grid-template-columns: 1fr;
+  }
+  .move-form {
+    flex-direction: column;
+  }
+  .move-form button {
+    min-height: 44px;
+  }
+}
+
+/* Espaço de estudo compartilhado pelo treino e pelo duelo ao vivo. */
+:root {
+  --line: #3c3f43;
+  --surface: #25272b;
+  --soft: #202226;
+}
+.app-header {
+  max-width: 1240px;
+  margin: auto;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand span {
+  color: var(--accent);
+}
+.app-header nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.app-header nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+.app-header nav a[aria-current],
+.app-header nav a:hover {
+  color: var(--fg);
+  background: var(--panel);
+}
+.study-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 28px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 24px 28px 40px;
+  align-items: start;
+}
+.board-column {
+  min-width: 0;
+}
+.board-with-eval {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 10px;
+}
+.study-shell .board {
+  width: 100%;
+  aspect-ratio: 1;
+}
+.vertical-eval {
+  position: relative;
+  width: 26px;
+  height: 100%;
+  min-height: 100%;
+  background: #151619;
+  border: 1px solid #555;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.vertical-eval #eval-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  background: #edece6;
+  transition: height 180ms ease;
+}
+#eval-number {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 100%;
+  font:
+    700 10px ui-monospace,
+    monospace;
+  text-align: center;
+  color: #242529;
+  background: #edece6;
+  padding: 2px 0;
+}
+.player-strip {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 8px 36px;
+}
+.player-strip strong {
+  font-size: 14px;
+}
+.player-strip .quiet-button {
+  margin-left: auto;
+}
+.piece-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid #aaa;
+}
+.black-piece {
+  background: #111;
+}
+.white-piece {
+  background: #f0eee7;
+}
+.study-shell .analysis-panel {
+  width: 100%;
+  padding: 20px;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.analysis-panel h1 {
+  font-size: 17px;
+}
+.analysis-panel h2 {
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0;
+}
+.section-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-heading .badge {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.metric-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.evaluation-text {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.quiet-button {
+  background: transparent;
+  font-size: 12px;
+  min-height: 36px;
+  padding: 6px 10px;
+}
+.game-settings {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.game-settings summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 16px;
+}
+.controls label:has(input[type='checkbox']) {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  color: var(--fg);
+}
+.controls input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+}
+.board-status {
+  margin-left: 36px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  font-size: 14px;
+}
+.analysis-panel .moves {
+  max-height: 220px;
+}
+.analysis-panel input,
+.analysis-panel select {
+  width: 100%;
+  min-width: 0;
+}
+.analysis-panel input[type='checkbox'] {
+  width: 17px;
+}
+.duel-roster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.duel-roster label {
+  min-width: 0;
+}
+.duel-profile {
+  line-height: 1.6;
+}
+.live-indicator {
+  color: var(--accent);
+  font-size: 12px;
+}
+.duel-history {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  list-style-position: inside;
+  padding: 12px;
+}
+.duel-history li {
+  min-width: 0;
+  padding: 4px;
+}
+.duel-history {
+  list-style: none;
+}
+.board-with-eval {
+  margin-bottom: 16px;
+}
+.cg-wrap coords.files {
+  left: 0;
+  bottom: -18px;
+  width: 100%;
+  color: var(--muted);
+}
+.cg-wrap coords.ranks {
+  top: 0;
+  color: #222;
+  opacity: 1;
+  font-weight: 700;
+}
+.vertical-eval.reversed #eval-fill {
+  top: 0;
+  bottom: auto;
+}
+.vertical-eval.reversed #eval-number {
+  top: 8px;
+  bottom: auto;
+}
+.error:empty {
+  display: none;
+}
+@media (max-width: 960px) {
+  .study-shell {
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 18px;
+    padding: 16px;
+  }
+}
+@media (max-width: 740px) {
+  .app-header {
+    padding: 14px 16px;
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .app-header nav a {
+    padding: 8px 10px;
+  }
+  .study-shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+  .study-shell .analysis-panel {
+    padding: 16px;
+  }
+  .player-strip {
+    min-height: 48px;
+  }
+}
+
+.result-banner {
+  border: 1px solid var(--accent);
+  border-left: 5px solid var(--accent);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 14px;
+  background: var(--surface);
+}
+.result-banner[hidden],
+.replay-panel[hidden] {
+  display: none;
+}
+.result-banner strong {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.result-banner p {
+  line-height: 1.6;
+}
+.replay-panel {
+  margin-top: 20px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.replay-panel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.replay-panel p {
+  line-height: 1.7;
+  font-size: 14px;
+}
+.replay-panel input[type='range'] {
+  width: 100%;
+  padding: 0;
+}
+.replay-panel .row {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.timing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.timing-grid > * {
+  min-width: 0;
+  background: var(--soft);
+  padding: 12px 8px;
+  border-radius: 6px;
+}
+.timing-grid span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.timing-grid strong {
+  display: block;
+  font:
+    700 21px ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+.physical-clocks {
+  margin-bottom: 18px;
+}
+.physical-clocks strong {
+  font-size: clamp(22px, 3.6vw, 38px);
+}
+.tournament-dashboard #physical-board {
+  margin-bottom: 18px;
+}
+.tournament-dashboard .board-status {
+  margin-left: 0;
+}
+.engine-instruction {
+  border-top-color: var(--accent);
+}
+.engine-instruction button {
+  min-height: 52px;
+  white-space: normal;
+}
+.move-chip {
+  min-height: 36px;
+  width: 100%;
+  padding: 4px 8px;
+  background: transparent;
+  border-color: transparent;
+  font: inherit;
+  text-align: left;
+}
+.move-chip:hover {
+  background: #34383a;
+}
+.move-chip[data-grade='Gafe'],
+.move-chip[data-grade='Erro'] {
+  color: #f6a18e;
+}
+.move-chip[data-grade='Melhor'],
+.move-chip[data-grade='Excelente'],
+.move-chip[data-grade='Boa'] {
+  color: #bedb9a;
+}
+.move-chip[data-grade='Livro'] {
+  color: #b5cce5;
+}
+.move-chip[data-grade='Imprecisão'] {
+  color: #e2c97f;
+}
+.duel-history li {
+  padding: 0;
+}
+#move-explanation {
+  min-height: 54px;
+}
+#memory-budget,
+#tablebase,
+#performance-summary {
+  line-height: 1.7;
+}
+.tournament-dashboard #moves {
+  list-style: none;
+  padding: 12px;
+}
+.study-shell > *,
+.replay-panel > *,
+.player-strip > div {
+  min-width: 0;
+}
+.replay-panel {
+  overflow-wrap: anywhere;
 }

@@ -6,39 +6,117 @@
     <title>IA Xadrez</title>
   </head>
   <body>
-    <main>
-      <div id="board" class="board"></div>
-      <aside class="panel">
-        <h1>IA Xadrez</h1>
-        <p id="engine-name" class="muted"></p>
-        <p id="status" class="status"></p>
-        <p id="eval" class="muted"></p>
-        <div class="controls">
-          <label>
-            Jogar de
-            <select id="color">
-              <option value="white">Brancas</option>
-              <option value="black">Pretas</option>
-              <option value="random">Aleatório</option>
-            </select>
-          </label>
-          <label>
-            Tempo da IA por lance
-            <select id="movetime">
-              <option value="500">0,5 s</option>
-              <option value="1000">1 s</option>
-              <option value="3000" selected>3 s</option>
-              <option value="5000">5 s</option>
-              <option value="10000">10 s</option>
-            </select>
-          </label>
-          <button id="new-game" class="primary">Nova partida</button>
-          <a class="text-link" href="/tournament">Abrir operação de torneio</a>
-          <div class="row">
-            <button id="undo">Desfazer lance</button>
-            <button id="flip">Virar tabuleiro</button>
-          </div>
+    <header class="app-header">
+      <a class="brand" href="/">CHESS <span>CHALLENGE</span></a>
+      <nav aria-label="Modos de jogo">
+        <a href="/" aria-current="page">Treinar</a><a href="/duel">Assistir IA × IA</a
+        ><a href="/tournament">Torneio físico</a
+        ><button id="sound-toggle" class="quiet-button" aria-pressed="false">Som desligado</button>
+      </nav>
+    </header>
+    <main class="study-shell">
+      <section class="board-column" aria-label="Partida">
+        <div class="player-strip">
+          <span class="piece-dot black-piece"></span><strong id="top-player">Pretas</strong>
         </div>
+        <div class="board-with-eval">
+          <div
+            class="eval-track vertical-eval"
+            role="meter"
+            aria-label="Avaliação: participação visual das brancas, não probabilidade"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="50"
+          >
+            <div id="eval-fill"></div>
+            <span id="eval-number">0.0</span>
+          </div>
+          <div id="board" class="board"></div>
+        </div>
+        <div class="player-strip">
+          <span class="piece-dot white-piece"></span><strong id="bottom-player">Brancas</strong
+          ><button id="flip" class="quiet-button">Virar tabuleiro</button>
+        </div>
+        <p id="status" class="status board-status" role="status"></p>
+        <section id="training-replay" class="replay-panel" hidden>
+          <h2>Rever jogadas</h2>
+          <div class="row">
+            <button id="train-prev" aria-label="Lance anterior">←</button
+            ><span id="train-ply" class="badge">Ao vivo</span
+            ><button id="train-next" aria-label="Próximo lance">→</button
+            ><button id="train-live">Voltar à partida</button>
+          </div>
+          <label>Lance<input id="train-range" type="range" min="0" max="0" value="0" /></label>
+          <p id="train-explanation">Selecione uma jogada da análise.</p>
+        </section>
+      </section>
+      <aside class="panel analysis-panel" aria-label="Análise e controles">
+        <div class="section-heading">
+          <h1>Painel de análise</h1>
+          <span class="badge">LOCAL · OFFLINE</span>
+        </div>
+        <p id="engine-name" class="muted"></p>
+        <section class="metric-section">
+          <h2>Posição atual</h2>
+          <p id="eval" class="evaluation-text">Aguardando avaliação</p>
+          <p id="material" class="muted">Material equilibrado</p>
+        </section>
+        <section class="metric-section">
+          <div class="section-heading">
+            <h2>Evolução da avaliação</h2>
+            <button id="review-game" class="quiet-button">Analisar jogadas</button>
+          </div>
+          <p id="review-status" class="muted" role="status">
+            Analise o histórico para ver a qualidade de cada jogada.
+          </p>
+          <svg
+            id="score-chart"
+            viewBox="0 0 300 90"
+            role="img"
+            aria-label="Evolução da avaliação das brancas"
+          >
+            <path d="M0 45H300" stroke="#666" />
+            <polyline id="score-line" fill="none" stroke="#7fa650" stroke-width="2" />
+          </svg>
+          <div class="chart-legend"><span>↑ Brancas</span><span>Pretas ↓</span></div>
+          <ol id="review-rows" class="moves"></ol>
+        </section>
+        <details class="game-settings" open>
+          <summary>Configurar treino</summary>
+          <div class="controls">
+            <label>
+              Jogar de
+              <select id="color">
+                <option value="white">Brancas</option>
+                <option value="black">Pretas</option>
+                <option value="random">Aleatório</option>
+              </select>
+            </label>
+            <label>
+              Tempo da IA por lance
+              <select id="movetime">
+                <option value="500">0,5 s</option>
+                <option value="1000">1 s</option>
+                <option value="3000" selected>3 s</option>
+                <option value="5000">5 s</option>
+                <option value="10000">10 s</option>
+              </select>
+            </label>
+            <button id="new-game" class="primary">Nova partida</button>
+            <label><input id="premove" type="checkbox" /> Habilitar pré-movimento humano</label>
+            <label><input id="engine-prepare" type="checkbox" /> IA pensa durante minha vez</label>
+            <label><input id="opening-book" type="checkbox" /> Usar abertura preparada local</label>
+            <p id="prepare-status" class="muted" role="status">Preparação desligada.</p>
+            <button id="export-pgn">Salvar PGN</button>
+            <label
+              >Abrir partida salva (PGN)<input id="import-pgn" type="file" accept=".pgn,text/plain"
+            /></label>
+            <div class="row">
+              <button id="undo">Desfazer lance</button>
+            </div>
+          </div>
+        </details>
+        <h2>Histórico da partida</h2>
         <ol id="moves" class="moves"></ol>
       </aside>
     </main>

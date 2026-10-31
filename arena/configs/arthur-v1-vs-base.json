@@ -1,0 +1,18 @@
+{
+  "match_id": "arthur-v1-hash-vs-base",
+  "candidate_a": {
+    "name": "Arthur v1 (Hash 256 MB)",
+    "command": ["Stockfish/src/stockfish.exe"],
+    "options": { "Threads": 4, "Hash": 256, "Move Overhead": 50 }
+  },
+  "candidate_b": {
+    "name": "Vanderlei - base do repositorio (Hash 128 MB)",
+    "command": ["Stockfish/src/stockfish.exe"],
+    "options": { "Threads": 4, "Hash": 128, "Move Overhead": 50 }
+  },
+  "games": 2,
+  "time_control": { "base_seconds": 15, "increment_seconds": 0.1 },
+  "openings": { "pgn": null, "seed": 20261030 },
+  "max_plies": 600,
+  "output_dir": "results/arena/arthur-v1-vs-base-20261030-r3"
+}

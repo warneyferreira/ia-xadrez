@@ -18,3 +18,8 @@ openings/*.bin
 *.rtbz
 arena/.venv/
 __pycache__/
+tablebases-config/data/
+tablebases-config/verification.json
+*.part
+candidates/local*.json
+ui/test-results/

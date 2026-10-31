@@ -12,11 +12,20 @@ cada mudança deve ser pequena, reproduzível e comparada com o baseline.
 | Motor | Cópia exata de `vondele/Stockfish` no commit `effdc3fd3f6de6e75fe1374a51a7a7eed66f880b` |
 | Licença do motor | GPLv3; atribuições preservadas em `Stockfish/` |
 | Interface local | TypeScript/Bun; joga contra o motor via UCI em `127.0.0.1` |
-| Arena estatística | Runner UCI sequencial com PGN, logs e resultados; falta confrontá-lo com binários reais |
+| Arena estatística | Runner UCI sequencial, PGNs e logs; primeiros confrontos reais feitos, sem ganho de Elo demonstrado |
+| Laboratório ao vivo | IA × IA, candidatos nomeados, 25+0 ou exibição, tempos, reprise, análise e relatório JSON |
 | Controller de competição | Modo separado com posição canônica, relógio espelhado, validação e log; requer ensaio com engine/binário reais |
 | Baseline de hardware | Pendente de protocolo reproduzível e de execução na máquina de competição |
 
 ## Como se orientar
+
+Execução local: http://127.0.0.1:18766/ · [Duelo ao vivo](http://127.0.0.1:18766/duel).
+O launcher `scripts/jogar.ps1` ativa o Syzygy instalado em `%LOCALAPPDATA%`.
+Na primeira instalação, use `scripts/setup.ps1` após preparar WSL/MinGW;
+`-WithTablebases` também instala e verifica as bases offline.
+Leia o [guia do operador](docs/GUIA_DO_OPERADOR.md) e o [cadastro de candidatos](candidates/README.md).
+Veja [Duelo e finais offline](docs/DUEL_AND_ENDGAMES.md) para perfis, controles
+e detalhes do regulamento conferido.
 
 - [Mapa técnico do projeto](docs/architecture/PROJECT_MAP.md) — o que cada pasta e componente faz.
 - [Como compilar e usar](docs/USAGE.md) — comandos e fluxo de treino local.
@@ -32,7 +41,8 @@ cada mudança deve ser pequena, reproduzível e comparada com o baseline.
 Stockfish/         motor herdado; não editar diretamente no baseline
 ui/                interface de treino local (Bun + TypeScript)
 docs/              documentação de uso, arquitetura, medidas e operação
-arena/             futuro executor de partidas A/B
+arena/             executor de partidas A/B
+candidates/        versões imutáveis e aliases para candidatos recentes
 experiments/       propostas e registros de experimentos pequenos
 results/           resultados tabulares versionáveis (sem binários grandes)
 logs/              logs locais, ignorados pelo Git

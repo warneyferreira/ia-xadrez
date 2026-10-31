@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Duelo ao vivo · Chess Challenge</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="/">CHESS <span>CHALLENGE</span></a>
+      <nav aria-label="Modos de jogo">
+        <a href="/">Treinar</a><a href="/duel" aria-current="page">Assistir IA × IA</a
+        ><a href="/tournament">Torneio físico</a
+        ><button id="sound-toggle" class="quiet-button" aria-pressed="false">Som desligado</button>
+      </nav>
+    </header>
+    <main class="study-shell">
+      <section class="board-column" aria-label="Duelo ao vivo">
+        <section id="result-banner" class="result-banner" hidden role="status">
+          <strong id="winner"></strong>
+          <p id="result-reason"></p>
+          <p id="result-points" class="muted"></p>
+        </section>
+        <div class="player-strip">
+          <span class="piece-dot black-piece"></span>
+          <div>
+            <strong id="black-name">Vanderlei · base</strong>
+            <p id="black-profile" class="muted">Pretas · base do repositório</p>
+          </div>
+        </div>
+        <div class="board-with-eval">
+          <div
+            class="eval-track vertical-eval"
+            role="meter"
+            aria-label="Avaliação das brancas, não probabilidade"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="50"
+          >
+            <div id="eval-fill"></div>
+            <span id="eval-number">—</span>
+          </div>
+          <div id="board" class="board"></div>
+        </div>
+        <div class="player-strip">
+          <span class="piece-dot white-piece"></span>
+          <div>
+            <strong id="white-name">Arthur v1</strong>
+            <p id="white-profile" class="muted">Brancas · candidato Arthur</p>
+          </div>
+        </div>
+        <p id="duel-status" class="status board-status" role="status">
+          Pronto para começar. Configure os nomes e inicie o duelo.
+        </p>
+        <section id="replay-panel" class="replay-panel" aria-label="Reprise e análise" hidden>
+          <div class="section-heading">
+            <h2>Reprise da partida</h2>
+            <span id="replay-label" class="badge">Ao vivo</span>
+          </div>
+          <div class="row">
+            <button id="replay-first" aria-label="Posição inicial">|←</button
+            ><button id="replay-prev" aria-label="Lance anterior">←</button
+            ><button id="replay-next" aria-label="Próximo lance">→</button
+            ><button id="replay-last" aria-label="Último lance">→|</button
+            ><button id="replay-live">Ao vivo</button>
+          </div>
+          <label>Lance<input id="replay-range" type="range" min="0" max="0" value="0" /></label>
+          <p id="move-explanation">Selecione uma jogada para rever a posição.</p>
+          <p id="analysis-progress" class="muted" role="status">
+            A análise posterior não roda enquanto as engines estão jogando.
+          </p>
+          <button id="analyse-duel">Analisar e explicar jogadas</button>
+          <p class="muted">
+            ▤ Livro · ★ Melhor da busca · ! Excelente · ✓ Boa · ?! Imprecisão · ? Erro · ?? Gafe.
+            Classificação local aproximada; “melhor” não comprova perfeição.
+          </p>
+        </section>
+      </section>
+      <aside class="panel analysis-panel" aria-label="Duelo e análise">
+        <div class="section-heading">
+          <h1>Duelo ao vivo</h1>
+          <span id="live" class="live-indicator">PRONTO</span>
+        </div>
+        <section class="timing-grid" aria-label="Tempos da partida">
+          <div><span>Duração ativa</span><strong id="elapsed">00:00</strong></div>
+          <div><span>Brancas</span><strong id="white-time">00:00</strong></div>
+          <div><span>Pretas</span><strong id="black-time">00:00</strong></div>
+        </section>
+        <p id="time-caption" class="muted">Tempos de cálculo acumulados por lado.</p>
+        <section class="metric-section">
+          <div class="section-heading">
+            <h2>Avaliação</h2>
+            <span id="depth" class="badge">Aguardando busca</span>
+          </div>
+          <p id="evaluation" class="evaluation-text">—</p>
+          <p id="material" class="muted">Material equilibrado</p>
+          <p id="tablebase" class="muted">Consultas a finais: —</p>
+        </section>
+        <section class="metric-section">
+          <h2>Evolução da posição</h2>
+          <svg id="score-chart" viewBox="0 0 300 90" role="img" aria-label="Evolução da avaliação branca">
+            <path d="M0 45H300" stroke="#666" />
+            <polyline id="score-line" fill="none" stroke="#7fa650" stroke-width="2" />
+          </svg>
+          <div class="chart-legend"><span>↑ Brancas</span><span>Pretas ↓</span></div>
+        </section>
+        <form id="duel-form" class="controls">
+          <h2>Configuração do próximo duelo</h2>
+          <label
+            >Candidato principal<select id="primary-candidate">
+              <option value="arthur-latest">Arthur mais recente</option>
+            </select></label
+          >
+          <label
+            >Candidato adversário<select id="opponent-candidate">
+              <option value="vanderlei-latest">Vanderlei mais recente</option>
+            </select></label
+          >
+          <div class="duel-roster">
+            <label>Nome das brancas<input id="white-input" value="Arthur v1" maxlength="48" required /></label
+            ><label
+              >Nome das pretas<input id="black-input" value="Vanderlei · base" maxlength="48" required
+            /></label>
+          </div>
+          <label
+            >Perfil principal joga de<select id="arthur-side">
+              <option value="white">Brancas</option>
+              <option value="black">Pretas</option>
+            </select></label
+          >
+          <label
+            >Tempo de cálculo por lance<select id="duel-time">
+              <option value="250">Rápido · 0,25 s</option>
+              <option value="1000" selected>Normal · 1 s</option>
+              <option value="3000">Profundo · 3 s</option>
+              <option value="5000">Profundo · 5 s</option>
+            </select></label
+          >
+          <label
+            >Controle da partida<select id="time-mode">
+              <option value="fixed">Exibição · tempo fixo por lance</option>
+              <option value="25+0">Competição · 25 minutos por lado</option>
+            </select></label
+          >
+          <label
+            >Memória de busca do principal<select id="memory-profile">
+              <option value="balanced">Equilibrado · 256 MB</option>
+              <option value="strong">Busca longa · 2 GB</option>
+              <option value="maximum">Máximo · 10 GB</option>
+            </select></label
+          >
+          <p id="memory-budget" class="muted" role="status">Verificando memória livre…</p>
+          <p class="muted">
+            Alterações entram no próximo duelo. Mais Hash guarda mais posições; o ganho depende do tempo de
+            busca.
+          </p>
+          <label><input id="duel-book" type="checkbox" checked /> Principal usa o repertório preparado</label>
+          <button id="start" class="primary" type="submit">Iniciar novo duelo</button>
+        </form>
+        <div class="row">
+          <button id="pause">Pausar</button><button id="resume">Continuar</button
+          ><button id="save" title="Salvar todas as jogadas">PGN ↓</button>
+        </div>
+        <button id="save-report">Baixar relatório de desempenho (JSON)</button>
+        <p id="performance-summary" class="muted"></p>
+        <p id="duel-error" class="error" role="alert"></p>
+        <p id="competition-score" class="muted">
+          Pontuação do regulamento: vitória 3 · empate 1 · derrota 0.
+        </p>
+        <p id="duel-note" class="muted duel-profile">
+          O nome identifica o participante; o perfil identifica a configuração real. A referência usa a engine
+          do repositório, sem reproduzir configurações privadas do Vanderlei.
+        </p>
+        <section class="metric-section">
+          <h2>Jogadas · brancas / pretas</h2>
+          <ol id="duel-moves" class="moves duel-history"></ol>
+        </section>
+      </aside>
+    </main>
+    <script type="module" src="./duel.ts"></script>
+  </body>
+</html>

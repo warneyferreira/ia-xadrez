@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "aliases": { "arthur-latest": "arthur-v1", "vanderlei-latest": "vanderlei-base" },
+  "candidates": [
+    {
+      "id": "arthur-v1",
+      "label": "Arthur v1",
+      "owner": "Arthur",
+      "engine": "bin/baseline-effdc3fd3/stockfish.exe",
+      "sourceCommit": "effdc3fd3f6de6e75fe1374a51a7a7eed66f880b",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Mesmo motor herdado; candidato de configuração com repertório e finais locais."
+    },
+    {
+      "id": "vanderlei-base",
+      "label": "Vanderlei · base do repositório",
+      "owner": "Vanderlei (referência)",
+      "engine": "bin/baseline-effdc3fd3/stockfish.exe",
+      "sourceCommit": "effdc3fd3f6de6e75fe1374a51a7a7eed66f880b",
+      "threads": 2,
+      "hashMB": 128,
+      "book": false,
+      "syzygy": false,
+      "notes": "Referência pública. Não reproduz configurações pessoais não enviadas pelo Vanderlei."
+    }
+  ]
+}
