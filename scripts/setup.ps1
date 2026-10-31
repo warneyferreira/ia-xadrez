@@ -10,6 +10,15 @@ if (-not (Test-Path 'ui/node_modules/bun/bin/bun.exe')) {
 }
 if (-not (Test-Path 'Stockfish/src/stockfish.exe')) { & "$PSScriptRoot\build-engine.ps1" }
 if (-not (Test-Path 'bin/baseline-effdc3fd3/stockfish.exe')) { & "$PSScriptRoot\build-baseline.ps1" }
+$registry = Get-Content -LiteralPath 'candidates/registry.json' -Raw | ConvertFrom-Json
+foreach ($candidate in $registry.candidates) {
+    if ($candidate.build -and -not (Test-Path -LiteralPath $candidate.engine)) {
+        $buildArgs = @('scripts/build_candidate.py', '--id', $candidate.id, '--revision', $candidate.sourceCommit, '--arch', $candidate.build.architecture)
+        if ($candidate.build.pgo) { $buildArgs += '--pgo' }
+        & py -3 @buildArgs
+        if ($LASTEXITCODE -ne 0) { throw "Falha ao preparar $($candidate.label). Consulte o log em bin/$($candidate.id)." }
+    }
+}
 if (-not (Test-Path 'arena/.venv/Scripts/python.exe')) { & py -3 -m venv arena/.venv }
 & arena/.venv/Scripts/python.exe -m pip install -r arena/requirements.txt
 if ($LASTEXITCODE -ne 0) { throw 'Falha nas dependências da arena.' }

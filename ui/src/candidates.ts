@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -13,10 +13,11 @@ export type Candidate = {
   book: boolean;
   syzygy: boolean;
   notes: string;
+  build?: { architecture: 'auto' | 'x86-64-avx2' | 'x86-64-avxvnni'; pgo: boolean };
 };
 export class Candidates {
   private data: { aliases: Record<string, string>; candidates: Candidate[] };
-  private hashes = new Map<string, string>();
+  private hashes = new Map<string, { stamp: string; sha: string }>();
   private root: string;
   constructor(private defaultEngine: string) {
     const registry = existsSync('candidates/registry.json')
@@ -57,8 +58,21 @@ export class Candidates {
   }
   identity(c: Candidate) {
     const path = this.path(c);
-    if (!this.hashes.has(path))
-      this.hashes.set(path, createHash('sha256').update(readFileSync(path)).digest('hex'));
-    return { ...c, binarySha256: this.hashes.get(path) };
+    const stat = statSync(path);
+    const stamp = `${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
+    if (this.hashes.get(path)?.stamp !== stamp)
+      this.hashes.set(path, { stamp, sha: createHash('sha256').update(readFileSync(path)).digest('hex') });
+    const sha = this.hashes.get(path)!.sha;
+    const manifest = resolve(dirname(path), 'build.json');
+    const buildManifest = existsSync(manifest) ? JSON.parse(readFileSync(manifest, 'utf8')) : null;
+    if (
+      buildManifest &&
+      (buildManifest.binarySha256 !== sha ||
+        buildManifest.id !== c.id ||
+        typeof buildManifest.sourceCommit !== 'string' ||
+        !buildManifest.sourceCommit.toLowerCase().startsWith(c.sourceCommit.toLowerCase()))
+    )
+      throw new Error(`Binário diverge do manifesto: ${c.id}. Reinstale o candidato.`);
+    return { ...c, binarySha256: sha, buildManifest };
   }
 }

@@ -1,0 +1,11 @@
+{
+  "engineSha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa",
+  "inputSha256": "128955a7e63be61d31090efed39cfb5efc7c77b7769e26320601f79bf6e55784",
+  "outputSha256": "506cf9ed4b361253c8439edc1128058f663fb64b7ad3f4d0d040629e88ba5316",
+  "secondsPerSearch": 2.0,
+  "searchesPerPosition": 2,
+  "minimumDepth": 18,
+  "accepted": 36,
+  "rejected": [],
+  "status": "RETEST: estabilidade de busca n\u00e3o comprova vantagem em partidas; n\u00e3o promover automaticamente."
+}

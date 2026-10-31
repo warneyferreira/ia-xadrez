@@ -1,7 +1,20 @@
 {
   "schema": 1,
-  "aliases": { "arthur-latest": "arthur-v1", "vanderlei-latest": "vanderlei-base" },
+  "aliases": { "arthur-latest": "arthur-v2", "vanderlei-latest": "vanderlei-base" },
   "candidates": [
+    {
+      "id": "arthur-v2",
+      "label": "Arthur v2 · PGO",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v2/stockfish.exe",
+      "sourceCommit": "db2cf72047c7e88a267c4b690f40dc1763efd318",
+      "threads": 2,
+      "hashMB": 256,
+      "book": false,
+      "syzygy": true,
+      "build": { "architecture": "auto", "pgo": true },
+      "notes": "Compilação PGO; usa AVX-VNNI quando suportado, senão AVX2. Ganho local de velocidade medido; ganho de Elo ainda não demonstrado. Repertório preliminar desativado para isolar a busca."
+    },
     {
       "id": "arthur-v1",
       "label": "Arthur v1",

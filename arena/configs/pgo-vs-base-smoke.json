@@ -1,0 +1,18 @@
+{
+  "match_id": "arthur-pgo-vnni-r1-vs-frozen-base",
+  "candidate_a": {
+    "name": "Arthur PGO VNNI r1",
+    "command": ["bin/arthur-pgo-vnni-r1/stockfish.exe"],
+    "options": { "Threads": 2, "Hash": 256, "Move Overhead": 20, "Ponder": false }
+  },
+  "candidate_b": {
+    "name": "Baseline AVX2 congelado",
+    "command": ["bin/baseline-effdc3fd3/stockfish.exe"],
+    "options": { "Threads": 2, "Hash": 256, "Move Overhead": 20, "Ponder": false }
+  },
+  "games": 20,
+  "time_control": { "base_seconds": 6, "increment_seconds": 0.06 },
+  "openings": { "pgn": "../../openings/validation-holdout.pgn", "seed": 20261031 },
+  "max_plies": 1000,
+  "output_dir": "results/arena/pgo-vnni-r1-smoke"
+}

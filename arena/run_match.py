@@ -8,6 +8,9 @@ Comandos de engine são listas, nunca strings de shell.
 from __future__ import annotations
 
 import argparse
+import asyncio
+import hashlib
+import math
 import datetime as dt
 import json
 import platform
@@ -22,6 +25,7 @@ from typing import Any
 import chess
 import chess.engine
 import chess.pgn
+from match_statistics import paired_summary
 
 
 @dataclass(frozen=True)
@@ -44,7 +48,7 @@ class MatchError(RuntimeError):
 
 def read_json(path: Path) -> dict[str, Any]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except FileNotFoundError as exc:
         raise MatchError(f"Configuração não encontrada: {path}") from exc
     except json.JSONDecodeError as exc:
@@ -103,6 +107,8 @@ def load_openings(config: dict[str, Any], config_dir: Path) -> list[Opening]:
         index = 0
         while game := chess.pgn.read_game(handle):
             index += 1
+            if game.errors:
+                raise MatchError(f"PGN inválido no jogo {index}: {game.errors[0]}")
             board = game.board()
             initial_fen = board.fen()
             moves = tuple(game.mainline_moves())
@@ -170,7 +176,17 @@ def run_game(
                 white_inc=increment_seconds, black_inc=increment_seconds,
             )
             try:
-                reply = engines[color].play(board, limit, info=chess.engine.INFO_NONE)
+                # SimpleEngine.play não aplica timeout quando Limit só contém relógios.
+                # Future.result limita a espera mesmo se o motor ignorar stop.
+                engine = engines[color]
+                pending = asyncio.run_coroutine_threadsafe(
+                    engine.protocol.play(board, limit, info=chess.engine.INFO_NONE), engine.protocol.loop)
+                try:
+                    reply = pending.result(timeout=max(0, remaining[color]) + 1)
+                except TimeoutError:
+                    pending.cancel()
+                    engine.close()
+                    raise
             except (chess.engine.EngineError, chess.engine.EngineTerminatedError, TimeoutError) as exc:
                 crash = {"candidate": white.name if color == chess.WHITE else black.name, "error": str(exc)}
                 result = "0-1" if color == chess.WHITE else "1-0"
@@ -183,17 +199,22 @@ def run_game(
                 result = "0-1" if color == chess.WHITE else "1-0"
                 termination = "time forfeit"
                 break
-            if reply.move not in board.legal_moves:
+            if reply.move is None or reply.move not in board.legal_moves:
                 crash = {"candidate": white.name if color == chess.WHITE else black.name,
-                         "error": f"Engine returned illegal move {reply.move.uci()}"}
+                         "error": f"Engine returned illegal move {reply.move}"}
                 result = "0-1" if color == chess.WHITE else "1-0"
                 termination = "illegal engine move"
                 break
             node = node.add_variation(reply.move)
+            node.set_clock(remaining[color] + increment_seconds)
+            node.set_emt(spent)
             board.push(reply.move)
             remaining[color] += increment_seconds
         else:
-            result = "*"
+            outcome = board.outcome(claim_draw=True)
+            if outcome is not None:
+                result = outcome.result()
+                termination = outcome.termination.name.lower().replace("_", " ")
     except (OSError, chess.engine.EngineError, chess.engine.EngineTerminatedError, TimeoutError) as exc:
         if starting is None:
             raise
@@ -213,6 +234,7 @@ def run_game(
                          "Termination": termination})
     return game, {
         "white": white.name, "black": black.name, "opening": opening.label,
+        "opening_key": hashlib.sha256((opening.initial_fen + " " + " ".join(m.uci() for m in opening.moves)).encode()).hexdigest(),
         "result": result, "termination": termination, "plies": len(board.move_stack),
         "white_seconds": round(elapsed[chess.WHITE], 3),
         "black_seconds": round(elapsed[chess.BLACK], 3), "crash": crash,
@@ -232,6 +254,8 @@ def main() -> int:
             raise MatchError("match_id precisa ser texto não vazio.")
         candidate_a = candidate_from_config(config.get("candidate_a"), "candidate_a")
         candidate_b = candidate_from_config(config.get("candidate_b"), "candidate_b")
+        if candidate_a.name == candidate_b.name:
+            raise MatchError("Candidatos precisam ter nomes diferentes.")
         engine_options(candidate_a)
         engine_options(candidate_b)
         games = config.get("games")
@@ -241,7 +265,7 @@ def main() -> int:
         if not isinstance(tc, dict):
             raise MatchError("time_control precisa ser um objeto.")
         base_seconds, increment_seconds = float(tc.get("base_seconds", 0)), float(tc.get("increment_seconds", 0))
-        if base_seconds <= 0 or increment_seconds < 0:
+        if not all(math.isfinite(t) for t in (base_seconds, increment_seconds)) or base_seconds <= 0 or increment_seconds < 0:
             raise MatchError("time_control requer base_seconds > 0 e increment_seconds >= 0.")
         max_plies = config.get("max_plies", 512)
         if not isinstance(max_plies, int) or max_plies < 2:
@@ -274,20 +298,31 @@ def main() -> int:
         print(f"ERRO: output_dir já existe; escolha outro para não sobrescrever evidência: {output_dir}", file=sys.stderr)
         return 2
     output_dir.mkdir(parents=True)
+    fingerprints = {}
+    for candidate in (candidate_a, candidate_b):
+        executable = Path(candidate.command[0]).resolve()
+        fingerprints[candidate.name] = {"command": candidate.command, "options": candidate.options,
+                                       "binarySha256": hashlib.sha256(executable.read_bytes()).hexdigest() if executable.is_file() else None}
     metadata = {"started_at": dt.datetime.now(dt.timezone.utc).isoformat(), "match_id": match_id,
+                "engines": fingerprints,
                 "git_revision": git_revision(), "python": sys.version, "platform": platform.platform(), "config": config}
     (output_dir / "config.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
     scores = {candidate_a.name: {"win": 0, "draw": 0, "loss": 0}, candidate_b.name: {"win": 0, "draw": 0, "loss": 0}}
     crashes = {candidate_a.name: 0, candidate_b.name: 0}
     unfinished = 0
+    reports = []
     with (output_dir / "games.pgn").open("w", encoding="utf-8") as pgn_file, (output_dir / "events.jsonl").open("w", encoding="utf-8") as event_file:
         for index, opening in enumerate(schedule, start=1):
             white, black = (candidate_a, candidate_b) if index % 2 else (candidate_b, candidate_a)
             print(f"Iniciando jogo {index}/{games}: {white.name} (brancas) vs {black.name} (pretas)")
             game, report = run_game(white, black, opening, base_seconds, increment_seconds, max_plies)
             report["game"] = index
+            reports.append(report)
             pgn_file.write(f"{game}\n\n")
             event_file.write(json.dumps(report, ensure_ascii=False) + "\n")
+            pgn_file.flush()
+            event_file.flush()
+            print(f"  {report['result']} ({report['termination']}); {report['plies']} meios-lances", flush=True)
             if report['result'] == '*':
                 unfinished += 1
             else:
@@ -296,6 +331,7 @@ def main() -> int:
             if report["crash"]:
                 crashes[report["crash"]["candidate"]] += 1
     summary = {"finished_at": dt.datetime.now(dt.timezone.utc).isoformat(), "match_id": match_id,
+               "paired": paired_summary(reports, candidate_a.name),
                "scores": scores, "crashes": crashes, "games": games, "unfinished": unfinished,
                "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."}
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -68,3 +68,23 @@ Os artefatos são escritos no diretório definido por `output_dir`: `games.pgn`,
 Para o campeonato, livro próprio pode ser usado somente se for permitido e
 deve ser testado separadamente como estratégia de sistema, não confundido com
 Elo interno da engine.
+
+## Confronto no tempo oficial
+
+Na raiz, execute `scripts/test_strength.ps1`. O padrão é 20 partidas em
+25+0: podem consumir até **16 h 40 min** de relógio, além da preparação.
+Para um ensaio rápido use `scripts/test_strength.ps1 -Games 20 -BaseSeconds 6 -IncrementSeconds 0.06`.
+O script resolve os candidatos do cadastro, fixa recursos iguais e cria uma
+pasta nova. Não inicia a interface nem análise de revisão junto da arena.
+
+O resumo inclui pontos 3/1/0, escore convencional, pares completos e intervalo
+conservador de 95%. Duas cores formam um par. Repetir a mesma abertura não
+aumenta a amostra efetiva: agrupamos por posição inicial antes de calcular
+a incerteza. Dez aberturas são uma verificação inicial, não um universo que
+represente todos os adversários. O campo `evidenceOfSuperiority` não promove
+um candidato automaticamente e não substitui uma decisão prévia de amostra.
+
+PGNs também guardam tempo restante e tempo gasto por jogada. Limites de lances
+não viram empates; mate exatamente no limite conta. A espera por motor travado
+é limitada pelo relógio restante mais 1 s. Falhas de inicialização têm prazo
+separado de 15 s e entram no relatório.

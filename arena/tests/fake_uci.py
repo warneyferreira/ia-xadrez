@@ -35,6 +35,8 @@ def main() -> int:
         elif command.startswith("position "):
             board = position_from_command(command)
         elif command.startswith("go "):
+            if "--stall" in sys.argv:
+                continue
             legal = list(board.legal_moves)
             print(f"bestmove {legal[0].uci() if legal else '0000'}", flush=True)
         elif command == "quit":

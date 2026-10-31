@@ -76,6 +76,23 @@ let replayPly: number | null = null;
 let analysisKey = '';
 let reviewPolling = false;
 let seenId = '';
+let catalog: {
+  aliases: Record<string, string>;
+  candidates: { id: string; label: string; owner: string; book: boolean }[];
+} = { aliases: {}, candidates: [] };
+function selectedCandidate(selectId: string) {
+  const id = el<HTMLSelectElement>(selectId).value;
+  return catalog.candidates.find((c) => c.id === (catalog.aliases[id] ?? id));
+}
+function bookAvailability(locked = false) {
+  const candidate = selectedCandidate('primary-candidate');
+  const input = el<HTMLInputElement>('duel-book');
+  input.disabled = locked || !candidate?.book;
+  if (!candidate?.book) input.checked = false;
+  el('book-availability').textContent = candidate?.book
+    ? 'Repertório preliminar. Desative para comparar apenas os motores.'
+    : 'Este candidato joga sem repertório: as aberturas preparadas ainda precisam passar pela validação em partidas.';
+}
 const icons: Record<string, string> = {
   Livro: '▤',
   Melhor: '★',
@@ -283,6 +300,7 @@ function render(state: State) {
     'opponent-candidate',
   ])
     (el(id) as HTMLInputElement).disabled = active || reviewPolling;
+  bookAvailability(active || reviewPolling);
   el<HTMLButtonElement>('save').disabled = state.rows.length === 0;
   if (count === state.rows.length) return;
   count = state.rows.length;
@@ -420,10 +438,8 @@ el('save-report').addEventListener('click', () => {
   link.click();
 });
 async function loadCandidates() {
-  const data = (await (await fetch('/api/candidates')).json()) as {
-    aliases: Record<string, string>;
-    candidates: { id: string; label: string; owner: string }[];
-  };
+  const data = (await (await fetch('/api/candidates')).json()) as typeof catalog;
+  catalog = data;
   for (const [id, owner] of [
     ['primary-candidate', 'arthur'],
     ['opponent-candidate', 'vanderlei'],
@@ -435,6 +451,18 @@ async function loadCandidates() {
     );
     select.value = `${owner}-latest`;
   }
+}
+for (const [selectId, primary] of [
+  ['primary-candidate', true],
+  ['opponent-candidate', false],
+] as const) {
+  el(selectId).addEventListener('change', () => {
+    const candidate = selectedCandidate(selectId);
+    const primaryWhite = el<HTMLSelectElement>('arthur-side').value === 'white';
+    if (candidate)
+      el<HTMLInputElement>(primary === primaryWhite ? 'white-input' : 'black-input').value = candidate.label;
+    bookAvailability();
+  });
 }
 async function poll() {
   try {

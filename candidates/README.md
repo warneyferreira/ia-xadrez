@@ -34,3 +34,25 @@ impede saber se houve progresso real ao longo do tempo.
 em pasta separada, mesmo se `Stockfish/` já tiver mudanças de pesquisa. Não
 sobrescreve um slot existente. Uma v2 deve apontar para outro binário, como
 `bin/vanderlei-v2/stockfish.exe`, para a atualização não substituir a base.
+
+## Arthur v2 · PGO
+
+Usa o mesmo código/NNUE da referência, recompilado com perfil de buscas reais.
+O cadastro fixa o commit e pede arquitetura `auto`: AVX-VNNI se a CPU oferecer,
+AVX2 caso contrário. O manifesto local registra qual variante foi realmente
+compilada. Um ID fixa a receita, mas o SHA do executável identifica o artefato
+exato; compiladores/arquiteturas diferentes não são a mesma condição de teste.
+
+`scripts/setup.ps1` prepara os candidatos com receita `build` cadastrada.
+Para compilar apenas este, em um slot ainda inexistente:
+
+```powershell
+py -3 scripts/build_candidate.py --id arthur-v2 --revision db2cf72047c7e88a267c4b690f40dc1763efd318 --arch auto --pgo
+```
+
+O livro preliminar fica desativado na v2. A comparação de compilação mantém
+Threads/Hash iguais e não usa Syzygy para nenhum lado; no uso normal a v2
+continua podendo consultar as tabelas locais de finais.
+
+Mais velocidade não equivale a uma porcentagem igual de vitórias. Consulte
+`experiments/2026-10-31-pgo-clock.md` para resultado e limitações reais.

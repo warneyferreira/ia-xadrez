@@ -1,3 +1,4 @@
+param([switch]$NoOpen)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
@@ -8,4 +9,6 @@ if (-not (Test-Path -LiteralPath $enginePath)) { throw 'Binário do candidato au
 $extraOptions = @()
 $syzygyPath = Join-Path $env:LOCALAPPDATA 'ChessChallenge\syzygy\3-4-5'
 if (Test-Path -LiteralPath (Join-Path $syzygyPath 'manifest.json')) { $extraOptions = @('--syzygy', $syzygyPath) }
-& "$projectRoot\ui\node_modules\bun\bin\bun.exe" "$projectRoot\ui\src\server.ts" --engine $enginePath --port 18766 --book "$projectRoot\openings\arthur-prepared.json" @extraOptions
+if (-not $primary.book) { $extraOptions += '--no-training-book' }
+if ($NoOpen) { $extraOptions += '--no-open' }
+& "$projectRoot\ui\node_modules\bun\bin\bun.exe" "$projectRoot\ui\src\server.ts" --engine $enginePath --threads $primary.threads --hash-mb $primary.hashMB --candidate-name $primary.label --port 18766 --book "$projectRoot\openings\arthur-prepared.json" @extraOptions

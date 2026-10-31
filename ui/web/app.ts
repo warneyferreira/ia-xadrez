@@ -447,8 +447,13 @@ try {
     candidate: string;
     threads: number;
     syzygy: boolean;
+    book: boolean;
   };
   els.engineName.textContent = `${info.candidate} | ${info.engine} · ${info.threads} threads${info.syzygy ? ' · Syzygy local ativo' : ''}`;
+  byId<HTMLInputElement>('opening-book').disabled = !info.book;
+  byId<HTMLInputElement>('opening-book').title = info.book
+    ? 'Repertório preliminar local.'
+    : 'Este candidato está usando apenas busca; repertório ainda em validação.';
 } catch {
   els.engineName.textContent = 'Servidor indisponível';
 }

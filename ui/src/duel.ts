@@ -208,6 +208,8 @@ export class Duel {
     );
     const primaryPath = this.registry.path(primary),
       opponentPath = this.registry.path(opponent);
+    // Verifica binários/manifestos antes de descartar a partida anterior.
+    const identities = [this.registry.identity(primary), this.registry.identity(opponent)];
     const reclaimable =
       this.engines.length === 2
         ? (MEMORY_PROFILES[this.config.memoryProfile].hashMB +
@@ -255,8 +257,8 @@ export class Duel {
     this.pausedMillis = 0;
     this.forfeit = null;
     this.spent = { white: 0, black: 0 };
-    this.identities = [primary, opponent].map((c, i) => ({
-      ...this.registry.identity(c),
+    this.identities = identities.map((c, i) => ({
+      ...c,
       color: (i === 0) === this.config.arthurWhite ? 'white' : 'black',
       effectiveOptions: {
         Threads: c.threads,

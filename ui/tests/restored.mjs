@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 const browser = await chromium.launch({
   headless: true,
   executablePath:
@@ -9,6 +10,15 @@ const browser = await chromium.launch({
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await page.goto('http://127.0.0.1:18766/duel');
+  const saved = JSON.parse(
+    readFileSync(fileURLToPath(new URL('../../logs/latest-finished.json', import.meta.url)), 'utf8'),
+  );
+  const report = await (await page.request.get('http://127.0.0.1:18766/api/duel/report')).json();
+  assert.equal(
+    report.analysisEngine,
+    saved.analysisEngine ?? null,
+    'restaurar análise preserva motor original',
+  );
   await page.waitForFunction(() => !document.querySelector('#result-banner').hidden);
   await page.waitForFunction(
     () => document.querySelector('#analysis-progress').textContent.includes('Análise concluída'),

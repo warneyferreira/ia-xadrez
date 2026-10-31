@@ -86,3 +86,32 @@ Promover "latest" não transforma o candidato na release de competição.
 4. Testar uma hipótese pequena de gerenciamento de tempo contra baseline fixo.
 5. Só integrar mudanças com força/estabilidade medidas; comparar também com a
    versão recente do colega, sem apagar a referência congelada.
+
+## Atualização de desempenho — Arthur v2
+
+A v2 é um candidato de compilação PGO, com AVX-VNNI nesta máquina. A rede e a
+lógica do Stockfish continuam as mesmas. Medimos 9,14% mais nós/s na mediana
+de seis rodadas em uma thread; todas pesquisaram exatamente 8.539.195 nós.
+Na série curta 6+0,06 com cores pareadas, foram 1 vitória, 19 empates e zero
+derrotas/travamentos. Isso é evidência inicial de estabilidade e velocidade,
+não comprovação de Elo ou do resultado no controle 25+0.
+
+O perfil mantém duas threads e Hash 256 MB para isolar a compilação. A varredura
+1/2/4/6/8 threads fica nos registros; NPS maior com mais threads não mede,
+sozinho, a utilidade da busca paralela. Antes de fixar outro perfil de competição,
+use `scripts/test_strength.ps1` com recursos iguais e tempo oficial.
+
+O repertório preliminar não fica habilitado na v2. `scripts/validate_book.py`
+reanalisa cada posição duas vezes, limpa o Hash entre buscas e só aceita lances
+iguais com profundidade mínima. O resultado continua experimental e precisa
+ser comparado em partidas antes de ativação.
+
+A primeira revisão conservou 36 posições, profundidade 21–27, e mudou 12
+jogadas. Os arquivos `openings/arthur-v2-verified.*` documentam essa preparação;
+eles não substituem o repertório ativo da v1 nem habilitam livro na v2.
+
+No tabuleiro físico, a reserva de operação começa em 2 s por lance e acompanha
+as últimas 12 confirmações (percentil 90 + 500 ms, entre 1,5 e 8 s). Ela informa
+o `Move Overhead` nativo e preserva margem antes de o relógio zerar. O motor
+continua decidindo como distribuir seu tempo. Essa política reduz risco
+operacional; não cria tempo adicional no relógio oficial.

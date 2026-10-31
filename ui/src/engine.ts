@@ -15,7 +15,13 @@ export type SearchResult = {
   engineMillis?: number;
   pv?: string[];
 };
-export type ClockSearch = { whiteMillis: number; blackMillis: number; incrementMillis?: number };
+export type ClockSearch = {
+  whiteMillis: number;
+  blackMillis: number;
+  incrementMillis?: number;
+  /** Margem para mover a peça/pressionar relógio, além da gestão nativa do motor. */
+  reserveMillis?: number;
+};
 
 type Listener = (line: string | null) => void;
 
@@ -28,8 +34,12 @@ export class Engine {
   private dead = false;
   name = 'UCI engine';
 
-  constructor(path: string) {
-    this.proc = Bun.spawn([path], { stdin: 'pipe', stdout: 'pipe', stderr: 'inherit' });
+  constructor(path: string | readonly string[]) {
+    this.proc = Bun.spawn(typeof path === 'string' ? [path] : [...path], {
+      stdin: 'pipe',
+      stdout: 'pipe',
+      stderr: 'inherit',
+    });
     void this.readLoop();
   }
 
@@ -56,20 +66,32 @@ export class Engine {
   }
 
   /** Resolve com a primeira linha que satisfaz `match`; `onLine` vê todas as linhas até lá. */
-  private waitFor(match: (line: string) => boolean, onLine?: (line: string) => void): Promise<string> {
+  private waitFor(
+    match: (line: string) => boolean,
+    onLine?: (line: string) => void,
+    timeoutMillis = 15000,
+  ): Promise<string> {
     const { promise, resolve, reject } = Promise.withResolvers<string>();
     if (this.dead) {
       reject(new Error('O motor foi encerrado.'));
       return promise;
     }
+    const timer = setTimeout(() => {
+      this.listeners.delete(listener);
+      this.dead = true;
+      this.proc.kill();
+      reject(new Error('O motor não respondeu no prazo. Reinicie a sessão antes de continuar.'));
+    }, timeoutMillis);
     const listener: Listener = (line) => {
       if (line === null) {
+        clearTimeout(timer);
         this.listeners.delete(listener);
         reject(new Error('O motor foi encerrado.'));
         return;
       }
       onLine?.(line);
       if (match(line)) {
+        clearTimeout(timer);
         this.listeners.delete(listener);
         resolve(line);
       }
@@ -86,6 +108,7 @@ export class Engine {
   }
 
   private async isReady(): Promise<void> {
+    if (this.dead) throw new Error('O motor foi encerrado. Reinicie o laboratório.');
     const ready = this.waitFor((l) => l === 'readyok');
     this.send('isready');
     await ready;
@@ -93,6 +116,7 @@ export class Engine {
 
   init(options: Record<string, string | number>): Promise<void> {
     return this.serialize(async () => {
+      if (this.dead) throw new Error('O motor foi encerrado. Reinicie o laboratório.');
       const uciok = this.waitFor(
         (l) => l === 'uciok',
         (l) => {
@@ -101,6 +125,13 @@ export class Engine {
       );
       this.send('uci');
       await uciok;
+      for (const [name, value] of Object.entries(options)) this.send(`setoption name ${name} value ${value}`);
+      await this.isReady();
+    });
+  }
+
+  configure(options: Record<string, string | number>): Promise<void> {
+    return this.serialize(async () => {
       for (const [name, value] of Object.entries(options)) this.send(`setoption name ${name} value ${value}`);
       await this.isReady();
     });
@@ -125,12 +156,17 @@ export class Engine {
 
   /** Busca a partir da posição inicial após `moves` (notação UCI), por `movetime` ms. */
   search(moves: readonly string[], movetime: number): Promise<SearchResult> {
-    return this.searchCommand(moves, `go movetime ${movetime}`);
+    return this.searchCommand(moves, `go movetime ${movetime}`, Math.max(1, movetime));
   }
 
-  private searchCommand(moves: readonly string[], command: string): Promise<SearchResult> {
+  private searchCommand(
+    moves: readonly string[],
+    command: string,
+    stopAfterMillis: number,
+  ): Promise<SearchResult> {
     this.interrupt();
     return this.serialize(async () => {
+      if (this.dead) throw new Error('O motor foi encerrado. Reinicie o laboratório.');
       let depth = 0;
       let score: Score | null = null;
       let tbhits = 0;
@@ -157,10 +193,12 @@ export class Engine {
           telemetry.pv = l.split(' pv ')[1]?.trim().split(/\s+/);
           if (s) score = { unit: s[1] as Score['unit'], value: Number(s[2]) };
         },
+        stopAfterMillis + 1500,
       );
       this.send(moves.length ? `position startpos moves ${moves.join(' ')}` : 'position startpos');
       this.send(command);
       this.searching = true;
+      const deadline = setTimeout(() => this.interrupt(), stopAfterMillis);
       try {
         const line = await done;
         const parts = line.split(' ');
@@ -173,6 +211,7 @@ export class Engine {
           ...telemetry,
         };
       } finally {
+        clearTimeout(deadline);
         this.searching = false;
       }
     });
@@ -183,7 +222,13 @@ export class Engine {
     const white = Math.max(0, Math.floor(clocks.whiteMillis));
     const black = Math.max(0, Math.floor(clocks.blackMillis));
     const increment = Math.max(0, Math.floor(clocks.incrementMillis ?? 0));
-    return this.searchCommand(moves, `go wtime ${white} btime ${black} winc ${increment} binc ${increment}`);
+    const own = moves.length % 2 === 0 ? white : black;
+    const reserve = Math.max(0, clocks.reserveMillis ?? 100);
+    return this.searchCommand(
+      moves,
+      `go wtime ${white} btime ${black} winc ${increment} binc ${increment}`,
+      Math.max(1, own - reserve),
+    );
   }
 
   quit(): void {

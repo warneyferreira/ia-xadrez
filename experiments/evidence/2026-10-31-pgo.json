@@ -1,0 +1,236 @@
+{
+  "build": {
+    "id": "arthur-v2",
+    "sourceCommit": "db2cf72047c7e88a267c4b690f40dc1763efd318",
+    "stockfishTree": "8bf55890eeb1a9e809dec576ac4ee8adee8fb79d",
+    "architecture": "x86-64-avxvnni",
+    "pgo": true,
+    "profileFiles": 26,
+    "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+    "networks": {
+      "nn-c9e480e92425.nnue": "c9e480e92425f887df6ab9b05c6180fbd762b07879df9d9845f1aa75440caa73"
+    },
+    "binarySha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa"
+  },
+  "confirmation": {
+    "createdAt": "2026-10-31T02:01:56.045031-03:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "depth": 16,
+    "rounds": 6,
+    "binaries": {
+      "baseline": {
+        "path": "bin/baseline-effdc3fd3/stockfish.exe",
+        "sha256": "0667b5f2747583ad79af88c85b99b4ac584066efeb1f995d98704f8302a2f477"
+      },
+      "candidate": {
+        "path": "bin/arthur-v2/stockfish.exe",
+        "sha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa"
+      }
+    },
+    "summary": [
+      {
+        "threads": 1,
+        "medianNps": {
+          "baseline": 560811.0,
+          "candidate": 612067.5
+        },
+        "candidateSpeedupPercent": 9.14,
+        "oneThreadNodesIdentical": true
+      }
+    ],
+    "samples": [
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 0,
+        "nodes": 8539195,
+        "nps": 613183,
+        "millis": 13926,
+        "wallSeconds": 14.197
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 0,
+        "nodes": 8539195,
+        "nps": 636256,
+        "millis": 13421,
+        "wallSeconds": 13.716
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 1,
+        "nodes": 8539195,
+        "nps": 659295,
+        "millis": 12952,
+        "wallSeconds": 13.206
+      },
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 1,
+        "nodes": 8539195,
+        "nps": 566372,
+        "millis": 15077,
+        "wallSeconds": 15.35
+      },
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 2,
+        "nodes": 8539195,
+        "nps": 582482,
+        "millis": 14660,
+        "wallSeconds": 14.953
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 2,
+        "nodes": 8539195,
+        "nps": 600928,
+        "millis": 14210,
+        "wallSeconds": 14.495
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 3,
+        "nodes": 8539195,
+        "nps": 578105,
+        "millis": 14771,
+        "wallSeconds": 15.069
+      },
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 3,
+        "nodes": 8539195,
+        "nps": 504114,
+        "millis": 16939,
+        "wallSeconds": 17.235
+      },
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 4,
+        "nodes": 8539195,
+        "nps": 555250,
+        "millis": 15379,
+        "wallSeconds": 15.66
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 4,
+        "nodes": 8539195,
+        "nps": 623207,
+        "millis": 13702,
+        "wallSeconds": 13.973
+      },
+      {
+        "engine": "candidate",
+        "threads": 1,
+        "round": 5,
+        "nodes": 8539195,
+        "nps": 577557,
+        "millis": 14785,
+        "wallSeconds": 15.051
+      },
+      {
+        "engine": "baseline",
+        "threads": 1,
+        "round": 5,
+        "nodes": 8539195,
+        "nps": 520428,
+        "millis": 16408,
+        "wallSeconds": 16.689
+      }
+    ],
+    "note": "Velocidade de busca na máquina atual, não ganho de Elo. NPS entre quantidades de threads não compara trabalho útil nem força."
+  },
+  "exploratory": [
+    {
+      "threads": 1,
+      "medianNps": {
+        "baseline": 1020584.0,
+        "candidate": 1069843.5
+      },
+      "candidateSpeedupPercent": 4.83,
+      "oneThreadNodesIdentical": true
+    },
+    {
+      "threads": 2,
+      "medianNps": {
+        "baseline": 2091687.5,
+        "candidate": 2467622.5
+      },
+      "candidateSpeedupPercent": 17.97,
+      "oneThreadNodesIdentical": null
+    },
+    {
+      "threads": 4,
+      "medianNps": {
+        "baseline": 4188800.0,
+        "candidate": 4539583.0
+      },
+      "candidateSpeedupPercent": 8.37,
+      "oneThreadNodesIdentical": null
+    },
+    {
+      "threads": 6,
+      "medianNps": {
+        "baseline": 5281354.5,
+        "candidate": 5625972.5
+      },
+      "candidateSpeedupPercent": 6.53,
+      "oneThreadNodesIdentical": null
+    },
+    {
+      "threads": 8,
+      "medianNps": {
+        "baseline": 5649717.0,
+        "candidate": 6048908.5
+      },
+      "candidateSpeedupPercent": 7.07,
+      "oneThreadNodesIdentical": null
+    }
+  ],
+  "arena": {
+    "finished_at": "2026-10-31T02:07:22.380734-03:00",
+    "match_id": "arthur-pgo-vnni-r1-vs-frozen-base",
+    "paired": {
+      "completedPairs": 10,
+      "distinctOpeningClusters": 10,
+      "pairScore": 0.525,
+      "score95": [
+        0.09553059165326244,
+        0.9544694083467375
+      ],
+      "competitionPoints": 22,
+      "stable": true,
+      "evidenceOfSuperiority": false,
+      "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+    },
+    "scores": {
+      "Arthur PGO VNNI r1": {
+        "win": 1,
+        "draw": 19,
+        "loss": 0
+      },
+      "Baseline AVX2 congelado": {
+        "win": 0,
+        "draw": 19,
+        "loss": 1
+      }
+    },
+    "crashes": {
+      "Arthur PGO VNNI r1": 0,
+      "Baseline AVX2 congelado": 0
+    },
+    "games": 20,
+    "unfinished": 0,
+    "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+  }
+}

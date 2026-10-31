@@ -1,10 +1,10 @@
-import './style.css';
 import { Chess } from 'chess.js';
 import { Chessground } from 'chessground';
 import type { Key } from 'chessground/types';
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
+import './style.css';
 import { ChessSounds } from './sounds.ts';
 
 type State = {
@@ -18,6 +18,7 @@ type State = {
   blackMillis: number;
   elapsedMillis: number;
   initialMillis: number;
+  timePolicy: { overheadMillis: number; observedMoves: number };
   running: string | null;
   pending: {
     bestmove: string;
@@ -66,6 +67,10 @@ function sync(next: State) {
     Math.ceil((next.phase === 'idle' ? next.initialMillis : next.blackMillis) / 1000) * 1000,
   );
   el('total-clock').textContent = clock(next.elapsedMillis);
+  el('physical-time-control').textContent =
+    `${Math.floor(next.initialMillis / 60000)}+0 · ${next.initialMillis === 1500000 ? 'OFICIAL' : 'ENSAIO'}`;
+  el('time-policy').textContent =
+    `Margem de operação: ${(next.timePolicy.overheadMillis / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
   const instruction = next.outcome ?? instructions[next.phase] ?? next.phase;
   if (el('phase').textContent !== instruction) el('phase').textContent = instruction;
   el('running-side').textContent = next.running

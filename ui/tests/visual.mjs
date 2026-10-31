@@ -21,6 +21,7 @@ await page.addInitScript(() => {
 });
 page.on('pageerror', (error) => errors.push(error.message));
 try {
+  await page.request.post('http://127.0.0.1:18766/api/tournament/end');
   await page.request.post('http://127.0.0.1:18766/api/duel/pause');
   for (let i = 0; i < 100; i++) {
     const state = await (await page.request.get('http://127.0.0.1:18766/api/duel/status')).json();
@@ -33,20 +34,28 @@ try {
   assert(bar.height > bar.width * 5, 'barra deve ser vertical');
   await page.screenshot({ path: `${output}/treino-desktop.png`, fullPage: true });
   await page.goto('http://127.0.0.1:18766/duel');
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#white-profile').textContent.includes('Hash') &&
+      document.querySelector('#primary-candidate').value,
+  );
+  await page.locator('#arthur-side').selectOption('white');
   await page.locator('#sound-toggle').click();
   assert.equal(await page.locator('#sound-toggle').getAttribute('aria-pressed'), 'true');
   await page.locator('#white-input').fill('Arthur · teste visual');
   await page.locator('#black-input').fill('Vanderlei · referência');
   await page.locator('#duel-time').selectOption('250');
+  const starting = page.waitForResponse((response) => response.url().endsWith('/api/duel/start'));
   await page.locator('#start').click();
+  const started = await starting;
+  assert.equal(started.status(), 200, await started.text());
   await page.waitForFunction(
     () =>
       document.querySelectorAll('#duel-moves li').length >= 6 &&
       document.querySelector('#white-name').textContent.includes('teste visual') &&
       document.querySelector('#live').textContent.includes('AO VIVO'),
-    {
-      timeout: 20000,
-    },
+    null,
+    { timeout: 20000 },
   );
   assert(await page.evaluate(() => globalThis.__soundNotes > 0), 'sons gerados após ativação voluntária');
   await page.locator('#pause').click();
@@ -104,6 +113,7 @@ try {
   assert.match(await page.locator('#move-explanation').textContent(), /Move|Escolhida/);
   const report = await (await page.request.get('http://127.0.0.1:18766/api/duel/report')).json();
   assert(report.analysis.length >= 2 && report.identities[0].binarySha256.length === 64);
+  assert.equal(report.analysisBinarySha256.length, 64, 'revisão identifica seu próprio executável');
   assert(report.rows.some((r) => r.elapsedMillis >= 0));
   await page.locator('#replay-live').click();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -131,6 +141,9 @@ try {
   });
   await page.locator('#train-prev').click();
   assert.match(await page.locator('#train-ply').textContent(), /3\/4/);
+  await page.request.post('http://127.0.0.1:18766/api/tournament/newgame', {
+    data: { engineColor: 'white', initialMillis: 1500000 },
+  });
   await page.goto('http://127.0.0.1:18766/tournament');
   await page.waitForFunction(() => document.querySelector('#white-clock').textContent === '25:00');
   await page.locator('#engine-color').selectOption('black');

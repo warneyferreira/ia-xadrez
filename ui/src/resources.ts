@@ -17,7 +17,7 @@ export function requireMemory(hashMB: number, availableBytes?: number, opponentH
   const memory = memoryBudget(hashMB, availableBytes, opponentHashMB);
   if (!memory.fits)
     throw new Error(
-      `Perfil solicita ${(hashMB / 1024).toFixed(2)} GB de Hash. Há ${(memory.availableBytes / 2 ** 30).toFixed(1)} GB de RAM livres; são necessários ${(memory.requiredBytes / 2 ** 30).toFixed(1)} GB livres incluindo o adversário e a reserva. Feche aplicativos que você não estiver usando ou escolha um perfil menor. A partida anterior foi preservada.`,
+      `Perfil solicita ${(hashMB / 1024).toFixed(2)} GB de Hash. Há ${(memory.availableBytes / 2 ** 30).toFixed(2)} GB de RAM livres; são necessários ${(memory.requiredBytes / 2 ** 30).toFixed(2)} GB livres incluindo o adversário e a reserva. Feche aplicativos que você não estiver usando ou escolha um perfil menor. A partida anterior foi preservada.`,
     );
   return memory;
 }

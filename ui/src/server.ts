@@ -10,6 +10,8 @@ import { Duel } from './duel.ts';
 import { Engine, type SearchResult } from './engine.ts';
 import { review, type ReviewRow } from './review.ts';
 import { performanceReport } from './report.ts';
+import { PhysicalTimePolicy } from './time-policy.ts';
+import { createHash } from 'node:crypto';
 
 const UCI_MOVE = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
 const MOVETIME_MIN = 100;
@@ -71,6 +73,9 @@ const { values: args } = parseArgs({
     'candidate-name': { type: 'string', default: 'Arthur v1 · preparação especulativa' },
     syzygy: { type: 'string' },
     book: { type: 'string' },
+    'no-training-book': { type: 'boolean', default: false },
+    threads: { type: 'string' },
+    'hash-mb': { type: 'string' },
   },
 });
 
@@ -85,6 +90,17 @@ if (!existsSync(enginePath)) {
 }
 
 const threads = availableParallelism();
+const engineThreads = Number(args.threads ?? Math.min(threads, 4));
+const engineHash = Number(args['hash-mb'] ?? 256);
+if (
+  !Number.isInteger(engineThreads) ||
+  engineThreads < 1 ||
+  engineThreads > threads ||
+  !Number.isInteger(engineHash) ||
+  engineHash < 16 ||
+  engineHash > 10240
+)
+  await fatal('Threads/Hash inválidos. Escolha threads disponíveis e Hash entre 16 e 10240 MB.');
 const preparedBook: Record<string, { move: string; depth: number }> = args.book
   ? JSON.parse(readFileSync(resolve(args.book), 'utf8'))
   : {};
@@ -129,7 +145,18 @@ let reviewJob: {
   total: number;
   rows: ReviewRow[];
   error: string | null;
-} = { key: '', status: 'idle', completed: 0, total: 0, rows: [], error: null };
+  engineName: string | null;
+  binarySha256: string | null;
+} = {
+  key: '',
+  status: 'idle',
+  completed: 0,
+  total: 0,
+  rows: [],
+  error: null,
+  engineName: null,
+  binarySha256: null,
+};
 if (existsSync('logs/latest-finished.json')) {
   try {
     const saved = JSON.parse(readFileSync('logs/latest-finished.json', 'utf8'));
@@ -145,6 +172,8 @@ if (existsSync('logs/latest-finished.json')) {
         total: saved.rows.length,
         rows: saved.analysis,
         error: null,
+        engineName: typeof saved.analysisEngine === 'string' ? saved.analysisEngine : null,
+        binarySha256: saved.analysisBinarySha256 ?? null,
       };
   } catch {
     /* A partida original fica preservada; a análise pode ser refeita. */
@@ -158,7 +187,8 @@ function duelReport() {
     {
       ...state,
       analysisStatus: reviewJob.key === key ? reviewJob.status : 'not-requested',
-      analysisEngine: reviewer?.name ?? engine.name,
+      analysisEngine: reviewJob.key === key ? reviewJob.engineName : null,
+      analysisBinarySha256: reviewJob.key === key ? reviewJob.binarySha256 : null,
       analysisMillisPerPosition: 300,
     },
     reviewJob.key === key ? reviewJob.rows : [],
@@ -178,10 +208,21 @@ async function startDuelReview() {
   if (reviewing) throw new Error('Já existe uma análise em andamento.');
   reviewing = true;
   engine.stop();
-  reviewJob = { key, status: 'running', completed: 0, total: state.rows.length, rows: [], error: null };
+  reviewJob = {
+    key,
+    status: 'running',
+    completed: 0,
+    total: state.rows.length,
+    rows: [],
+    error: null,
+    engineName: null,
+    binarySha256: null,
+  };
   void (async () => {
     try {
       const analyzer = await getReviewer();
+      reviewJob.engineName = analyzer.name;
+      reviewJob.binarySha256 = createHash('sha256').update(readFileSync(enginePath)).digest('hex');
       await analyzer.newGame();
       const rows = await review(
         analyzer,
@@ -216,7 +257,7 @@ async function startDuelReview() {
 }
 try {
   // A UI de treino usa buscas curtas; o modo torneio recebe relógios por UCI.
-  await engine.init({ Threads: Math.min(threads, 4), Hash: 256, 'Move Overhead': 500 });
+  await engine.init({ Threads: engineThreads, Hash: engineHash, 'Move Overhead': 500 });
   if (args.syzygy) {
     const tableOptions = { SyzygyPath: resolve(args.syzygy), Syzygy50MoveRule: 'true' };
     await engine.init(tableOptions);
@@ -280,6 +321,8 @@ let tournamentState: TournamentState = {
   elapsedAtEnd: null,
 };
 let tournamentQueue: Promise<unknown> = Promise.resolve();
+const physicalTimePolicy = new PhysicalTimePolicy();
+let moveReadyAt: number | null = null;
 
 function serializeTournament<T>(task: () => Promise<T> | T): Promise<T> {
   const result = tournamentQueue.then(task, task);
@@ -345,6 +388,7 @@ function tournamentSnapshot(): Record<string, unknown> {
               : null,
     error: tournamentState.error,
     logPath: tournamentLogPath,
+    timePolicy: physicalTimePolicy.snapshot(),
     initialMillis: tournamentState.initialMillis,
     elapsedMillis:
       tournamentState.elapsedAtEnd ??
@@ -368,21 +412,28 @@ async function calculateEngineMove(session: number): Promise<void> {
   const current = tournamentState;
   if (current.session !== session || current.phase !== 'engine-thinking' || current.engineColor === null)
     return;
-  const clocks = { whiteMillis: projectedClock('white'), blackMillis: projectedClock('black') };
   const moves = movesUci();
   try {
-    const result = await engine.searchWithClocks(moves, clocks);
+    await engine.configure({ 'Move Overhead': physicalTimePolicy.overheadMillis });
+    if (tournamentState.session !== session || tournamentState.phase !== 'engine-thinking') return;
+    // Relê relógios depois da configuração; a operação inteira consome tempo.
+    const result = await engine.searchWithClocks(moves, {
+      whiteMillis: projectedClock('white'),
+      blackMillis: projectedClock('black'),
+      reserveMillis: physicalTimePolicy.reserveMillis,
+    });
     await serializeTournament(() => {
       if (tournamentState.session !== session || tournamentState.phase !== 'engine-thinking') return;
       if (!UCI_MOVE.test(result.bestmove))
         throw new Error(`Motor retornou bestmove inválido: ${result.bestmove}`);
       tournamentState.pending = result;
+      moveReadyAt = performance.now();
       tournamentState.phase = 'awaiting-engine-confirmation';
       appendTournamentLog('engine-move-ready', { ...tournamentSnapshot(), bestmove: result.bestmove });
     });
   } catch (err) {
     await serializeTournament(() => {
-      if (tournamentState.session !== session) return;
+      if (tournamentState.session !== session || tournamentState.phase !== 'engine-thinking') return;
       stopClock();
       tournamentState.phase = 'error';
       tournamentState.error = `Falha da engine: ${(err as Error).message}`;
@@ -460,9 +511,10 @@ const server = Bun.serve({
         Response.json({
           engine: engine.name,
           candidate: args['candidate-name'],
-          threads: Math.min(threads, 4),
-          hash: 256,
+          threads: engineThreads,
+          hash: engineHash,
           syzygy: Boolean(args.syzygy),
+          book: !args['no-training-book'] && Object.keys(preparedBook).length > 0,
         }),
     },
     '/api/prepare': {
@@ -556,7 +608,7 @@ const server = Bun.serve({
           );
         }
         try {
-          if (body?.book === true) {
+          if (body?.book === true && !args['no-training-book']) {
             const board = new Chess();
             for (const move of moves as string[]) board.move(move);
             const entry = preparedBook[board.fen().split(' ').slice(0, 4).join(' ')];
@@ -593,6 +645,8 @@ const server = Bun.serve({
         }
         await serializeTournament(async () => {
           tournamentState.session += 1;
+          physicalTimePolicy.reset();
+          moveReadyAt = null;
           tournamentState = {
             session: tournamentState.session,
             game: new Chess(),
@@ -679,6 +733,8 @@ const server = Bun.serve({
             return jsonError('Não existe jogada da engine aguardando confirmação.');
           }
           const move = tournamentState.pending.bestmove;
+          if (moveReadyAt !== null) physicalTimePolicy.observe(performance.now() - moveReadyAt);
+          moveReadyAt = null;
           try {
             applyUci(tournamentState.game, move);
           } catch {
@@ -737,7 +793,7 @@ const server = Bun.serve({
 });
 
 const url = server.url.href;
-console.log(`IA Xadrez — ${engine.name} (${threads} threads)`);
+console.log(`IA Xadrez — ${engine.name} (${engineThreads} threads · Hash ${engineHash} MB)`);
 console.log(`Treino: ${url}`);
 console.log(`Torneio: ${url}tournament`);
 console.log(`Log de torneio: ${tournamentLogPath}`);
