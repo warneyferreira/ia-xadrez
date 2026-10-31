@@ -45,6 +45,7 @@
 #include "syzygy/tbprobe.h"
 #include "thread.h"
 #include "timeman.h"
+#include "tournament_time.h"
 #include "tt.h"
 #include "types.h"
 #include "uci.h"
@@ -293,6 +294,7 @@ bool Search::Worker::iterative_deepening() {
     Value  bestValue     = -VALUE_INFINITE;
     Color  us            = rootPos.side_to_move();
     double timeReduction = 1, totBestMoveChanges = 0;
+    bool criticalBudgetReported = false;
     int    delta, iterIdx                        = 0;
 
     // Allocate stack with extra size to allow access from (ss - 7) to (ss + 2):
@@ -609,6 +611,18 @@ bool Search::Worker::iterative_deepening() {
 
             double totalTime = mainThread->tm.optimum() * fallingEval * reduction
                              * bestMoveInstability * highBestMoveEffort;
+
+            const double criticalFactor = TournamentTime::critical_factor(
+              options["Tournament Critical Time"], limits.time[us], limits.inc[us],
+              rootPos.game_ply(), rootDepth, rootMoves.size(),
+              totBestMoveChanges / threads.size());
+            totalTime *= criticalFactor;
+            if (criticalFactor > 1.0 && !criticalBudgetReported)
+            {
+                sync_cout << "info string Tournament Critical Time target x1.20; native maximum retained"
+                          << sync_endl;
+                criticalBudgetReported = true;
+            }
 
             if (rootMoves.size() == 1)
                 // Cap used time to 0.5s for a better viewer experience
