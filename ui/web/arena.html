@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arena de testes · Chess Challenge</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="/" class="brand">CHESS <span>CHALLENGE</span></a>
+      <nav aria-label="Modos de jogo">
+        <a href="/">Treinar</a><a href="/duel">Assistir IA × IA</a><a href="/tournament">Torneio físico</a
+        ><a href="/arena" class="active" aria-current="page">Arena de testes</a>
+      </nav>
+    </header>
+    <main class="arena-shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LABORATÓRIO LOCAL · SEM GPT NAS PARTIDAS</p>
+          <h1>Comparar candidatos</h1>
+          <p class="muted">
+            A bateria mede resultados. Melhorar a IA exige usar esses dados para validar o próximo ajuste.
+          </p>
+        </div>
+        <span id="arena-status" class="badge" role="status">Conectando…</span>
+      </div>
+      <p id="arena-error" class="error" role="alert"></p>
+      <div class="arena-grid">
+        <section class="panel arena-results">
+          <label
+            >Bateria acompanhada<select id="run-picker" aria-label="Escolher bateria de testes"></select
+          ></label>
+          <div id="arena-empty" class="muted">
+            Nenhuma bateria encontrada. Escolha os candidatos e prepare o primeiro confronto.
+          </div>
+          <div id="run-content" hidden>
+            <div class="timing-grid">
+              <div><span>Partidas concluídas</span><strong id="completed">—</strong></div>
+              <div><span>Tempo decorrido</span><strong id="elapsed">—</strong></div>
+              <div><span>Controle por lado</span><strong id="arena-clock">—</strong></div>
+            </div>
+            <progress id="batch-progress" max="8" value="0" aria-label="Partidas concluídas"></progress>
+            <p id="current-game" class="board-status" aria-live="polite"></p>
+            <p id="progress-explanation" class="muted"></p>
+            <div id="arena-position" hidden>
+              <div class="timing-grid">
+                <div><span>Brancas</span><strong id="arena-white-clock">—</strong></div>
+                <div><span>Pretas</span><strong id="arena-black-clock">—</strong></div>
+                <div><span>Meios-lances</span><strong id="arena-plies">—</strong></div>
+              </div>
+              <div id="arena-board" class="board"></div>
+            </div>
+            <div class="arena-table-wrap">
+              <table class="arena-table">
+                <caption>
+                  Placar desta bateria · vitória 3 / empate 1 / derrota 0
+                </caption>
+                <thead>
+                  <tr>
+                    <th>Candidato</th>
+                    <th>V</th>
+                    <th>E</th>
+                    <th>D</th>
+                    <th>Pontos</th>
+                  </tr>
+                </thead>
+                <tbody id="score-body"></tbody>
+              </table>
+            </div>
+            <p id="evidence" class="muted"></p>
+            <p id="run-issues" class="muted"></p>
+            <div class="row">
+              <button id="download-summary">Resumo ↓</button><button id="download-pgn">Partidas PGN ↓</button
+              ><button id="download-config">Configuração ↓</button>
+            </div>
+            <p id="research-status" class="operator-note"></p>
+          </div>
+          <details class="game-settings">
+            <summary>Como saber se melhorou?</summary>
+            <p>
+              Observe vitórias, empates, derrotas e falhas com cores e aberturas pareadas. Mais velocidade ou
+              uma vitória isolada não comprovam ganho de força.
+            </p>
+            <p>
+              Uma bateria concluída salva o resumo. Partida interrompida pelo limite de lances continua
+              incompleta: não vira empate.
+            </p>
+            <p>
+              A rede não aprende automaticamente ao jogar. Usamos os dados para selecionar e testar mudanças.
+            </p>
+          </details>
+        </section>
+        <aside class="panel analysis-panel">
+          <h2>Preparar nova bateria</h2>
+          <form id="batch-form" class="controls">
+            <label>Candidato principal<select id="batch-a"></select></label>
+            <label>Referência de comparação<select id="batch-b"></select></label>
+            <label
+              >Quantidade de partidas<select id="batch-games">
+                <option value="8">8 · verificação inicial</option>
+                <option value="20">20 · ampliar a amostra</option>
+                <option value="40">40 · bateria maior</option>
+              </select></label
+            >
+            <label
+              >Ritmo<select id="batch-time">
+                <option value="official">25+0 · tempo oficial</option>
+                <option value="quick">1 min + 0,1 s · diagnóstico rápido</option>
+              </select></label
+            >
+            <div class="duel-roster">
+              <label
+                >Threads por motor<select id="batch-threads">
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="4">4</option>
+                  <option value="6">6</option>
+                  <option value="8">8</option>
+                </select></label
+              ><label
+                >Hash por motor<select id="batch-hash">
+                  <option value="256">256 MB</option>
+                  <option value="1024">1 GB</option>
+                  <option value="2048">2 GB</option>
+                </select></label
+              >
+            </div>
+            <p id="batch-estimate" class="muted"></p>
+            <p class="muted">
+              Os dois motores recebem os mesmos recursos, sem Ponder, repertório ou Syzygy. Esta comparação
+              isola os motores; recursos de torneio precisam de testes próprios.
+            </p>
+            <button id="batch-start" class="primary" type="submit">Iniciar bateria local</button>
+            <p id="reservation" class="muted" role="status"></p>
+          </form>
+          <p class="operator-note">
+            Mantenha o computador ligado e sem suspensão. Fechar esta aba não encerra as partidas. Nenhuma
+            chamada ao GPT é feita pela bateria local.
+          </p>
+        </aside>
+      </div>
+    </main>
+    <script type="module" src="./arena.ts"></script>
+  </body>
+</html>

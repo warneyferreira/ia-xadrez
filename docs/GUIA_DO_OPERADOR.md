@@ -112,6 +112,68 @@ eles não substituem o repertório ativo da v1 nem habilitam livro na v2.
 
 No tabuleiro físico, a reserva de operação começa em 2 s por lance e acompanha
 as últimas 12 confirmações (percentil 90 + 500 ms, entre 1,5 e 8 s). Ela informa
-o `Move Overhead` nativo e preserva margem antes de o relógio zerar. O motor
+o `Move Overhead` nativo, limitado a 5 s nesta versão, e uma reserva externa
+completa com mais 250 ms antes de o relógio zerar. O motor
 continua decidindo como distribuir seu tempo. Essa política reduz risco
 operacional; não cria tempo adicional no relógio oficial.
+
+## Arena de testes e fila local
+
+Abra **Arena de testes** no menu (`/arena`) depois de reiniciar a interface
+com o código atualizado. A página acompanha as baterias iniciadas pelo
+terminal e permite preparar novas. Mostra partidas concluídas, V/E/D,
+pontos 3/1/0, recursos reais de cada motor e arquivos para baixar.
+
+Na série de 8 jogos 25+0, cada partida pode consumir até 50 minutos de relógio;
+a série inteira pode chegar a 6 h 40 min, mais preparação. O progresso só
+conta jogos encerrados. A série antiga, iniciada antes desta atualização,
+não envia posição por lance; isso fica explicado na tela. Novas séries enviam
+tabuleiro e relógios. Ausência de processo e resumo é tratada como interrupção.
+
+As aberturas vêm de `openings/validation-holdout.pgn`: dez linhas iniciais de
+famílias diferentes. Uma semente fixa embaralha a lista de forma reproduzível.
+Cada posição é disputada com as cores trocadas. Oito jogos cobrem quatro
+posições; vinte cobrem as dez. Isso reduz a influência da abertura/cor na
+comparação. Não é um repertório escolhido pelo motor para vencer.
+
+Durante uma bateria, o servidor atualizado recusa novos duelos, análises e
+partidas físicas para evitar competição pela CPU. Acompanhar o placar e
+baixar resultados continua possível. Uma janela antiga do servidor precisa
+ser encerrada pelo operador e reaberta para receber as mudanças.
+
+No duelo visual, **25+0** usa os relógios reais, sem um tempo fixo por lance.
+A seleção de 0,25/1/5 s fica oculta nesse modo. A primeira jogada pode levar
+dezenas de segundos; profundidade e nós aparecem durante a busca.
+
+Para deixar a fila posterior, execute na raiz do projeto:
+
+```powershell
+.\arena\.venv\Scripts\python.exe scripts/research_queue.py --after results/arena/match-20261031-031514-070
+```
+
+Ela espera a bateria terminar, testa o protocolo real, analisa seis posições
+e executa um piloto rápido de 4 vs 2 threads. É processamento local, sem
+chamadas ao GPT. Não treina a rede e não substitui automaticamente o candidato.
+Mantenha o PC ligado e sem suspensão. O estágio e a pasta dos relatórios ficam
+em `results/arena/research-queue.json` e na arena. **Concluída** significa que
+os relatórios foram produzidos; **falhou**, **bloqueada** ou **interrompida**
+exigem investigar os logs. Traga os relatórios para escolher o próximo ajuste.
+
+## Respostas rápidas e Ponder físico experimental
+
+A tela física oferece **Pensar no tempo do adversário (experimental)**,
+desligado por padrão. Prepare novamente a sessão para mudar essa opção.
+Se o adversário confirmar a previsão, a mesma busca continua com `ponderhit`.
+Se jogar diferente, a previsão é descartada e a posição real é pesquisada.
+O sistema mostra previsões, acertos, descartes e tempo de cálculo reaproveitado.
+
+Quando só existe um lance legal, o controlador o entrega imediatamente e
+indica que não houve avaliação. Isso não permite antecipar uma jogada antes
+de saber a resposta adversária. Perto do fim do relógio, há um teto de busca
+curto para preservar a margem de operação. O relógio físico segue soberano.
+Valide o Ponder com o motor real antes de ativar em competição.
+
+Duelo pausado também é restaurado ao reiniciar; o tempo com o programa fechado
+não corre nesse duelo de laboratório. O histórico e a identidade dos motores
+são conferidos antes de continuar. O relógio de competição física não recebe
+essa regra de pausa.

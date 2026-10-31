@@ -11,6 +11,7 @@ import argparse
 import asyncio
 import hashlib
 import math
+import os
 import datetime as dt
 import json
 import platform
@@ -26,6 +27,7 @@ import chess
 import chess.engine
 import chess.pgn
 from match_statistics import paired_summary
+from process_lock import acquire, release, atomic_json
 
 
 @dataclass(frozen=True)
@@ -138,6 +140,7 @@ def run_game(
     base_seconds: float,
     increment_seconds: float,
     max_plies: int,
+    on_progress=None,
 ) -> tuple[chess.pgn.Game, dict[str, Any]]:
     board = chess.Board(opening.initial_fen)
     game = chess.pgn.Game()
@@ -171,6 +174,10 @@ def run_game(
                 break
             color = board.turn
             started = time.monotonic()
+            if on_progress:
+                on_progress({"phase": "thinking", "fen": board.fen(), "plies": len(board.move_stack),
+                             "turn": "white" if color else "black", "thinkingSince": dt.datetime.now(dt.timezone.utc).isoformat(),
+                             "whiteRemaining": remaining[chess.WHITE], "blackRemaining": remaining[chess.BLACK]})
             limit = chess.engine.Limit(
                 white_clock=remaining[chess.WHITE], black_clock=remaining[chess.BLACK],
                 white_inc=increment_seconds, black_inc=increment_seconds,
@@ -297,6 +304,11 @@ def main() -> int:
     if output_dir.exists():
         print(f"ERRO: output_dir já existe; escolha outro para não sobrescrever evidência: {output_dir}", file=sys.stderr)
         return 2
+    try:
+        acquire(output_dir)
+    except RuntimeError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
     output_dir.mkdir(parents=True)
     fingerprints = {}
     for candidate in (candidate_a, candidate_b):
@@ -311,13 +323,22 @@ def main() -> int:
     crashes = {candidate_a.name: 0, candidate_b.name: 0}
     unfinished = 0
     reports = []
+    progress = {"pid": os.getpid(), "phase": "preparing", "game": 1, "games": games, "completed": 0,
+                "startedAt": metadata["started_at"], "output_dir": str(output_dir)}
+    atomic_json(output_dir / "progress.json", progress)
     with (output_dir / "games.pgn").open("w", encoding="utf-8") as pgn_file, (output_dir / "events.jsonl").open("w", encoding="utf-8") as event_file:
         for index, opening in enumerate(schedule, start=1):
             white, black = (candidate_a, candidate_b) if index % 2 else (candidate_b, candidate_a)
             print(f"Iniciando jogo {index}/{games}: {white.name} (brancas) vs {black.name} (pretas)")
-            game, report = run_game(white, black, opening, base_seconds, increment_seconds, max_plies)
+            progress.update({"game": index, "white": white.name, "black": black.name, "opening": opening.label})
+            def on_progress(update):
+                progress.update(update)
+                atomic_json(output_dir / "progress.json", progress)
+            game, report = run_game(white, black, opening, base_seconds, increment_seconds, max_plies, on_progress)
             report["game"] = index
             reports.append(report)
+            progress.update({"completed": index, "phase": "between-games", "thinkingSince": None})
+            atomic_json(output_dir / "progress.json", progress)
             pgn_file.write(f"{game}\n\n")
             event_file.write(json.dumps(report, ensure_ascii=False) + "\n")
             pgn_file.flush()
@@ -335,6 +356,9 @@ def main() -> int:
                "scores": scores, "crashes": crashes, "games": games, "unfinished": unfinished,
                "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."}
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    progress.update({"phase": "finished", "finishedAt": summary["finished_at"]})
+    atomic_json(output_dir / "progress.json", progress)
+    release()
     print(json.dumps(summary, indent=2, ensure_ascii=False))
     return 0
 

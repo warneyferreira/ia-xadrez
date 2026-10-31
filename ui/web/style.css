@@ -8,6 +8,119 @@
   --accent: #7fa650;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
+[hidden] {
+  display: none !important;
+}
+.arena-shell {
+  display: block;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.arena-shell h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+.arena-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 28px;
+  align-items: start;
+  margin-top: 24px;
+}
+.arena-grid > * {
+  min-width: 0;
+}
+.arena-shell .panel {
+  width: auto;
+  padding: 20px;
+}
+.arena-results {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.arena-results label {
+  display: grid;
+  gap: 8px;
+}
+.arena-results select {
+  width: 100%;
+  min-width: 0;
+}
+.arena-results progress {
+  width: 100%;
+  height: 12px;
+  margin-top: 18px;
+  accent-color: var(--accent);
+}
+.arena-results .board-status {
+  margin-left: 0;
+}
+.arena-table-wrap {
+  overflow-x: auto;
+}
+.arena-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 13px;
+}
+.arena-table caption {
+  text-align: left;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.arena-table th,
+.arena-table td {
+  padding: 12px 8px;
+  text-align: right;
+  border-bottom: 1px solid #393d40;
+  font-variant-numeric: tabular-nums;
+}
+.arena-table th:first-child,
+.arena-table td:first-child {
+  text-align: left;
+  max-width: 280px;
+  overflow-wrap: anywhere;
+}
+.arena-table strong,
+.arena-table small {
+  display: block;
+}
+.arena-table small {
+  color: var(--muted);
+  margin-top: 4px;
+}
+#arena-board {
+  width: min(100%, 480px);
+  aspect-ratio: 1;
+  margin: 18px auto 28px;
+}
+@media (max-width: 760px) {
+  .arena-shell {
+    padding: 12px;
+  }
+  .arena-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .arena-shell > .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .arena-shell h1 {
+    font-size: 23px;
+  }
+  .arena-shell .panel {
+    padding: 16px;
+  }
+  .arena-table th,
+  .arena-table td {
+    padding: 10px 4px;
+    font-size: 12px;
+  }
+}
 
 .eval-track {
   height: 14px;
@@ -630,7 +743,8 @@ dialog button {
   opacity: 1;
   font-weight: 700;
 }
-.study-shell .cg-wrap coords.files coord {
+.study-shell .cg-wrap coords.files coord,
+.arena-shell .cg-wrap coords.files coord {
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;

@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js';
-import { appendFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
-import { Engine, type Score } from './engine.ts';
+import { appendFileSync, mkdirSync, readFileSync, existsSync, statSync } from 'node:fs';
+import { Engine, type Score, type SearchInfo } from './engine.ts';
 import { MEMORY_PROFILES, memoryBudget, requireMemory, type MemoryProfile } from './resources.ts';
 import { Candidates } from './candidates.ts';
 import { writeFileSync } from 'node:fs';
@@ -76,6 +76,7 @@ export class Duel {
   private forfeit: string | null = null;
   private spent = { white: 0, black: 0 };
   private identities: unknown[] = [];
+  private liveSearch: SearchInfo | null = null;
   private hardware = {
     cpu: cpus()[0]?.model ?? 'desconhecida',
     logicalProcessors: cpus().length,
@@ -92,13 +93,17 @@ export class Duel {
     private onFinished?: () => void,
   ) {
     this.registry = new Candidates(path);
-    if (existsSync('logs/latest-finished.json')) {
+    const savedPaths = ['logs/latest-finished.json', 'logs/latest-session.json']
+      .filter(existsSync)
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+    for (const savedPath of savedPaths) {
       try {
-        const saved = JSON.parse(readFileSync('logs/latest-finished.json', 'utf8'));
+        const saved = JSON.parse(readFileSync(savedPath, 'utf8'));
         const game = new Chess();
         game.loadPgn(saved.pgn);
         if (
-          saved.phase !== 'finished' ||
+          !['paused', 'finished'].includes(saved.phase) ||
+          !/^\d{10,20}$/.test(saved.id) ||
           !Array.isArray(saved.rows) ||
           game.history().length !== saved.rows.length
         )
@@ -107,7 +112,7 @@ export class Duel {
         this.registry.get(saved.opponentCandidate);
         this.game = game;
         this.rows = saved.rows;
-        this.phase = 'finished';
+        this.phase = saved.phase;
         this.id = saved.id;
         this.config = {
           whiteName: saved.whiteName,
@@ -123,9 +128,12 @@ export class Duel {
         this.startedAt = saved.startedAt;
         this.endedAt = saved.endedAt;
         this.forfeit = saved.outcome;
-        this.pausedMillis = Math.max(0, this.endedAt - this.startedAt - saved.elapsedMillis);
+        this.pauseAt = this.phase === 'paused' ? Date.now() : 0;
+        this.pausedMillis = Math.max(0, (this.endedAt || Date.now()) - this.startedAt - saved.elapsedMillis);
         this.spent = { white: saved.whiteSearchMillis, black: saved.blackSearchMillis };
         this.identities = saved.identities;
+        this.log = `logs/duel-${this.id}.jsonl`;
+        break;
       } catch (err) {
         console.error('Última partida não foi restaurada:', (err as Error).message);
       }
@@ -157,6 +165,8 @@ export class Duel {
       startedAt: this.startedAt,
       endedAt: this.endedAt,
       identities: this.identities,
+      liveSearch: this.phase === 'running' ? this.liveSearch : null,
+      effectiveMoveLimitMillis: this.config.timeMode === 'fixed' ? this.config.movetime : null,
       hardware: this.hardware,
       phase: this.phase,
       busy: this.busy,
@@ -206,8 +216,6 @@ export class Duel {
     const opponent = this.registry.get(
       typeof raw.opponentCandidate === 'string' ? raw.opponentCandidate : 'vanderlei-latest',
     );
-    const primaryPath = this.registry.path(primary),
-      opponentPath = this.registry.path(opponent);
     // Verifica binários/manifestos antes de descartar a partida anterior.
     const identities = [this.registry.identity(primary), this.registry.identity(opponent)];
     const reclaimable =
@@ -279,18 +287,7 @@ export class Duel {
     mkdirSync('logs', { recursive: true });
     this.log = `logs/duel-${this.id}.jsonl`;
     try {
-      for (let side = 0; side < 2; side++) {
-        const arthur = (side === 0) === this.config.arthurWhite;
-        const candidate = arthur ? primary : opponent;
-        const engine = new Engine(arthur ? primaryPath : opponentPath);
-        this.engines.push(engine);
-        await engine.init({
-          Threads: candidate.threads,
-          Hash: arthur ? MEMORY_PROFILES[selectedMemory].hashMB : candidate.hashMB,
-          'Move Overhead': 20,
-          ...(candidate.syzygy && this.syzygy ? { SyzygyPath: this.syzygy, Syzygy50MoveRule: 'true' } : {}),
-        });
-      }
+      await this.createEngines();
       appendFileSync(
         this.log,
         JSON.stringify({ event: 'start', ...this.config, syzygy: this.syzygy ?? null }) + '\n',
@@ -315,10 +312,30 @@ export class Duel {
       this.pauseAt = Date.now();
       for (const engine of this.engines) engine.stop();
     }
+    if (!this.busy && this.phase === 'paused') this.checkpoint();
     return this.snapshot();
   }
-  resume() {
+  async resume() {
     if (this.phase !== 'paused' || this.busy) throw new Error('Aguarde o cálculo encerrar para continuar.');
+    if (this.engines.length === 0) {
+      const primary = this.registry.get(this.config.arthurCandidate),
+        opponent = this.registry.get(this.config.opponentCandidate);
+      requireMemory(MEMORY_PROFILES[this.config.memoryProfile].hashMB, undefined, opponent.hashMB);
+      for (const c of [primary, opponent]) {
+        const old = (this.identities as { id: string; binarySha256: string }[]).find((i) => i.id === c.id);
+        if (!old || this.registry.identity(c).binarySha256 !== old.binarySha256)
+          throw new Error('O binário mudou desde a pausa. Preserve o PGN e inicie outro duelo.');
+      }
+      this.busy = true;
+      try {
+        await this.createEngines();
+      } catch (err) {
+        this.close();
+        throw err;
+      } finally {
+        this.busy = false;
+      }
+    }
     this.pausedMillis += this.pauseAt ? Date.now() - this.pauseAt : 0;
     this.pauseAt = 0;
     this.phase = 'running';
@@ -328,6 +345,26 @@ export class Duel {
   close() {
     for (const engine of this.engines) engine.quit();
     this.engines = [];
+  }
+
+  private async createEngines() {
+    for (let side = 0; side < 2; side++) {
+      const arthur = (side === 0) === this.config.arthurWhite;
+      const c = this.registry.get(arthur ? this.config.arthurCandidate : this.config.opponentCandidate);
+      const native = new Engine(this.registry.path(c));
+      this.engines.push(native);
+      await native.init({
+        Threads: c.threads,
+        Hash: arthur ? MEMORY_PROFILES[this.config.memoryProfile].hashMB : c.hashMB,
+        'Move Overhead': 20,
+        ...(c.syzygy && this.syzygy ? { SyzygyPath: this.syzygy, Syzygy50MoveRule: 'true' } : {}),
+      });
+    }
+  }
+
+  private checkpoint() {
+    mkdirSync('logs', { recursive: true });
+    writeFileSync('logs/latest-session.json', JSON.stringify(this.snapshot()));
   }
 
   private finish(result: string) {
@@ -351,6 +388,7 @@ export class Duel {
     );
     writeFileSync(this.log.replace('.jsonl', '.report.json'), initialReport);
     writeFileSync('logs/latest-finished.json', initialReport);
+    writeFileSync('logs/latest-session.json', initialReport);
     this.close();
     if (this.onFinished) setTimeout(this.onFinished, 0);
   }
@@ -378,14 +416,22 @@ export class Duel {
         const whiteUsed = this.spent.white,
           blackUsed = this.spent.black;
         this.turnStarted = performance.now();
+        this.liveSearch = null;
+        const onInfo = (info: SearchInfo) => {
+          if (this.phase === 'running') this.liveSearch = info;
+        };
         const reply = entry
           ? { bestmove: entry.move, depth: entry.depth, score: null as Score | null, tbhits: 0 }
           : this.config.timeMode === '25+0'
-            ? await this.engines[white ? 0 : 1]!.searchWithClocks(moves, {
-                whiteMillis: 1500000 - whiteUsed,
-                blackMillis: 1500000 - blackUsed,
-              })
-            : await this.engines[white ? 0 : 1]!.search(moves, this.config.movetime);
+            ? await this.engines[white ? 0 : 1]!.searchWithClocks(
+                moves,
+                {
+                  whiteMillis: 1500000 - whiteUsed,
+                  blackMillis: 1500000 - blackUsed,
+                },
+                onInfo,
+              )
+            : await this.engines[white ? 0 : 1]!.search(moves, this.config.movetime, onInfo);
         const elapsedMillis = performance.now() - this.turnStarted;
         this.turnStarted = 0;
         this.spent[white ? 'white' : 'black'] += elapsedMillis;
@@ -435,6 +481,8 @@ export class Duel {
       this.close();
     } finally {
       this.busy = false;
+      this.liveSearch = null;
+      if (this.phase === 'paused') this.checkpoint();
     }
   }
 }

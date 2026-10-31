@@ -1,4 +1,4 @@
-param(
+﻿param(
     [int]$Games = 20,
     [double]$BaseSeconds = 1500,
     [double]$IncrementSeconds = 0,
@@ -10,10 +10,19 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $env:PYTHONUTF8 = '1'
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+$OutputEncoding = [Console]::OutputEncoding
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
 if ($Games -lt 2 -or $Games % 2 -ne 0 -or $BaseSeconds -le 0 -or $IncrementSeconds -lt 0 -or $Threads -lt 1 -or $HashMB -lt 16) { throw 'Use quantidade par de jogos e recursos/tempos positivos.' }
-$registry = Get-Content -LiteralPath 'candidates/registry.json' -Raw | ConvertFrom-Json
+$registry = Get-Content -LiteralPath 'candidates/registry.json' -Raw -Encoding UTF8 | ConvertFrom-Json
+$uiActive = $false
+try {
+    $duelState = Invoke-RestMethod 'http://127.0.0.1:18766/api/duel/status' -TimeoutSec 2
+    $physicalState = Invoke-RestMethod 'http://127.0.0.1:18766/api/tournament/status' -TimeoutSec 2
+    $uiActive = $duelState.busy -or $duelState.phase -in @('running','starting') -or $physicalState.phase -notin @('idle','ready','finished')
+} catch { }
+if ($uiActive) { throw 'Pause o duelo e encerre a partida física antes da bateria, para não disputar processamento.' }
 function Resolve-Candidate([string]$id) {
     $alias = $registry.aliases.PSObject.Properties[$id]
     if ($alias) { $id = [string]$alias.Value }

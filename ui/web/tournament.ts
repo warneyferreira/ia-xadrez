@@ -8,6 +8,7 @@ import './style.css';
 import { ChessSounds } from './sounds.ts';
 
 type State = {
+  arenaBusy?: boolean;
   phase: string;
   engineColor: 'white' | 'black' | null;
   turn: string;
@@ -18,13 +19,26 @@ type State = {
   blackMillis: number;
   elapsedMillis: number;
   initialMillis: number;
-  timePolicy: { overheadMillis: number; observedMoves: number };
+  timePolicy: { overheadMillis: number; operationMillis?: number; observedMoves: number };
+  search: { depth: number; nps?: number; nodes?: number } | null;
+  controller: {
+    enabled: boolean;
+    thinking: boolean;
+    expected: string | null;
+    depth: number | null;
+    hits: number;
+    attempts: number;
+    forcedReplies: number;
+  };
+  engineConfiguration: { name: string; threads: number; hashMB: number };
   running: string | null;
   pending: {
     bestmove: string;
     depth: number;
     score: { unit: string; value: number } | null;
     nps?: number;
+    source?: string;
+    ponderMillis?: number;
   } | null;
   error: string | null;
   outcome: string | null;
@@ -60,6 +74,14 @@ const instructions: Record<string, string> = {
 function sync(next: State) {
   const previous = state;
   state = next;
+  if (!previous && next.phase !== 'idle') {
+    el<HTMLSelectElement>('engine-color').value = next.engineColor ?? 'white';
+    const time = el<HTMLSelectElement>('initial-time');
+    if (![...time.options].some((o) => o.value === String(next.initialMillis)))
+      time.add(new Option(`${next.initialMillis / 60000} minutos · ensaio`, String(next.initialMillis)));
+    time.value = String(next.initialMillis);
+    el<HTMLInputElement>('ponder-enabled').checked = next.controller.enabled;
+  }
   el('white-clock').textContent = clock(
     Math.ceil((next.phase === 'idle' ? next.initialMillis : next.whiteMillis) / 1000) * 1000,
   );
@@ -70,7 +92,14 @@ function sync(next: State) {
   el('physical-time-control').textContent =
     `${Math.floor(next.initialMillis / 60000)}+0 · ${next.initialMillis === 1500000 ? 'OFICIAL' : 'ENSAIO'}`;
   el('time-policy').textContent =
-    `Margem de operação: ${(next.timePolicy.overheadMillis / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
+    `Margem de operação: ${((next.timePolicy.operationMillis ?? next.timePolicy.overheadMillis) / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
+  el('engine-configuration').textContent =
+    `${next.engineConfiguration.name} · ${next.engineConfiguration.threads} threads · Hash ${next.engineConfiguration.hashMB} MB. Lance único legal tem resposta imediata.`;
+  el('ponder-status').textContent = next.controller.thinking
+    ? `Pensando durante a vez adversária · previsão ${next.controller.expected} · profundidade ${next.controller.depth ?? '…'}. Aguardando o lance real.`
+    : next.controller.enabled
+      ? `Ponder ativo · ${next.controller.hits} previsões confirmadas / ${next.controller.attempts} tentativas. Respostas forçadas imediatas: ${next.controller.forcedReplies}.`
+      : 'Ponder desligado. Respostas forçadas imediatas continuam disponíveis.';
   const instruction = next.outcome ?? instructions[next.phase] ?? next.phase;
   if (el('phase').textContent !== instruction) el('phase').textContent = instruction;
   el('running-side').textContent = next.running
@@ -92,8 +121,12 @@ function sync(next: State) {
     ? `${next.pending.bestmove.slice(0, 2)} → ${next.pending.bestmove.slice(2, 4)}${next.pending.bestmove[4] ? ` = ${next.pending.bestmove[4].toUpperCase()}` : ''}`
     : '—';
   el('engine-detail').textContent = next.pending
-    ? `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}`
-    : 'Aguardando a vez da nossa IA.';
+    ? next.pending.source === 'forced'
+      ? `${san} · único lance legal; sem gastar tempo em nova busca.`
+      : `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}${next.pending.source === 'ponder-hit' ? ` · cálculo antecipado reaproveitado (${((next.pending.ponderMillis ?? 0) / 1000).toFixed(1)} s)` : ''}`
+    : next.search && next.phase === 'engine-thinking'
+      ? `Calculando agora · profundidade ${next.search.depth} · ${(next.search.nodes ?? 0).toLocaleString('pt-BR')} nós`
+      : 'Aguardando a vez da nossa IA.';
   board.set({
     fen: next.fen,
     orientation: next.engineColor ?? 'white',
@@ -139,8 +172,21 @@ function sync(next: State) {
       }),
     );
   el<HTMLButtonElement>('new-game').disabled =
+    actionPending || !!next.arenaBusy || !['idle', 'ready', 'finished'].includes(next.phase);
+  el('arena-reservation').textContent = next.arenaBusy
+    ? 'A bateria de testes está usando o processador. Aguarde terminar para preparar uma partida física.'
+    : '';
+  el<HTMLInputElement>('ponder-enabled').disabled =
     actionPending || !['idle', 'ready', 'finished'].includes(next.phase);
-  el<HTMLButtonElement>('start-game').disabled = actionPending || next.phase !== 'ready';
+  const draftChanged =
+    next.phase === 'ready' &&
+    (el<HTMLSelectElement>('engine-color').value !== next.engineColor ||
+      Number(el<HTMLSelectElement>('initial-time').value) !== next.initialMillis ||
+      el<HTMLInputElement>('ponder-enabled').checked !== next.controller.enabled);
+  el<HTMLButtonElement>('start-game').disabled =
+    actionPending || !!next.arenaBusy || next.phase !== 'ready' || draftChanged;
+  if (draftChanged)
+    el('phase').textContent = 'A preparação mudou. Clique em Preparar nova partida antes de iniciar.';
   el<HTMLInputElement>('opponent-move').disabled = actionPending || next.phase !== 'awaiting-opponent';
   el<HTMLButtonElement>('send-opponent').disabled = actionPending || next.phase !== 'awaiting-opponent';
   el<HTMLButtonElement>('confirm-engine').disabled =
@@ -188,9 +234,14 @@ el('new-game').addEventListener(
     void command('/api/tournament/newgame', {
       engineColor: el<HTMLSelectElement>('engine-color').value,
       initialMillis: Number(el<HTMLSelectElement>('initial-time').value),
+      ponder: el<HTMLInputElement>('ponder-enabled').checked,
     }),
 );
 el('start-game').addEventListener('click', () => void command('/api/tournament/start'));
+for (const id of ['engine-color', 'initial-time', 'ponder-enabled'])
+  el(id).addEventListener('change', () => {
+    if (state) sync(state);
+  });
 el('confirm-engine').addEventListener('click', () => void command('/api/tournament/confirm-engine-move'));
 el('opponent-form').addEventListener('submit', (e) => {
   e.preventDefault();

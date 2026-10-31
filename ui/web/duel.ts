@@ -25,6 +25,7 @@ type Row = {
 };
 type State = {
   phase: string;
+  arenaBusy?: boolean;
   busy: boolean;
   fen: string;
   turn: string;
@@ -52,6 +53,14 @@ type State = {
   timeMode: string;
   arthurCandidate: string;
   opponentCandidate: string;
+  liveSearch: {
+    depth: number;
+    nodes?: number;
+    nps?: number;
+    tbhits?: number;
+    hashfull?: number;
+    score: { unit: 'cp' | 'mate'; value: number } | null;
+  } | null;
 };
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const board = Chessground(el('board'), {
@@ -92,6 +101,30 @@ function bookAvailability(locked = false) {
   el('book-availability').textContent = candidate?.book
     ? 'Repertório preliminar. Desative para comparar apenas os motores.'
     : 'Este candidato joga sem repertório: as aberturas preparadas ainda precisam passar pela validação em partidas.';
+}
+function timeControls(locked = false) {
+  const competition = el<HTMLSelectElement>('time-mode').value === '25+0';
+  el('move-time-setting').hidden = competition;
+  el<HTMLSelectElement>('duel-time').disabled = locked || competition;
+  el('time-mode-help').textContent = competition
+    ? '25 minutos para todas as jogadas de cada lado. A IA administra o relógio; o primeiro lance pode levar dezenas de segundos. O limite fixo por lance não se aplica.'
+    : 'Tempo fixo por lance, útil para observar partidas rápidas. Um teste com 0,25 s não representa o ritmo do campeonato.';
+}
+function paintLive(state: State) {
+  if (replayPly !== null || state.phase !== 'running') return;
+  const live = state.liveSearch;
+  el('depth').textContent = live ? `Busca ao vivo · prof. ${live.depth}` : 'Motor iniciando a busca…';
+  if (!live) return;
+  el('tablebase').textContent =
+    `Nesta busca · ${(live.nodes ?? 0).toLocaleString('pt-BR')} nós · ${(live.nps ?? 0).toLocaleString('pt-BR')} nós/s · Syzygy ${live.tbhits ?? 0} · Hash ${live.hashfull === undefined ? '—' : (live.hashfull / 10).toFixed(1) + '%'}`;
+  if (live.score) {
+    const score = live.score.unit === 'cp' ? live.score.value : Math.sign(live.score.value || 1) * 10000;
+    const cp = score * (state.turn === 'w' ? 1 : -1);
+    el('evaluation').textContent =
+      `Brancas ${cp > 0 ? '+' : ''}${(cp / 100).toFixed(2)} · estimativa da busca em andamento`;
+    el('eval-fill').style.height = `${50 + 50 * Math.tanh(cp / 400)}%`;
+    el('eval-number').textContent = `${cp > 0 ? '+' : ''}${(cp / 100).toFixed(1)}`;
+  }
 }
 const icons: Record<string, string> = {
   Livro: '▤',
@@ -274,7 +307,7 @@ function render(state: State) {
   }
   el('replay-panel').hidden = !['paused', 'finished'].includes(state.phase);
   el<HTMLInputElement>('replay-range').max = String(state.rows.length);
-  el<HTMLButtonElement>('analyse-duel').disabled = reviewPolling || state.busy;
+  el<HTMLButtonElement>('analyse-duel').disabled = reviewPolling || state.busy || !!state.arenaBusy;
   if (state.phase === 'running') replayPly = null;
   if (state.phase === 'finished' && analysisKey !== `${state.id}:${state.rows.length}`) {
     analysisKey = `${state.id}:${state.rows.length}`;
@@ -284,10 +317,13 @@ function render(state: State) {
     ? `Pontos desta partida: ${state.whiteName} ${state.points.white} · ${state.blackName} ${state.points.black}`
     : 'Pontuação do regulamento: vitória 3 · empate 1 · derrota 0.';
   const active = state.phase === 'running' || state.phase === 'starting' || state.busy;
-  el<HTMLButtonElement>('start').disabled = active || pending || reviewPolling;
+  el<HTMLButtonElement>('start').disabled = active || pending || reviewPolling || !!state.arenaBusy;
+  el('arena-reservation').textContent = state.arenaBusy
+    ? 'Uma bateria está rodando. Novos duelos e análises aguardam para preservar o teste; acompanhe em Arena de testes.'
+    : '';
   el<HTMLButtonElement>('pause').disabled = state.phase !== 'running';
   el<HTMLButtonElement>('resume').disabled =
-    state.phase !== 'paused' || state.busy || pending || reviewPolling;
+    state.phase !== 'paused' || state.busy || pending || reviewPolling || !!state.arenaBusy;
   for (const id of [
     'white-input',
     'black-input',
@@ -301,8 +337,12 @@ function render(state: State) {
   ])
     (el(id) as HTMLInputElement).disabled = active || reviewPolling;
   bookAvailability(active || reviewPolling);
+  timeControls(active || reviewPolling);
   el<HTMLButtonElement>('save').disabled = state.rows.length === 0;
-  if (count === state.rows.length) return;
+  if (count === state.rows.length) {
+    paintLive(state);
+    return;
+  }
   count = state.rows.length;
   const last = state.rows.at(-1);
   if (last && state.rows.length > previousCount && previousCount > 0 && replayPly === null) soundFor(last);
@@ -357,6 +397,7 @@ function render(state: State) {
     `${state.rows.length} meios-lances · ${state.rows.reduce((s, r) => s + (r.nodes ?? 0), 0).toLocaleString('pt-BR')} nós · ${state.rows.reduce((s, r) => s + r.tbhits, 0)} consultas Syzygy somadas.`;
   if (follow) list.scrollTop = list.scrollHeight;
   selectPly(replayPly);
+  paintLive(state);
 }
 
 async function api(path: string, body?: object) {
@@ -390,7 +431,7 @@ async function command(path: string, body = {}) {
     if (current) render(current);
     if (current)
       el<HTMLButtonElement>('start').disabled =
-        current.busy || ['running', 'starting'].includes(current.phase);
+        current.busy || ['running', 'starting'].includes(current.phase) || !!current.arenaBusy;
   }
 }
 el('duel-form').addEventListener('submit', (e) => {
@@ -409,6 +450,7 @@ el('duel-form').addEventListener('submit', (e) => {
   });
 });
 el('pause').addEventListener('click', () => void command('/api/duel/pause'));
+el('time-mode').addEventListener('change', () => timeControls());
 el('arthur-side').addEventListener('change', () => {
   const white = el<HTMLInputElement>('white-input');
   const black = el<HTMLInputElement>('black-input');

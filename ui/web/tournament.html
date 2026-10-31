@@ -10,7 +10,7 @@
       <a class="brand" href="/">CHESS <span>CHALLENGE</span></a>
       <nav aria-label="Modos">
         <a href="/">Treinar</a><a href="/duel">Assistir IA × IA</a
-        ><a href="/tournament" aria-current="page">Torneio físico</a
+        ><a href="/tournament" aria-current="page">Torneio físico</a><a href="/arena">Arena de testes</a
         ><button id="sound-toggle" class="quiet-button" aria-pressed="false">Som desligado</button>
       </nav>
     </header>
@@ -26,6 +26,7 @@
           <p id="phase" class="status">Prepare a partida para começar.</p>
           <p id="running-side" class="muted">Relógios parados</p>
           <p id="error" class="error" hidden></p>
+          <p id="arena-reservation" class="muted" role="status"></p>
         </section>
         <p class="operator-note">
           O relógio físico e as decisões do árbitro são a autoridade. Estes relógios espelham o tempo para a
@@ -54,6 +55,14 @@
             >
             <button id="new-game" class="primary">Preparar nova partida</button
             ><button id="start-game">Iniciar junto com o relógio físico</button>
+            <p id="engine-configuration" class="muted"></p>
+            <label
+              ><input id="ponder-enabled" type="checkbox" /> Antecipar respostas · Ponder experimental</label
+            >
+            <p class="muted">
+              Calcula durante a vez adversária. Uma resposta antecipada só é usada depois de conferir a jogada
+              real.
+            </p>
           </div>
         </details>
         <section class="metric-section">
@@ -81,6 +90,7 @@
           <p id="engine-move" class="engine-move">—</p>
           <p id="engine-detail" class="muted">Aguardando a vez da nossa IA.</p>
           <p id="time-policy" class="muted">Margem de operação: 2 s por lance, ajustada ao seu ritmo.</p>
+          <p id="ponder-status" class="muted" aria-live="polite"></p>
           <button id="confirm-engine" class="primary">Fiz o lance e pressionei o relógio físico</button>
         </section>
         <section class="metric-section">

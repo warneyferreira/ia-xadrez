@@ -1,4 +1,4 @@
-param([switch]$WithTablebases)
+﻿param([switch]$WithTablebases)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
@@ -10,7 +10,7 @@ if (-not (Test-Path 'ui/node_modules/bun/bin/bun.exe')) {
 }
 if (-not (Test-Path 'Stockfish/src/stockfish.exe')) { & "$PSScriptRoot\build-engine.ps1" }
 if (-not (Test-Path 'bin/baseline-effdc3fd3/stockfish.exe')) { & "$PSScriptRoot\build-baseline.ps1" }
-$registry = Get-Content -LiteralPath 'candidates/registry.json' -Raw | ConvertFrom-Json
+$registry = Get-Content -LiteralPath 'candidates/registry.json' -Raw -Encoding UTF8 | ConvertFrom-Json
 foreach ($candidate in $registry.candidates) {
     if ($candidate.build -and -not (Test-Path -LiteralPath $candidate.engine)) {
         $buildArgs = @('scripts/build_candidate.py', '--id', $candidate.id, '--revision', $candidate.sourceCommit, '--arch', $candidate.build.architecture)

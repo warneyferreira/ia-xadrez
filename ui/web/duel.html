@@ -10,7 +10,7 @@
       <a class="brand" href="/">CHESS <span>CHALLENGE</span></a>
       <nav aria-label="Modos de jogo">
         <a href="/">Treinar</a><a href="/duel" aria-current="page">Assistir IA × IA</a
-        ><a href="/tournament">Torneio físico</a
+        ><a href="/tournament">Torneio físico</a><a href="/arena">Arena de testes</a
         ><button id="sound-toggle" class="quiet-button" aria-pressed="false">Som desligado</button>
       </nav>
     </header>
@@ -128,7 +128,7 @@
               <option value="black">Pretas</option>
             </select></label
           >
-          <label
+          <label id="move-time-setting"
             >Tempo de cálculo por lance<select id="duel-time">
               <option value="250">Rápido · 0,25 s</option>
               <option value="1000" selected>Normal · 1 s</option>
@@ -136,6 +136,7 @@
               <option value="5000">Profundo · 5 s</option>
             </select></label
           >
+          <p id="time-mode-help" class="muted"></p>
           <label
             >Controle da partida<select id="time-mode">
               <option value="fixed">Exibição · tempo fixo por lance</option>
@@ -157,6 +158,7 @@
           <label><input id="duel-book" type="checkbox" checked /> Principal usa o repertório preparado</label>
           <p id="book-availability" class="muted"></p>
           <button id="start" class="primary" type="submit">Iniciar novo duelo</button>
+          <p id="arena-reservation" class="muted" role="status"></p>
         </form>
         <div class="row">
           <button id="pause">Pausar</button><button id="resume">Continuar</button

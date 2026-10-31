@@ -6,8 +6,11 @@ import { Chess } from 'chess.js';
 import index from '../web/index.html';
 import tournament from '../web/tournament.html';
 import duelPage from '../web/duel.html';
+import arenaPage from '../web/arena.html';
+import { ArenaService } from './arena.ts';
 import { Duel } from './duel.ts';
-import { Engine, type SearchResult } from './engine.ts';
+import { Engine, type SearchResult, type SearchInfo } from './engine.ts';
+import { TournamentBrain } from './tournament-brain.ts';
 import { review, type ReviewRow } from './review.ts';
 import { performanceReport } from './report.ts';
 import { PhysicalTimePolicy } from './time-policy.ts';
@@ -107,7 +110,10 @@ const preparedBook: Record<string, { move: string; depth: number }> = args.book
 const duel = new Duel(enginePath, preparedBook, args.syzygy ? resolve(args.syzygy) : undefined, () => {
   void startDuelReview().catch((err) => console.error('Revisão automática:', (err as Error).message));
 });
+const arena = new ArenaService(process.cwd(), duel.registry);
 const engine = new Engine(enginePath);
+let tournamentBrain = new TournamentBrain(engine, { ponder: false, forcedMoves: true });
+let liveTournamentSearch: SearchInfo | null = null;
 let reviewer: Engine | null = null;
 async function getReviewer() {
   if (reviewer) return reviewer;
@@ -205,6 +211,7 @@ async function startDuelReview() {
   )
     throw new Error('A análise roda após o duelo ou enquanto ele estiver pausado.');
   if (reviewJob.key === key && ['running', 'done'].includes(reviewJob.status)) return reviewJob;
+  await arena.requireIdle();
   if (reviewing) throw new Error('Já existe uma análise em andamento.');
   reviewing = true;
   engine.stop();
@@ -372,6 +379,14 @@ function tournamentSnapshot(): Record<string, unknown> {
     blackMillis: projectedClock('black'),
     running: tournamentState.running,
     pending: tournamentState.pending,
+    search: liveTournamentSearch,
+    controller: { version: 'tournament-v1', forcedMoves: true, ...tournamentBrain.snapshot() },
+    engineConfiguration: {
+      name: args['candidate-name'],
+      threads: engineThreads,
+      hashMB: engineHash,
+      syzygy: Boolean(args.syzygy),
+    },
     gameOver: tournamentState.game.isGameOver(),
     outcome: tournamentState.game.isCheckmate()
       ? tournamentState.game.turn() === 'w'
@@ -400,6 +415,7 @@ function tournamentSnapshot(): Record<string, unknown> {
 
 function finishIfGameOver(): boolean {
   if (!tournamentState.game.isGameOver()) return false;
+  tournamentBrain.cancel();
   stopClock();
   tournamentState.phase = 'finished';
   tournamentState.elapsedAtEnd =
@@ -412,20 +428,30 @@ async function calculateEngineMove(session: number): Promise<void> {
   const current = tournamentState;
   if (current.session !== session || current.phase !== 'engine-thinking' || current.engineColor === null)
     return;
-  const moves = movesUci();
   try {
-    await engine.configure({ 'Move Overhead': physicalTimePolicy.overheadMillis });
+    // Configurar enquanto go ponder está ativo bloquearia a fila UCI.
+    if (!tournamentBrain.snapshot().thinking)
+      await engine.configure({ 'Move Overhead': physicalTimePolicy.overheadMillis });
     if (tournamentState.session !== session || tournamentState.phase !== 'engine-thinking') return;
     // Relê relógios depois da configuração; a operação inteira consome tempo.
-    const result = await engine.searchWithClocks(moves, {
-      whiteMillis: projectedClock('white'),
-      blackMillis: projectedClock('black'),
-      reserveMillis: physicalTimePolicy.reserveMillis,
-    });
+    liveTournamentSearch = null;
+    const result = await tournamentBrain.respond(
+      current.game,
+      {
+        whiteMillis: projectedClock('white'),
+        blackMillis: projectedClock('black'),
+        reserveMillis: physicalTimePolicy.reserveMillis,
+      },
+      (info) => {
+        if (tournamentState.session === session && tournamentState.phase === 'engine-thinking')
+          liveTournamentSearch = info;
+      },
+    );
     await serializeTournament(() => {
       if (tournamentState.session !== session || tournamentState.phase !== 'engine-thinking') return;
       if (!UCI_MOVE.test(result.bestmove))
         throw new Error(`Motor retornou bestmove inválido: ${result.bestmove}`);
+      new Chess(tournamentState.game.fen()).move(result.bestmove);
       tournamentState.pending = result;
       moveReadyAt = performance.now();
       tournamentState.phase = 'awaiting-engine-confirmation';
@@ -442,6 +468,21 @@ async function calculateEngineMove(session: number): Promise<void> {
   }
 }
 
+async function anticipateOpponent(session: number, predicted: string | undefined) {
+  if (tournamentState.session !== session || tournamentState.phase !== 'awaiting-opponent') return;
+  try {
+    await engine.configure({ 'Move Overhead': physicalTimePolicy.overheadMillis });
+    if (tournamentState.session !== session || tournamentState.phase !== 'awaiting-opponent') return;
+    await tournamentBrain.anticipate(tournamentState.game, predicted, {
+      whiteMillis: projectedClock('white'),
+      blackMillis: projectedClock('black'),
+      reserveMillis: physicalTimePolicy.reserveMillis,
+    });
+  } catch (err) {
+    appendTournamentLog('ponder-unavailable', { session, error: (err as Error).message });
+  }
+}
+
 function jsonError(message: string, status = 400): Response {
   return Response.json({ error: message, state: tournamentSnapshot() }, { status });
 }
@@ -453,6 +494,15 @@ async function parseBody(req: Request): Promise<Record<string, unknown> | null> 
     : null;
 }
 
+async function arenaGuard(): Promise<Response | null> {
+  try {
+    await arena.requireIdle();
+    return null;
+  } catch (err) {
+    return Response.json({ error: (err as Error).message }, { status: 409 });
+  }
+}
+
 const server = Bun.serve({
   hostname: '127.0.0.1',
   port: Number(args.port),
@@ -462,7 +512,28 @@ const server = Bun.serve({
     '/': index,
     '/tournament': tournament,
     '/duel': duelPage,
-    '/api/duel/status': { GET: () => Response.json(duel.snapshot()) },
+    '/arena': arenaPage,
+    '/api/arena/status': { GET: async () => Response.json(await arena.snapshot()) },
+    '/api/arena/start': {
+      POST: async (req) => {
+        if (duel.active || reviewing || !['idle', 'finished'].includes(tournamentState.phase))
+          return jsonError('Pause o duelo e encerre torneio/análise antes de iniciar a bateria.', 409);
+        try {
+          return Response.json(await arena.start((await parseBody(req)) ?? {}));
+        } catch (err) {
+          return Response.json({ error: (err as Error).message }, { status: 409 });
+        }
+      },
+    },
+    '/api/arena/download': {
+      GET: (req) => {
+        const url = new URL(req.url);
+        return arena.download(url.searchParams.get('id') ?? '', url.searchParams.get('file') ?? '');
+      },
+    },
+    '/api/duel/status': {
+      GET: async () => Response.json({ ...duel.snapshot(), arenaBusy: (await arena.snapshot()).busy }),
+    },
     '/api/candidates': { GET: () => Response.json(duel.registry.list()) },
     '/api/duel/report': {
       GET: () =>
@@ -484,6 +555,8 @@ const server = Bun.serve({
     },
     '/api/duel/start': {
       POST: async (req) => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (!['idle', 'finished'].includes(tournamentState.phase) || reviewing)
           return jsonError('Encerre torneio/análise antes de iniciar o duelo.', 409);
         engine.stop();
@@ -496,11 +569,13 @@ const server = Bun.serve({
     },
     '/api/duel/pause': { POST: () => Response.json(duel.pause()) },
     '/api/duel/resume': {
-      POST: () => {
+      POST: async () => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (!['idle', 'finished'].includes(tournamentState.phase) || reviewing)
           return jsonError('Encerre torneio/análise antes de continuar o duelo.', 409);
         try {
-          return Response.json(duel.resume());
+          return Response.json(await duel.resume());
         } catch (err) {
           return Response.json({ error: (err as Error).message }, { status: 409 });
         }
@@ -519,6 +594,8 @@ const server = Bun.serve({
     },
     '/api/prepare': {
       POST: async (req) => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (duel.active) return jsonError('Preparação desativada enquanto o duelo estiver calculando.', 409);
         if (!['idle', 'finished'].includes(tournamentState.phase))
           return jsonError('Preparação de treino indisponível durante torneio.', 409);
@@ -547,6 +624,8 @@ const server = Bun.serve({
     },
     '/api/review': {
       POST: async (req) => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (duel.active) return jsonError('Pause o duelo para analisar.', 409);
         if (reviewing) return Response.json({ error: 'Análise já em andamento. Aguarde.' }, { status: 409 });
         if (!['idle', 'ready', 'finished'].includes(tournamentState.phase))
@@ -574,6 +653,8 @@ const server = Bun.serve({
     },
     '/api/newgame': {
       POST: async () => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (duel.active) return jsonError('Pause o duelo antes de treinar.', 409);
         if (!['idle', 'finished'].includes(tournamentState.phase))
           return jsonError('Encerre a sessão de torneio antes de abrir treino.', 409);
@@ -583,6 +664,8 @@ const server = Bun.serve({
     },
     '/api/move': {
       POST: async (req) => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (duel.active) return jsonError('Pause o duelo antes de treinar.', 409);
         if (!['idle', 'finished'].includes(tournamentState.phase))
           return jsonError('Treino bloqueado durante a sessão de torneio.', 409);
@@ -624,9 +707,13 @@ const server = Bun.serve({
         }
       },
     },
-    '/api/tournament/status': { GET: () => Response.json(tournamentSnapshot()) },
+    '/api/tournament/status': {
+      GET: async () => Response.json({ ...tournamentSnapshot(), arenaBusy: (await arena.snapshot()).busy }),
+    },
     '/api/tournament/newgame': {
       POST: async (req) => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (duel.active) return jsonError('Pause o duelo antes de iniciar o torneio.', 409);
         const body = await parseBody(req);
         const engineColor = body?.engineColor;
@@ -644,7 +731,10 @@ const server = Bun.serve({
           );
         }
         await serializeTournament(async () => {
+          await tournamentBrain.stop();
           tournamentState.session += 1;
+          tournamentBrain = new TournamentBrain(engine, { ponder: body?.ponder === true, forcedMoves: true });
+          liveTournamentSearch = null;
           physicalTimePolicy.reset();
           moveReadyAt = null;
           tournamentState = {
@@ -663,6 +753,10 @@ const server = Bun.serve({
             elapsedAtEnd: null,
           };
           await engine.newGame();
+          await engine.configure({
+            Ponder: body?.ponder === true ? 'true' : 'false',
+            'Move Overhead': physicalTimePolicy.overheadMillis,
+          });
           appendTournamentLog('new-game-ready', { ...tournamentSnapshot() });
         });
         return Response.json(tournamentSnapshot());
@@ -670,6 +764,8 @@ const server = Bun.serve({
     },
     '/api/tournament/start': {
       POST: async () => {
+        const reserved = await arenaGuard();
+        if (reserved) return reserved;
         if (reviewing) return jsonError('Aguarde a análise terminar antes de iniciar o relógio.', 409);
         let session: number | null = null;
         const response = await serializeTournament(() => {
@@ -724,7 +820,9 @@ const server = Bun.serve({
     },
     '/api/tournament/confirm-engine-move': {
       POST: async () => {
-        return serializeTournament(() => {
+        let predicted: string | undefined;
+        let session: number | null = null;
+        const response = await serializeTournament(() => {
           if (
             tournamentState.engineColor === null ||
             tournamentState.phase !== 'awaiting-engine-confirmation' ||
@@ -733,6 +831,7 @@ const server = Bun.serve({
             return jsonError('Não existe jogada da engine aguardando confirmação.');
           }
           const move = tournamentState.pending.bestmove;
+          predicted = tournamentState.pending.ponder;
           if (moveReadyAt !== null) physicalTimePolicy.observe(performance.now() - moveReadyAt);
           moveReadyAt = null;
           try {
@@ -750,14 +849,17 @@ const server = Bun.serve({
           if (finishIfGameOver()) return Response.json(tournamentSnapshot());
           startClock(opposite(tournamentState.engineColor));
           tournamentState.phase = 'awaiting-opponent';
+          session = tournamentState.session;
           return Response.json(tournamentSnapshot());
         });
+        if (session !== null && tournamentBrain.options.ponder) void anticipateOpponent(session, predicted);
+        return response;
       },
     },
     '/api/tournament/end': {
       POST: () =>
         serializeTournament(() => {
-          engine.stop();
+          tournamentBrain.cancel();
           stopClock();
           tournamentState.phase = 'finished';
           tournamentState.elapsedAtEnd =
@@ -779,6 +881,7 @@ const server = Bun.serve({
           const running = tournamentState.running;
           if (tournamentState.phase === 'engine-thinking')
             return jsonError('Aguarde a resposta da engine antes de corrigir os relógios.', 409);
+          tournamentBrain.cancel();
           stopClock();
           tournamentState.whiteMillis = body.whiteMillis as number;
           tournamentState.blackMillis = body.blackMillis as number;

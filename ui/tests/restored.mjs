@@ -1,7 +1,8 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
+const base = process.env.CHESS_TEST_URL ?? 'http://127.0.0.1:18766';
 const browser = await chromium.launch({
   headless: true,
   executablePath:
@@ -9,22 +10,29 @@ const browser = await chromium.launch({
 });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  await page.goto('http://127.0.0.1:18766/duel');
-  const saved = JSON.parse(
-    readFileSync(fileURLToPath(new URL('../../logs/latest-finished.json', import.meta.url)), 'utf8'),
-  );
-  const report = await (await page.request.get('http://127.0.0.1:18766/api/duel/report')).json();
+  const files = ['latest-finished.json', 'latest-session.json']
+    .map((name) => fileURLToPath(new URL(`../../logs/${name}`, import.meta.url)))
+    .filter(existsSync)
+    .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+  const saved = JSON.parse(readFileSync(files[0], 'utf8'));
+  await page.goto(`${base}/duel`);
+  const report = await (await page.request.get(`${base}/api/duel/report`)).json();
+  assert.equal(report.id, saved.id);
+  assert.equal(report.phase, saved.phase);
+  assert.equal(report.rows.length, saved.rows.length);
   assert.equal(
     report.analysisEngine,
     saved.analysisEngine ?? null,
     'restaurar análise preserva motor original',
   );
-  await page.waitForFunction(() => !document.querySelector('#result-banner').hidden);
-  await page.waitForFunction(
-    () => document.querySelector('#analysis-progress').textContent.includes('Análise concluída'),
-    null,
-    { timeout: 15000 },
-  );
+  if (saved.phase === 'finished')
+    await page.waitForFunction(() => !document.querySelector('#result-banner').hidden);
+  if (saved.analysisStatus === 'done')
+    await page.waitForFunction(
+      () => document.querySelector('#analysis-progress').textContent.includes('Análise concluída'),
+      null,
+      { timeout: 15000 },
+    );
   await page.locator('#replay-prev').click();
   assert.match(await page.locator('#replay-label').textContent(), /Lance/);
   await page.screenshot({
@@ -44,7 +52,7 @@ try {
     path: fileURLToPath(new URL('../../results/visual/resultado-reprise-mobile.png', import.meta.url)),
     fullPage: true,
   });
-  console.log('PASS: partida concluída e análise restauradas; reprise e layout móvel verificados.');
+  console.log('PASS: sessão salva restaurada; identidade, reprise e layout móvel verificados.');
 } finally {
   await browser.close();
 }

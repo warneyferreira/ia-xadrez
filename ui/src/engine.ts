@@ -14,6 +14,21 @@ export type SearchResult = {
   hashfull?: number;
   engineMillis?: number;
   pv?: string[];
+  ponderHit?: boolean;
+  ponderMillis?: number;
+  source?: 'search' | 'forced' | 'ponder-hit';
+};
+export type SearchInfo = Omit<SearchResult, 'bestmove'>;
+export type PonderSearch = {
+  ready: Promise<void>;
+  result: Promise<SearchResult>;
+  hit: (clocks: ClockSearch) => boolean;
+  cancel: () => void;
+};
+type PonderControl = {
+  ready: ReturnType<typeof Promise.withResolvers<void>>;
+  activate: ((clocks: ClockSearch) => void) | null;
+  cancel: () => void;
 };
 export type ClockSearch = {
   whiteMillis: number;
@@ -21,6 +36,7 @@ export type ClockSearch = {
   incrementMillis?: number;
   /** Margem para mover a peça/pressionar relógio, além da gestão nativa do motor. */
   reserveMillis?: number;
+  maxSearchMillis?: number;
 };
 
 type Listener = (line: string | null) => void;
@@ -32,6 +48,8 @@ export class Engine {
   private queue: Promise<unknown> = Promise.resolve();
   private searching = false;
   private dead = false;
+  private failure: string | null = null;
+  private generation = 0;
   name = 'UCI engine';
 
   constructor(path: string | readonly string[]) {
@@ -76,22 +94,25 @@ export class Engine {
       reject(new Error('O motor foi encerrado.'));
       return promise;
     }
-    const timer = setTimeout(() => {
-      this.listeners.delete(listener);
-      this.dead = true;
-      this.proc.kill();
-      reject(new Error('O motor não respondeu no prazo. Reinicie a sessão antes de continuar.'));
-    }, timeoutMillis);
+    const timer =
+      timeoutMillis > 0
+        ? setTimeout(() => {
+            this.listeners.delete(listener);
+            this.dead = true;
+            this.proc.kill();
+            reject(new Error('O motor não respondeu no prazo. Reinicie a sessão antes de continuar.'));
+          }, timeoutMillis)
+        : null;
     const listener: Listener = (line) => {
       if (line === null) {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
         this.listeners.delete(listener);
-        reject(new Error('O motor foi encerrado.'));
+        reject(new Error(this.failure ?? 'O motor foi encerrado.'));
         return;
       }
       onLine?.(line);
       if (match(line)) {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
         this.listeners.delete(listener);
         resolve(line);
       }
@@ -143,10 +164,12 @@ export class Engine {
   }
 
   stop(): void {
+    this.generation++;
     this.interrupt();
   }
 
   newGame(): Promise<void> {
+    this.generation++;
     this.interrupt();
     return this.serialize(async () => {
       this.send('ucinewgame');
@@ -155,18 +178,43 @@ export class Engine {
   }
 
   /** Busca a partir da posição inicial após `moves` (notação UCI), por `movetime` ms. */
-  search(moves: readonly string[], movetime: number): Promise<SearchResult> {
-    return this.searchCommand(moves, `go movetime ${movetime}`, Math.max(1, movetime));
+  search(
+    moves: readonly string[],
+    movetime: number,
+    onInfo?: (info: SearchInfo) => void,
+  ): Promise<SearchResult> {
+    return this.searchCommand(moves, `go movetime ${movetime}`, Math.max(1, movetime), onInfo);
   }
 
   private searchCommand(
     moves: readonly string[],
     command: string,
     stopAfterMillis: number,
+    onInfo?: (info: SearchInfo) => void,
+    ponder?: PonderControl,
   ): Promise<SearchResult> {
+    const generation = ++this.generation;
     this.interrupt();
     return this.serialize(async () => {
+      if (generation !== this.generation) throw new Error('Busca cancelada antes de iniciar.');
       if (this.dead) throw new Error('O motor foi encerrado. Reinicie o laboratório.');
+      let deadline: ReturnType<typeof setTimeout> | undefined;
+      let watchdog: ReturnType<typeof setTimeout> | undefined;
+      let ponderHit = false;
+      let ponderMillis = 0;
+      const started = performance.now();
+      const arm = (millis: number) => {
+        clearTimeout(deadline);
+        clearTimeout(watchdog);
+        deadline = setTimeout(() => this.interrupt(), millis);
+        watchdog = setTimeout(() => {
+          this.failure = 'O motor não respondeu no prazo. Reinicie a sessão antes de continuar.';
+          this.dead = true;
+          this.proc.kill();
+          // No Windows o fechamento do pipe pode chegar depois da saída do processo.
+          for (const listener of [...this.listeners]) listener(null);
+        }, millis + 1500);
+      };
       let depth = 0;
       let score: Score | null = null;
       let tbhits = 0;
@@ -192,13 +240,23 @@ export class Engine {
           }
           telemetry.pv = l.split(' pv ')[1]?.trim().split(/\s+/);
           if (s) score = { unit: s[1] as Score['unit'], value: Number(s[2]) };
+          onInfo?.({ depth, score, tbhits, ...telemetry });
         },
-        stopAfterMillis + 1500,
+        0,
       );
       this.send(moves.length ? `position startpos moves ${moves.join(' ')}` : 'position startpos');
       this.send(command);
       this.searching = true;
-      const deadline = setTimeout(() => this.interrupt(), stopAfterMillis);
+      arm(stopAfterMillis);
+      if (ponder) {
+        ponder.activate = (clocks) => {
+          ponderMillis = performance.now() - started;
+          ponderHit = true;
+          this.send('ponderhit');
+          arm(this.clockBudget(moves, clocks));
+        };
+        ponder.ready.resolve();
+      }
       try {
         const line = await done;
         const parts = line.split(' ');
@@ -209,26 +267,80 @@ export class Engine {
           score,
           tbhits,
           ...telemetry,
+          ...(ponder
+            ? { ponderHit, ponderMillis: ponderHit ? ponderMillis : performance.now() - started }
+            : {}),
         };
       } finally {
         clearTimeout(deadline);
+        clearTimeout(watchdog);
+        if (ponder) ponder.activate = null;
         this.searching = false;
       }
     });
   }
 
   /** Busca usando os relógios reais da partida, no formato UCI `go wtime/btime`. */
-  searchWithClocks(moves: readonly string[], clocks: ClockSearch): Promise<SearchResult> {
+  private clockCommand(clocks: ClockSearch) {
     const white = Math.max(0, Math.floor(clocks.whiteMillis));
     const black = Math.max(0, Math.floor(clocks.blackMillis));
     const increment = Math.max(0, Math.floor(clocks.incrementMillis ?? 0));
-    const own = moves.length % 2 === 0 ? white : black;
+    return `wtime ${white} btime ${black} winc ${increment} binc ${increment}`;
+  }
+
+  private clockBudget(moves: readonly string[], clocks: ClockSearch) {
+    const own = moves.length % 2 === 0 ? clocks.whiteMillis : clocks.blackMillis;
     const reserve = Math.max(0, clocks.reserveMillis ?? 100);
+    return Math.max(1, Math.floor(Math.min(own - reserve, clocks.maxSearchMillis ?? Infinity)));
+  }
+
+  searchWithClocks(
+    moves: readonly string[],
+    clocks: ClockSearch,
+    onInfo?: (info: SearchInfo) => void,
+  ): Promise<SearchResult> {
     return this.searchCommand(
       moves,
-      `go wtime ${white} btime ${black} winc ${increment} binc ${increment}`,
-      Math.max(1, own - reserve),
+      `go ${this.clockCommand(clocks)}`,
+      this.clockBudget(moves, clocks),
+      onInfo,
     );
+  }
+
+  /** Ponder real: mantém a mesma busca quando a previsão é confirmada por ponderhit. */
+  startPonder(
+    moves: readonly string[],
+    clocks: ClockSearch,
+    onInfo?: (info: SearchInfo) => void,
+  ): PonderSearch {
+    const control: PonderControl = { ready: Promise.withResolvers<void>(), activate: null, cancel: () => {} };
+    const opponentMillis = moves.length % 2 === 0 ? clocks.blackMillis : clocks.whiteMillis;
+    const result = this.searchCommand(
+      moves,
+      `go ponder ${this.clockCommand(clocks)}`,
+      Math.max(1, opponentMillis),
+      onInfo,
+      control,
+    );
+    const generation = this.generation;
+    control.cancel = () => {
+      if (generation === this.generation) this.stop();
+    };
+    void result.catch((error) => control.ready.reject(error));
+    // A busca fica em segundo plano; o controlador consumirá o resultado após o lance real.
+    void control.ready.promise.catch(() => {});
+    return {
+      ready: control.ready.promise,
+      result,
+      hit: (actualClocks) => {
+        if (generation !== this.generation || !control.activate) return false;
+        const activate = control.activate;
+        control.activate = null;
+        activate(actualClocks);
+        return true;
+      },
+      cancel: control.cancel,
+    };
   }
 
   quit(): void {

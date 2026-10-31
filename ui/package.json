@@ -10,6 +10,7 @@
     "build": "./build.sh",
     "test": "bun test ./src",
     "test:visual": "node tests/visual.mjs",
+    "test:arena-ui": "bun tests/capture-arena.ts && bun build web/arena.html web/duel.html web/tournament.html --outdir ../results/visual/controller-v1 --target browser && node tests/arena-visual.mjs",
     "format": "prettier --write \"src/**/*.ts\" \"web/**/*.{ts,html,css}\" \"tests/*.mjs\" \"../candidates/*.json\""
   },
   "devDependencies": {
