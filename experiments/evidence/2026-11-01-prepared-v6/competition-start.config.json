@@ -1,0 +1,149 @@
+{
+  "started_at": "2026-11-01T15:35:03.918966+00:00",
+  "match_id": "match-2026-11-01T15-35-02-878Z-710a41",
+  "engines": {
+    "Arthur v6 · preparação NNUE19": {
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v6-prepared.json",
+        "--sha256",
+        "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125"
+    },
+    "Vanderlei · base do repositório": {
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\baseline-effdc3fd3\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "0667b5f2747583ad79af88c85b99b4ac584066efeb1f995d98704f8302a2f477"
+    }
+  },
+  "git_revision": "7214d173dda579ef9c1113a1367b58edbde9e154",
+  "python": "3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "draw_policy": "played",
+  "config": {
+    "match_id": "match-2026-11-01T15-35-02-878Z-710a41",
+    "candidate_a": {
+      "name": "Arthur v6 · preparação NNUE19",
+      "prepared_repertoire": true,
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v6-prepared.json",
+        "--sha256",
+        "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      }
+    },
+    "candidate_b": {
+      "name": "Vanderlei · base do repositório",
+      "prepared_repertoire": false,
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\baseline-effdc3fd3\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      }
+    },
+    "games": 4,
+    "draw_policy": "played",
+    "time_control": {
+      "base_seconds": 1500,
+      "increment_seconds": 0
+    },
+    "openings": {
+      "pgn": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\validation-holdout.pgn",
+      "seed": 20261031
+    },
+    "max_plies": 2000,
+    "output_dir": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\results\\arena\\match-2026-11-01T15-35-02-878Z-710a41",
+    "identities": [
+      {
+        "id": "arthur-v6-prepared",
+        "label": "Arthur v6 · preparação NNUE19",
+        "owner": "Arthur",
+        "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+        "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+        "threads": 2,
+        "hashMB": 256,
+        "book": true,
+        "syzygy": true,
+        "notes": "Experimental: mesmo motor/rede da v5, com 10 respostas preparadas pela NNUE19 e verificadas em profundidade 26. MultiPV coerente; perda estimada de até 5 cp na publicação. Inclui históricos de partidas 25+0. Ganho de vitórias ainda em teste.",
+        "engineId": "arthur-v5-nnue19",
+        "preparedRepertoire": "openings/arthur-v6-prepared.json",
+        "preparedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+        "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+        "buildManifest": {
+          "id": "arthur-v5-nnue19",
+          "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+          "stockfishTree": "d7a7cc1a683e14a356e1bbdb046d5cd01a85804c",
+          "repository": "https://github.com/official-stockfish/Stockfish.git",
+          "architecture": "x86-64-avxvnni",
+          "pgo": true,
+          "profileFiles": 26,
+          "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+          "networks": {
+            "nn-d1ee674a62ca.nnue": "d1ee674a62ca754648fb8c2907ff4e92f0c3acff28f59afa0f5bd4e3949538f1"
+          },
+          "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5"
+        },
+        "preparationSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+        "controllerSha256": "5e1d408f8f53ce1177811f1fc134ba9b6016225cda1a3b215b7434156760f881"
+      },
+      {
+        "id": "vanderlei-base",
+        "label": "Vanderlei · base do repositório",
+        "owner": "Vanderlei (referência)",
+        "engine": "bin/baseline-effdc3fd3/stockfish.exe",
+        "sourceCommit": "effdc3fd3f6de6e75fe1374a51a7a7eed66f880b",
+        "threads": 2,
+        "hashMB": 128,
+        "book": false,
+        "syzygy": false,
+        "notes": "Referência pública. Não reproduz configurações pessoais não enviadas pelo Vanderlei.",
+        "binarySha256": "0667b5f2747583ad79af88c85b99b4ac584066efeb1f995d98704f8302a2f477",
+        "buildManifest": null,
+        "preparationSha256": null,
+        "controllerSha256": null
+      }
+    ]
+  }
+}
