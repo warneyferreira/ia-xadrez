@@ -6,6 +6,23 @@
   },
   "candidates": [
     {
+      "id": "arthur-v5-nnue19",
+      "label": "Arthur v5 · NNUE19",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": false,
+      "syzygy": true,
+      "build": {
+        "architecture": "auto",
+        "pgo": true,
+        "repository": "https://github.com/official-stockfish/Stockfish.git"
+      },
+      "notes": "Em avaliação: núcleo e rede oficiais SFNNv19 de 28/10, compilados com PGO. Rede dos autores do Stockfish, não treinada pela equipe. Inclui arquitetura para finais sem damas/torres. Ganho local de vitórias ainda em teste; não incorpora o livro da v4 nem o ajuste de tempo da v3."
+    },
+    {
       "id": "arthur-v4-prepared",
       "label": "Arthur v4 · preparação offline",
       "owner": "Arthur",

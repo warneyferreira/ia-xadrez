@@ -105,3 +105,16 @@ Não misture resultados das duas políticas para inferir ganho de força.
 `scripts/audit_repetitions.py` preserva o PGN de origem, identifica esses
 casos e pesquisa alternativas com histórico completo. Avaliação limitada
 próxima de zero não prova vitória perdida nem igualdade exata.
+
+## Comparar preparação offline
+
+Um candidato pode ser um comando UCI com controlador local. A v4 responde
+algumas linhas de um arquivo offline e encaminha as demais ao mesmo Stockfish.
+As opções `Use Prepared Repertoire=true/false` permitem uma ablação no mesmo
+controlador/binário. Eventos registram `book_hits` por cor; a interface soma
+o uso real. Recursos de CPU/Hash permanecem iguais.
+
+Essa é uma comparação do sistema com preparação, não um ganho do algoritmo
+interno da NNUE. No piloto da v4 ambos partiram da posição inicial, com cores
+trocadas; repetições da mesma posição inicial não aumentam grupos independentes.
+Uma série rápida não substitui o teste em 25+0.

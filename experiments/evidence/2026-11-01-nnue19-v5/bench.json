@@ -1,0 +1,8 @@
+{
+  "nodes": 1556650,
+  "nps": 593009,
+  "millis": 2625,
+  "expectedNodes": 1556650,
+  "rawLogSha256": "3639460860c090b90f2225f8331ebdecb594681f545ca9d13d779d7ad731eb8b",
+  "note": "Assinatura funcional do bench padrão; NPS isolado não mede ganho de força."
+}

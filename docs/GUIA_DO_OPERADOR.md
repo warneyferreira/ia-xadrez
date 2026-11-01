@@ -209,3 +209,40 @@ a terceira ocorrência efetiva no tabuleiro. O PGN e o resumo registram
 `draw_policy: played`. A política anterior, `claimable`, só serve para
 reprodução. Compare candidatos sempre sob a mesma política. A tela física
 continua subordinada ao regulamento, ao relógio e às decisões do árbitro.
+
+## Arthur v4 — chegar com respostas estudadas
+
+O perfil **Arthur v4 · preparação offline** carrega 39 respostas calculadas
+antes de iniciar o relógio. É preparação contra a referência do repositório,
+não uma cópia das configurações pessoais do Vanderlei. As sequências cobrem
+o começo da partida; quando a sequência diverge, a busca normal continua.
+
+Selecione a v4 no duelo e deixe marcada a preparação offline. O nome e a origem
+aparecem no histórico como **Repertório**. O contador da arena mostra quantos
+lances preparados foram usados. A profundidade registrada é da preparação:
+esses lances não inventam avaliação ao vivo nem nós pesquisados na partida.
+O relatório separa profundidade de busca de profundidade preparada. Uma revisão
+posterior ainda pode classificar um lance preparado como erro ou gafe.
+
+Para o torneio físico, abra `scripts/jogar.ps1 -Candidate arthur-v4-prepared`.
+O modo também usa a preparação e pode combinar com o Ponder experimental.
+A resposta só é entregue depois de receber a jogada real do adversário;
+nenhuma previsão é aplicada antecipadamente ao tabuleiro físico.
+
+O processamento de preparação é local e não usa tokens do GPT. Durante as
+partidas, basta carregar o arquivo já pronto. Não há chamada externa nem
+mudança automática de pesos. Se o arquivo for alterado, a verificação SHA
+recusa iniciar esse perfil. V2, v3 e referência continuam selecionáveis.
+
+## Arthur v5 — avaliação de posições com a nova NNUE
+
+Selecione **Arthur v5 · NNUE19** no duelo ou na arena para comparar com a v2
+ou com a referência do Vanderlei. Para treino e tabuleiro físico, abra
+`scripts/jogar.ps1 -Candidate arthur-v5-nnue19`. Os perfis antigos continuam
+disponíveis, e o atalho `arthur-latest` permanece na v2 durante a validação.
+
+A v5 troca o núcleo e a rede de avaliação pelo código oficial de 28/10/2026.
+Isso muda como o motor julga as posições, inclusive finais sem damas/torres.
+Ela não usa o repertório preparado para a rede anterior. Os pesos são do
+Stockfish; não foram treinados pela equipe. Consulte o experimento da v5
+para os testes reais: uma rede nova não garante vitória nem elimina empates.

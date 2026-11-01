@@ -1,0 +1,118 @@
+{
+  "started_at": "2026-11-01T05:41:05.558599+00:00",
+  "match_id": "prepared-v4-pilot",
+  "engines": {
+    "Arthur v4 - preparação ON": {
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v4-prepared.json",
+        "--sha256",
+        "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false,
+        "Use Prepared Repertoire": true
+      },
+      "binarySha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125"
+    },
+    "Mesmo motor - preparação OFF": {
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v4-prepared.json",
+        "--sha256",
+        "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false,
+        "Use Prepared Repertoire": false
+      },
+      "binarySha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125"
+    }
+  },
+  "git_revision": "07adcccc187c962a0f83272d9cc481978e5118e3",
+  "python": "3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "draw_policy": "played",
+  "config": {
+    "match_id": "prepared-v4-pilot",
+    "candidate_a": {
+      "name": "Arthur v4 - preparação ON",
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v4-prepared.json",
+        "--sha256",
+        "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a"
+      ],
+      "prepared_repertoire": true,
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false,
+        "Use Prepared Repertoire": true
+      }
+    },
+    "candidate_b": {
+      "name": "Mesmo motor - preparação OFF",
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v4-prepared.json",
+        "--sha256",
+        "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false,
+        "Use Prepared Repertoire": false
+      }
+    },
+    "games": 8,
+    "time_control": {
+      "base_seconds": 20,
+      "increment_seconds": 0
+    },
+    "openings": {
+      "pgn": null,
+      "seed": 20261101
+    },
+    "draw_policy": "played",
+    "max_plies": 2000,
+    "output_dir": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\results\\arena\\prepared-v4-pilot"
+  }
+}

@@ -117,7 +117,9 @@ function render() {
       : clock(
           ((run.finishedAt ? Date.parse(run.finishedAt) : Date.now()) - Date.parse(run.startedAt)) / 1000,
         );
-  el('arena-clock').textContent = `${run.timeControl.base_seconds / 60}+${run.timeControl.increment_seconds}`;
+  const baseSeconds = run.timeControl.base_seconds;
+  const clockBase = baseSeconds % 60 === 0 ? String(baseSeconds / 60) : `${baseSeconds} s`;
+  el('arena-clock').textContent = `${clockBase}+${run.timeControl.increment_seconds}`;
   const progress = el<HTMLProgressElement>('batch-progress');
   progress.max = run.planned;
   progress.value = run.completed;

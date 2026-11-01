@@ -1,0 +1,57 @@
+bun test v1.4.4 (38afee6c8)
+
+ui\src\arena.test.ts:
+(pass) bateria antiga em andamento não aparece concluída nem inventa posição [2.16ms]
+(pass) nova política registra somente repetição já ocorrida [0.23ms]
+(pass) partida incompleta não vira empate e encerramento com falha é identificado [0.27ms]
+(pass) fim de processo sem resumo é interrupção e não sucesso [0.16ms]
+(pass) nomes antigos do PowerShell são corrigidos só na exibição [1.52ms]
+(pass) download da arena rejeita caminhos fora dos arquivos autorizados [2.12ms]
+
+ui\src\candidates.test.ts:
+(pass) aliases resolvem versões fixas e baseline tem slot próprio [9.93ms]
+(pass) manifesto rejeita executável substituído mesmo após consulta anterior [26.37ms]
+
+ui\src\duel-restore.test.ts:
+(pass) restauração conserva pausa e relógios; checkpoint inválido recupera o anterior [239.66ms]
+
+ui\src\duel.test.ts:
+(pass) duelo distingue mate, afogamento e partida em andamento [11.04ms]
+(pass) duelo registra repetição em vez de decidir por material [2.54ms]
+
+ui\src\engine.integration.test.ts:
+(pass) motor travado é encerrado, sem deixar busca pendurada [1569.44ms]
+(pass) UCI: busca, previsão interrompida e nova partida [821.68ms]
+
+ui\src\ponder-native.test.ts:
+(pass) Stockfish real aceita go ponder e ponderhit com lance legal [695.87ms]
+
+ui\src\prepared-engine.test.ts:
+(pass) preparação é identificada sem inventar avaliação ou nós pesquisados [73.14ms]
+(pass) preparação após previsão confirmada limpa métricas da busca descartada [73.14ms]
+
+ui\src\report.test.ts:
+(pass) relatório separa tempos e não inventa erro sem revisão [0.67ms]
+
+ui\src\resources.test.ts:
+(pass) perfil máximo realmente solicita 10 GB de Hash [0.14ms]
+(pass) memória instalada não substitui memória disponível [2.42ms]
+
+ui\src\review.test.ts:
+(pass) avaliação usa sempre a perspectiva branca [0.15ms]
+(pass) explicação de mate é factual e progresso corresponde às posições [1302.72ms]
+(pass) dama extra não transforma afogamento em vitória [0.51ms]
+
+ui\src\time-policy.test.ts:
+(pass) margem física acompanha operação, limita outliers e reinicia por sessão [0.64ms]
+
+ui\src\tournament-brain.test.ts:
+(pass) previsão confirmada usa ponderhit e reaproveita a busca [92.75ms]
+(pass) previsão errada é descartada e a posição real é pesquisada [101.90ms]
+(pass) único lance legal dispensa busca sem inventar avaliação [54.60ms]
+(pass) cancelar antes de ponder iniciar não bloqueia a próxima partida [75.18ms]
+
+ 27 pass
+ 0 fail
+ 115 expect() calls
+Ran 27 tests across 12 files. [5.26s]

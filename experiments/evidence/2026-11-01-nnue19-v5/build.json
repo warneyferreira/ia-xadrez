@@ -1,0 +1,14 @@
+{
+  "id": "arthur-v5-nnue19",
+  "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+  "stockfishTree": "d7a7cc1a683e14a356e1bbdb046d5cd01a85804c",
+  "repository": "https://github.com/official-stockfish/Stockfish.git",
+  "architecture": "x86-64-avxvnni",
+  "pgo": true,
+  "profileFiles": 26,
+  "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+  "networks": {
+    "nn-d1ee674a62ca.nnue": "d1ee674a62ca754648fb8c2907ff4e92f0c3acff28f59afa0f5bd4e3949538f1"
+  },
+  "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5"
+}

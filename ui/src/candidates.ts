@@ -17,7 +17,11 @@ export type Candidate = {
   preparedRepertoire?: string;
   preparedSha256?: string;
   notes: string;
-  build?: { architecture: 'auto' | 'x86-64-avx2' | 'x86-64-avxvnni'; pgo: boolean };
+  build?: {
+    architecture: 'auto' | 'x86-64-avx2' | 'x86-64-avxvnni';
+    pgo: boolean;
+    repository?: 'https://github.com/official-stockfish/Stockfish.git';
+  };
 };
 export class Candidates {
   private data: { aliases: Record<string, string>; candidates: Candidate[] };
@@ -85,12 +89,15 @@ export class Candidates {
     const sha = this.hashes.get(path)!.sha;
     const manifest = resolve(dirname(path), 'build.json');
     const buildManifest = existsSync(manifest) ? JSON.parse(readFileSync(manifest, 'utf8')) : null;
+    if (c.build?.repository && !buildManifest)
+      throw new Error(`Manifesto de origem ausente: ${c.id}. Reinstale o candidato.`);
     if (
       buildManifest &&
       (buildManifest.binarySha256 !== sha ||
         buildManifest.id !== (c.engineId ?? c.id) ||
         typeof buildManifest.sourceCommit !== 'string' ||
-        !buildManifest.sourceCommit.toLowerCase().startsWith(c.sourceCommit.toLowerCase()))
+        !buildManifest.sourceCommit.toLowerCase().startsWith(c.sourceCommit.toLowerCase()) ||
+        (c.build?.repository && buildManifest.repository !== c.build.repository))
     )
       throw new Error(`Binário diverge do manifesto: ${c.id}. Reinstale o candidato.`);
     let preparationSha256: string | null = null,

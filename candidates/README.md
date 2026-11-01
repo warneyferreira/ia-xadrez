@@ -75,3 +75,37 @@ O perfil usa duas threads e Hash 256 MB. A mudança só atua em controle de
 relógio sem incremento; tempo fixo por lance não exercita a política. Ela
 permanece experimental até uma validação de força em 25+0. Consulte
 `experiments/2026-10-31-critical-time-v1.md`.
+
+## Arthur v4 · preparação offline
+
+Compartilha explicitamente o binário da v2 (`engineId: arthur-v2`) e acrescenta
+um controlador UCI com 39 respostas preparadas. O arquivo é protegido por SHA,
+confere histórico/FEN e volta ao Stockfish quando não há resposta preparada.
+O modo de análise não usa o livro. Não foi treinada uma nova NNUE.
+
+No duelo, escolha a v4 e mantenha marcada a preparação. Desmarcar permite
+comparar sem ela. O relatório identifica origem, quantidade de respostas
+preparadas, SHA da preparação e do controlador. A arena mostra explicitamente
+que esse perfil é uma comparação de sistema completo, com conhecimento offline.
+
+Para operar o tabuleiro físico com esse perfil:
+
+```powershell
+.\scripts\jogar.ps1 -Candidate arthur-v4-prepared
+```
+
+Os aliases antigos permanecem preservados. Ganho de tempo operacional não
+certifica ganho de força em 25+0; consulte o experimento da v4.
+
+## Arthur v5 · NNUE19
+
+Atualiza o núcleo e a rede para o commit oficial `ff7cee4244ec96ea488c402669e3674c0574dce6`.
+É uma mudança na avaliação das posições, com arquitetura específica também
+para finais sem damas nem torres. Os pesos são do projeto Stockfish; a v5
+não é uma rede treinada pela equipe. A receita fixa origem e commit, compila
+com PGO e incorpora a rede ao executável para funcionar offline.
+
+O cadastro fica separado da v4: não reutiliza automaticamente o repertório
+preparado para outra rede. `arthur-latest` continua na referência v2 até
+avaliação local. Consulte `experiments/2026-11-01-nnue19-v5.md` para resultados
+e limites; a aprovação dos testes upstream não garante vitória no torneio.

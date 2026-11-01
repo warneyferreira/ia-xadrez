@@ -15,6 +15,7 @@ foreach ($candidate in $registry.candidates) {
     if ($candidate.build -and -not (Test-Path -LiteralPath $candidate.engine)) {
         $buildArgs = @('scripts/build_candidate.py', '--id', $candidate.id, '--revision', $candidate.sourceCommit, '--arch', $candidate.build.architecture)
         if ($candidate.build.pgo) { $buildArgs += '--pgo' }
+        if ($candidate.build.repository) { $buildArgs += @('--repository', $candidate.build.repository) }
         & py -3 @buildArgs
         if ($LASTEXITCODE -ne 0) { throw "Falha ao preparar $($candidate.label). Consulte o log em bin/$($candidate.id)." }
     }

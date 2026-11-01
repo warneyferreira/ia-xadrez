@@ -40,6 +40,25 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 }, reducedMotion: 'reduce' });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  // Seletor real, sem iniciar jogo nem substituir o duelo salvo.
+  await page.goto(`${base}/duel`);
+  await page.waitForFunction(() => document.querySelector('#primary-candidate').value.length > 0);
+  await page.locator('#primary-candidate').selectOption('arthur-v4-prepared');
+  assert(await page.locator('#duel-book').isChecked());
+  assert(await page.locator('#duel-book').isEnabled());
+  assert.match(await page.locator('#book-availability').textContent(), /offline específica/);
+  await page.locator('#primary-candidate').selectOption('arthur-v5-nnue19');
+  assert(await page.locator('#duel-book').isDisabled());
+  assert(!(await page.locator('#duel-book').isChecked()));
+  await page.screenshot({ path: join(output, 'candidates-live-desktop.png'), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: join(output, 'candidates-live-mobile.png'), fullPage: true });
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.setViewportSize({ width: 1440, height: 1050 });
+  const unchanged = await (await fetch(`${base}/api/duel/status`)).json();
+  assert.equal(unchanged.id, duel.id);
+  assert.equal(unchanged.rows.length, duel.rows.length);
+  assert.equal(unchanged.phase, duel.phase);
   await page.route('http://controller.test/**', async (route) => {
     const pathname = new URL(route.request().url()).pathname;
     const states = {
@@ -65,9 +84,13 @@ try {
     const layout = await page.evaluate(() => ({
       width: innerWidth,
       scroll: document.documentElement.scrollWidth,
+      overflow: [...document.querySelectorAll('body *')]
+        .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+        .slice(0, 8)
+        .map((e) => ({ tag: e.tagName, id: e.id, class: e.className })),
     }));
-    assert(layout.scroll <= layout.width, `${name}: ${JSON.stringify(layout)}`);
     await page.screenshot({ path: join(output, `${name}-mobile.png`), fullPage: true });
+    assert(layout.scroll <= layout.width, `${name}: ${JSON.stringify(layout)}`);
     await page.setViewportSize({ width: 1440, height: 1050 });
   };
 
@@ -164,7 +187,7 @@ try {
   await mobile('physical-controller-fixture');
   assert.deepEqual(errors, []);
   console.log(
-    'PASS: UI compilada desktop/mobile, teclado, progresso real capturado, fixtures, erro persistente, reprise, 25+0 e preparação física. Nenhum motor iniciado.',
+    'PASS: candidatos v4/v5 na UI real sem alterar duelo; UI compilada desktop/mobile, teclado, progresso, fixtures, erro persistente, reprise, 25+0 e preparação física. Nenhum motor iniciado.',
   );
 } finally {
   await browser.close();

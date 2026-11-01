@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test';
 import { Candidates } from './candidates.ts';
-import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -12,6 +12,18 @@ test('aliases resolvem versões fixas e baseline tem slot próprio', () => {
   expect(registry.get('arthur-v2').book).toBe(false);
   expect(registry.get('arthur-v3-critical').tournamentCriticalTime).toBe(true);
   expect(registry.get('arthur-v2').tournamentCriticalTime).toBeUndefined();
+  const nnue19 = registry.get('arthur-v5-nnue19');
+  expect(nnue19.build?.repository).toBe('https://github.com/official-stockfish/Stockfish.git');
+  expect(nnue19.sourceCommit).toBe('ff7cee4244ec96ea488c402669e3674c0574dce6');
+  expect(nnue19.preparedRepertoire).toBeUndefined();
+  const prepared = registry.get('arthur-v4-prepared');
+  expect(prepared.engineId).toBe('arthur-v2');
+  expect(prepared.book).toBe(true);
+  expect(
+    createHash('sha256')
+      .update(readFileSync(new URL('../../' + prepared.preparedRepertoire, import.meta.url)))
+      .digest('hex'),
+  ).toBe(prepared.preparedSha256!);
   expect(registry.get('vanderlei-latest').id).toBe('vanderlei-base');
   expect(registry.get('vanderlei-base').engine).toBe('bin/baseline-effdc3fd3/stockfish.exe');
   expect(() => registry.get('inexistente')).toThrow('desconhecido');
@@ -31,6 +43,31 @@ test('manifesto rejeita executável substituído mesmo após consulta anterior',
       JSON.stringify({ id: candidate.id, sourceCommit: candidate.sourceCommit, binarySha256: sha }),
     );
     expect(registry.identity(candidate).binarySha256).toBe(sha);
+    const external = {
+      ...candidate,
+      build: {
+        architecture: 'auto' as const,
+        pgo: true,
+        repository: 'https://github.com/official-stockfish/Stockfish.git' as const,
+      },
+    };
+    expect(() => registry.identity(external)).toThrow('diverge do manifesto');
+    writeFileSync(
+      manifest,
+      JSON.stringify({
+        id: candidate.id,
+        sourceCommit: candidate.sourceCommit,
+        binarySha256: sha,
+        repository: external.build.repository,
+      }),
+    );
+    expect(registry.identity(external).binarySha256).toBe(sha);
+    unlinkSync(manifest);
+    expect(() => registry.identity(external)).toThrow('Manifesto de origem ausente');
+    writeFileSync(
+      manifest,
+      JSON.stringify({ id: candidate.id, sourceCommit: candidate.sourceCommit, binarySha256: sha }),
+    );
     writeFileSync(binary, 'substituido-sem-manifesto');
     expect(() => registry.identity(candidate)).toThrow('diverge do manifesto');
   } finally {

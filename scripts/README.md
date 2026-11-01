@@ -1,5 +1,12 @@
 # Scripts reproduzíveis
 
+Para um núcleo oficial mais recente, `build_candidate.py --repository` aceita
+apenas o repositório oficial e exige o SHA completo. A rede é obtida dos
+servidores oficiais (com alternativa GitHub/LFS), conferida e embutida durante
+o build. A partida não faz downloads. `--resume` retoma apenas um slot externo
+incompleto e intacto; não substitui um candidato já publicado. A instalação
+automática lê essa origem da receita cadastrada.
+
 Scripts futuros de build, bench, arena e coleta devem registrar argumentos,
 ambiente e saída. Não escreva scripts que baixem recursos no caminho de execução
 de uma partida de competição.
@@ -63,3 +70,22 @@ com o mesmo lock da arena:
 O build da v3 é reproduzido por `setup.ps1` a partir do commit cadastrado.
 `jogar.ps1 -Candidate arthur-v3-critical -Port 18767` abre um perfil separado;
 o padrão permanece v2. Nenhuma verificação promove o candidato automaticamente.
+
+## Preparação específica offline
+
+`prepare_opponent.py` pesquisa três alternativas, observa respostas do baseline
+em dois orçamentos e confirma escolhas com buscas independentes de profundidade
+fixa. Usa o lock da arena e exige uma pasta de saída nova:
+
+```powershell
+.\arena\.venv\Scripts\python.exe scripts/prepare_opponent.py --output results/research/preparation-new --positions 40 --teacher-seconds 2 --verify-seconds 2 --verify-depth 24
+```
+
+O resultado não é ativado automaticamente. Deve ser validado, filtrado e
+registrado com SHA próprio antes de substituir um candidato. A v4 publicada
+foi filtrada para perda estimada máxima de 10 centipeões, antes das partidas.
+
+`prepared_engine.py` é o controlador UCI desse perfil; executa o Stockfish
+local e encaminha a busca quando a linha não está preparada. O lançador usa
+o interpretador base e protege o filho por Job Object no Windows. Prefira
+`jogar.ps1 -Candidate arthur-v4-prepared`, que monta esses argumentos e hashes.

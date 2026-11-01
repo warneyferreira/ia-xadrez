@@ -1,0 +1,16 @@
+{
+  "bookSha256": "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a",
+  "bookHits": {
+    "Arthur v4 - preparação ON": 31,
+    "Mesmo motor - preparação OFF": 0
+  },
+  "files": {
+    "config.json": "cc5ec8204f0b1f604e5353160869723f746b0791b841805d7759bcd85cc1bd85",
+    "events.jsonl": "7c0473dea1d4983afe7e150ed4ca4c0df4afa1663dfd3039de8961abc28dd15f",
+    "games.pgn": "bcd993612421cd3aecafdf87ae27e04060010c7f463628bd7e3ccf3f902d505f",
+    "summary.json": "4cb8d408bceac04d5ecad0a27ec701c77d00567b1536e1271f768197268f591d",
+    "preparation-observations.json": "35a26c8c46c6fd261842dab8c9e7da94b32c067ba6a6d0edb0c0e742d4f5a8b4"
+  },
+  "nativeEngineSha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa",
+  "controllerSha256": "5e1d408f8f53ce1177811f1fc134ba9b6016225cda1a3b215b7434156760f881"
+}
