@@ -1,0 +1,36 @@
+{
+  "finished_at": "2026-10-31T11:09:32.990028+00:00",
+  "match_id": "controlled-20261031-031514-070",
+  "paired": {
+    "completedPairs": 4,
+    "distinctOpeningClusters": 4,
+    "pairScore": 0.5,
+    "score95": [
+      0.0,
+      1.0
+    ],
+    "competitionPoints": 8,
+    "stable": true,
+    "evidenceOfSuperiority": false,
+    "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+  },
+  "scores": {
+    "Arthur v2 Â· PGO": {
+      "win": 0,
+      "draw": 8,
+      "loss": 0
+    },
+    "Vanderlei Â· base do repositÃ³rio": {
+      "win": 0,
+      "draw": 8,
+      "loss": 0
+    }
+  },
+  "crashes": {
+    "Arthur v2 Â· PGO": 0,
+    "Vanderlei Â· base do repositÃ³rio": 0
+  },
+  "games": 8,
+  "unfinished": 0,
+  "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+}

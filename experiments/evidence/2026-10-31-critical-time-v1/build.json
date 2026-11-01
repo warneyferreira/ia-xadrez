@@ -1,0 +1,13 @@
+{
+  "id": "arthur-v3-critical",
+  "sourceCommit": "b888ad2fd819de53edf87b7da009a75a475b64ed",
+  "stockfishTree": "8b0e1f635cb99520db327bc4e5a29ae7b7bf498a",
+  "architecture": "x86-64-avxvnni",
+  "pgo": true,
+  "profileFiles": 26,
+  "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+  "networks": {
+    "nn-c9e480e92425.nnue": "c9e480e92425f887df6ab9b05c6180fbd762b07879df9d9845f1aa75440caa73"
+  },
+  "binarySha256": "ce1ad1158f64a90d93a5a365124a08d265dde4c4a7342a0c4f2404e36aa8bbcf"
+}

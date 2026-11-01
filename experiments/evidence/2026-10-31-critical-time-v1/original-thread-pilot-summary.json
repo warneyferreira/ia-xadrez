@@ -1,0 +1,36 @@
+{
+  "finished_at": "2026-10-31T16:21:45.128005+00:00",
+  "match_id": "threads-pilot-20261031-160140",
+  "paired": {
+    "completedPairs": 6,
+    "distinctOpeningClusters": 6,
+    "pairScore": 0.5,
+    "score95": [
+      0.0,
+      1.0
+    ],
+    "competitionPoints": 12,
+    "stable": true,
+    "evidenceOfSuperiority": false,
+    "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+  },
+  "scores": {
+    "Arthur v2 - 4 threads (experimento)": {
+      "win": 0,
+      "draw": 12,
+      "loss": 0
+    },
+    "Arthur v2 - 2 threads (referencia)": {
+      "win": 0,
+      "draw": 12,
+      "loss": 0
+    }
+  },
+  "crashes": {
+    "Arthur v2 - 4 threads (experimento)": 0,
+    "Arthur v2 - 2 threads (referencia)": 0
+  },
+  "games": 12,
+  "unfinished": 0,
+  "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+}

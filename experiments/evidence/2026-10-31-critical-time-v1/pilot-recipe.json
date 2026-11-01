@@ -1,0 +1,41 @@
+{
+  "match_id": "critical-time-v1-pilot",
+  "games": 4,
+  "draw_policy": "played",
+  "time_control": {
+    "base_seconds": 45,
+    "increment_seconds": 0
+  },
+  "openings": {
+    "pgn": "openings/validation-holdout.pgn",
+    "seed": 20261031
+  },
+  "max_plies": 2000,
+  "output_dir": "results/arena/critical-time-v1-pilot",
+  "candidate_a": {
+    "name": "Arthur v3 - tempo critico ON",
+    "command": [
+      "bin/arthur-v3-critical/stockfish.exe"
+    ],
+    "options": {
+      "Threads": 2,
+      "Hash": 256,
+      "Move Overhead": 20,
+      "Ponder": false,
+      "Tournament Critical Time": true
+    }
+  },
+  "candidate_b": {
+    "name": "Arthur v3 - controle OFF",
+    "command": [
+      "bin/arthur-v3-critical/stockfish.exe"
+    ],
+    "options": {
+      "Threads": 2,
+      "Hash": 256,
+      "Move Overhead": 20,
+      "Ponder": false,
+      "Tournament Critical Time": false
+    }
+  }
+}

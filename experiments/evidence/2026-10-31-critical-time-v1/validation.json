@@ -1,0 +1,111 @@
+{
+  "engineSha256": "ce1ad1158f64a90d93a5a365124a08d265dde4c4a7342a0c4f2404e36aa8bbcf",
+  "baselineSha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa",
+  "status": "passed",
+  "bench": {
+    "baseline": 1645615,
+    "candidate": 1645615
+  },
+  "rows": [
+    {
+      "case": "conversion-38",
+      "enabled": false,
+      "activated": false,
+      "seconds": 7.323906199999328,
+      "clockSeconds": 30,
+      "move": "g1f2",
+      "depth": 26,
+      "nodes": 6695698
+    },
+    {
+      "case": "conversion-38",
+      "enabled": true,
+      "activated": true,
+      "seconds": 8.102662000001146,
+      "clockSeconds": 30,
+      "move": "g2g3",
+      "depth": 24,
+      "nodes": 3787710
+    },
+    {
+      "case": "defense-after-g3",
+      "enabled": false,
+      "activated": false,
+      "seconds": 4.201508999998623,
+      "clockSeconds": 30,
+      "move": "c7a7",
+      "depth": 23,
+      "nodes": 2391166
+    },
+    {
+      "case": "defense-after-g3",
+      "enabled": true,
+      "activated": true,
+      "seconds": 3.631755099999282,
+      "clockSeconds": 30,
+      "move": "c7a7",
+      "depth": 23,
+      "nodes": 2135821
+    },
+    {
+      "case": "conversion-24",
+      "enabled": false,
+      "activated": false,
+      "seconds": 1.8518490999995265,
+      "clockSeconds": 30,
+      "move": "f1b1",
+      "depth": 22,
+      "nodes": 1273529
+    },
+    {
+      "case": "conversion-24",
+      "enabled": true,
+      "activated": true,
+      "seconds": 1.5193381999997655,
+      "clockSeconds": 30,
+      "move": "f1b1",
+      "depth": 22,
+      "nodes": 1273529
+    },
+    {
+      "case": "low-clock",
+      "enabled": true,
+      "activated": false,
+      "seconds": 3.1646963999992295,
+      "clockSeconds": 14,
+      "move": "g2g3",
+      "depth": 22,
+      "nodes": 1661394
+    },
+    {
+      "case": "increment",
+      "enabled": true,
+      "activated": false,
+      "seconds": 12.48581109999941,
+      "clockSeconds": 30,
+      "move": "g1f2",
+      "depth": 29,
+      "nodes": 8011738
+    },
+    {
+      "case": "forced",
+      "enabled": true,
+      "activated": false,
+      "seconds": 0.028894800001580734,
+      "clockSeconds": 30,
+      "move": "h8g8",
+      "depth": 2,
+      "nodes": 5
+    },
+    {
+      "case": "mate",
+      "enabled": true,
+      "activated": false,
+      "seconds": 0.03075639999951818,
+      "clockSeconds": 30,
+      "move": "g6g7",
+      "depth": 1,
+      "nodes": 7
+    }
+  ]
+}

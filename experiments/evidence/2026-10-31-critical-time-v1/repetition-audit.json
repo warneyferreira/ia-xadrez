@@ -1,0 +1,348 @@
+{
+  "createdAt": "2026-10-31T17:12:46.520086+00:00",
+  "pgnSha256": "91cf171ff6057d6372629da2a1f720ba50ca12e71e0dab7d797d65e910f8a77b",
+  "engineSha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa",
+  "secondsPerPosition": 3.0,
+  "threads": 2,
+  "hashMB": 256,
+  "rows": [
+    {
+      "game": 1,
+      "termination": "threefold repetition",
+      "plies": 112,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "b4a5",
+          "san": "Ka5",
+          "whiteCp": 0,
+          "depth": 42,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "b4a5",
+            "b1a1"
+          ]
+        },
+        {
+          "move": "b4a3",
+          "san": "Ka3",
+          "whiteCp": 0,
+          "depth": 42,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "b4a3"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 2,
+      "termination": "threefold repetition",
+      "plies": 81,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "c5a3",
+          "san": "Qa3",
+          "whiteCp": 0,
+          "depth": 31,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "c5a3"
+          ]
+        },
+        {
+          "move": "f5f4",
+          "san": "Rf4",
+          "whiteCp": 15,
+          "depth": 31,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "f5f4",
+            "d3g6",
+            "h7g6",
+            "e3c5",
+            "d6c5",
+            "c6e5",
+            "f4d4",
+            "f3f4",
+            "f8d6",
+            "e5g6",
+            "d4d5",
+            "f4f5",
+            "g8f7",
+            "c2c4",
+            "d5d3",
+            "b1c2",
+            "b5c4",
+            "f1a1",
+            "d3b3",
+            "a1a6",
+            "c8b8",
+            "f2f1",
+            "b3b2",
+            "c2c3",
+            "b2b3",
+            "c3c4",
+            "b3b4",
+            "c4c3"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 3,
+      "termination": "insufficient material",
+      "plies": 173,
+      "currentThreefold": false,
+      "claimableThreefold": false,
+      "automaticOutcome": "Outcome(termination=<Termination.INSUFFICIENT_MATERIAL: 3>, winner=None)",
+      "choices": []
+    },
+    {
+      "game": 4,
+      "termination": "threefold repetition",
+      "plies": 116,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "c5b5",
+          "san": "Rb5",
+          "whiteCp": 0,
+          "depth": 34,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "c5b5",
+            "a2e2",
+            "b5b7",
+            "e2e1",
+            "g1g2",
+            "e1e2"
+          ]
+        },
+        {
+          "move": "c5c7",
+          "san": "Rc7",
+          "whiteCp": 0,
+          "depth": 34,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "c5c7",
+            "a2a1",
+            "g1g2",
+            "a1a2",
+            "c7b7",
+            "g4e3",
+            "g2g1",
+            "a2a1",
+            "g1h2",
+            "a1a2"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 5,
+      "termination": "threefold repetition",
+      "plies": 149,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "h6h5",
+          "san": "h5",
+          "whiteCp": 0,
+          "depth": 57,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "h6h5",
+            "g2g3",
+            "e4f5",
+            "g3f3",
+            "h5h4",
+            "f3e3",
+            "g5g4",
+            "h3g4",
+            "f5g4",
+            "e3e2",
+            "g4h3",
+            "e2f1",
+            "h3h2",
+            "f2f4",
+            "h2h1",
+            "f4f5",
+            "h4h3",
+            "f5f6",
+            "h3h2",
+            "f6f7"
+          ]
+        },
+        {
+          "move": "e4f4",
+          "san": "Kf4",
+          "whiteCp": 0,
+          "depth": 57,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "e4f4"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 6,
+      "termination": "threefold repetition",
+      "plies": 52,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "f4g3",
+          "san": "Qg3",
+          "whiteCp": 0,
+          "depth": 23,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "f4g3",
+            "d8a5",
+            "d2f3",
+            "a5a2",
+            "f3e5",
+            "a2a5",
+            "e3e4",
+            "c8d8",
+            "e1e3",
+            "a5d2",
+            "e4d5",
+            "d2c1",
+            "e5f7",
+            "e6g7",
+            "f7d8",
+            "e8e3",
+            "g3e3",
+            "c1e3",
+            "f2e3",
+            "b7d5",
+            "f1a6",
+            "d5b3",
+            "d8c6",
+            "g7e6",
+            "a6d3"
+          ]
+        },
+        {
+          "move": "f4e5",
+          "san": "Qe5",
+          "whiteCp": 0,
+          "depth": 23,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "f4e5"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 7,
+      "termination": "threefold repetition",
+      "plies": 52,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "h4e7",
+          "san": "Bxe7",
+          "whiteCp": 1,
+          "depth": 25,
+          "lowerbound": false,
+          "upperbound": true,
+          "producesThirdRepetition": false,
+          "pv": [
+            "h4e7",
+            "d8e7"
+          ]
+        },
+        {
+          "move": "h4g3",
+          "san": "Bg3",
+          "whiteCp": 0,
+          "depth": 24,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "h4g3"
+          ]
+        }
+      ]
+    },
+    {
+      "game": 8,
+      "termination": "threefold repetition",
+      "plies": 70,
+      "currentThreefold": false,
+      "claimableThreefold": true,
+      "automaticOutcome": "None",
+      "choices": [
+        {
+          "move": "a7g7",
+          "san": "Rag7+",
+          "whiteCp": 0,
+          "depth": 57,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": false,
+          "pv": [
+            "a7g7",
+            "g8f8",
+            "g7f7",
+            "f8g8",
+            "f7g7"
+          ]
+        },
+        {
+          "move": "h7g7",
+          "san": "Rhg7+",
+          "whiteCp": 0,
+          "depth": 57,
+          "lowerbound": false,
+          "upperbound": false,
+          "producesThirdRepetition": true,
+          "pv": [
+            "h7g7"
+          ]
+        }
+      ]
+    }
+  ],
+  "note": "A reclamação antecipada era permitida, mas imposta pela arena. As avaliações limitadas não provam vitória perdida. Histórico original preservado."
+}

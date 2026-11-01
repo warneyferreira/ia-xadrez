@@ -41,3 +41,25 @@ Para apenas o diagnóstico de posições, com a máquina livre:
 
 A saída precisa ser nova. Veja `positions/README.md` para distinguir hipóteses
 de pesquisa de verificações exatas.
+
+## Auditoria de repetição e candidato de tempo
+
+`audit_repetitions.py` verifica os finais registrados no PGN e analisa os
+próximos lances com histórico completo. Use saída nova; o PGN não é modificado:
+
+```powershell
+.\arena\.venv\Scripts\python.exe scripts/audit_repetitions.py --pgn experiments/evidence/2026-10-31-critical-time-v1/25m-original.pgn --engine bin/arthur-v2/stockfish.exe --output results/research/repetition-audit-new --seconds 3
+```
+
+`verify_time_candidate.py` compara a assinatura de bench de profundidade fixa,
+confere a opção desligada por padrão, observa ativação real e verifica lances
+legais, mate, lance único, relógio baixo e incremento. Reserva o processador
+com o mesmo lock da arena:
+
+```powershell
+.\arena\.venv\Scripts\python.exe scripts/verify_time_candidate.py --engine bin/arthur-v3-critical/stockfish.exe --output results/research/critical-validation-new
+```
+
+O build da v3 é reproduzido por `setup.ps1` a partir do commit cadastrado.
+`jogar.ps1 -Candidate arthur-v3-critical -Port 18767` abre um perfil separado;
+o padrão permanece v2. Nenhuma verificação promove o candidato automaticamente.

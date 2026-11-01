@@ -177,3 +177,35 @@ Duelo pausado também é restaurado ao reiniciar; o tempo com o programa fechado
 não corre nesse duelo de laboratório. O histórico e a identidade dos motores
 são conferidos antes de continuar. O relógio de competição física não recebe
 essa regra de pausa.
+
+## Candidato de tempo crítico — Arthur v3 experimental
+
+Arthur v2 continua sendo o padrão. Para experimentar a v3, reinicie a interface
+e escolha **Arthur v3 · tempo crítico (experimental)** no seletor do duelo.
+Use relógio **25+0**: um tempo fixo de 0,25/1/5 s não exercita essa política.
+Para uma tela física separada, execute `scripts/jogar.ps1 -Candidate
+arthur-v3-critical -Port 18767`. O parâmetro não altera o candidato padrão.
+
+A mudança permite até 20% a mais de orçamento alvo quando a melhor jogada
+continua instável. Só atua sem incremento, após os primeiros oito lances,
+com profundidade pelo menos 10, mais de uma opção legal e ao menos 15 s no
+relógio. O teto nativo e a margem física continuam valendo. Mais orçamento
+não garante uma jogada melhor e pode deixar menos tempo para o restante.
+
+As versões antigas permanecem selecionáveis. Não foi treinada uma rede nova.
+A v3 só deve substituir a v2 após evidência de força/estabilidade; o piloto
+curto é uma verificação inicial, não comprovação de superioridade.
+
+## Interpretação dos empates das primeiras baterias
+
+Nas séries antigas, a arena reclamava empate assim que existia um próximo
+lance que permitiria a reclamação. Isso ocorreu nos sete empates por repetição
+dos oito jogos 25+0. Os arquivos originais foram preservados. Uma reanálise
+limitada não mostrou vantagem clara nas alternativas; não há prova de sete
+vitórias desperdiçadas.
+
+Novas baterias deixam o motor escolher e registram empate por repetição após
+a terceira ocorrência efetiva no tabuleiro. O PGN e o resumo registram
+`draw_policy: played`. A política anterior, `claimable`, só serve para
+reprodução. Compare candidatos sempre sob a mesma política. A tela física
+continua subordinada ao regulamento, ao relógio e às decisões do árbitro.
