@@ -1,0 +1,9 @@
+{
+  "publishedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+  "generatorSha256CanonicalLf": "910b4894f57ffaa49f67d03142adc1417929098773b6942175d7c70cb68b98ba",
+  "files": {
+    "observations.json": "b3832a551ba031011c55cf20d53af390b4ac257c9d890120b0aebef979d76a79",
+    "progress.json": "c67a63ed1a6a203d4617f2c9b34c55b08ebbd98489a853043972420e8c01fc89",
+    "repertoire.json": "7e1262e5219a1a47c0abf062c6073a54da4d2f96653ff6b03dae790c2faa2dca"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "finished_at": "2026-11-01T07:37:44.750877+00:00",
+  "match_id": "match-2026-11-01T06-24-26-581Z-ceaac8",
+  "paired": {
+    "completedPairs": 1,
+    "distinctOpeningClusters": 1,
+    "pairScore": 0.5,
+    "score95": [
+      0.0,
+      1.0
+    ],
+    "competitionPoints": 2,
+    "stable": true,
+    "evidenceOfSuperiority": false,
+    "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+  },
+  "scores": {
+    "Arthur v5 · NNUE19": {
+      "win": 0,
+      "draw": 2,
+      "loss": 0
+    },
+    "Vanderlei · base do repositório": {
+      "win": 0,
+      "draw": 2,
+      "loss": 0
+    }
+  },
+  "crashes": {
+    "Arthur v5 · NNUE19": 0,
+    "Vanderlei · base do repositório": 0
+  },
+  "games": 2,
+  "unfinished": 0,
+  "draw_policy": "played",
+  "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+}

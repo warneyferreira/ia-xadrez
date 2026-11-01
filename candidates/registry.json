@@ -6,6 +6,21 @@
   },
   "candidates": [
     {
+      "id": "arthur-v6-prepared",
+      "label": "Arthur v6 · preparação NNUE19",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: mesmo motor/rede da v5, com 10 respostas preparadas pela NNUE19 e verificadas em profundidade 26. MultiPV coerente; perda estimada de até 5 cp na publicação. Inclui históricos de partidas 25+0. Ganho de vitórias ainda em teste.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v6-prepared.json",
+      "preparedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+    },
+    {
       "id": "arthur-v5-nnue19",
       "label": "Arthur v5 · NNUE19",
       "owner": "Arthur",

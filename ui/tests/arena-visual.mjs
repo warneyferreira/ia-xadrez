@@ -11,10 +11,12 @@ const bundles = join(output, 'controller-v1');
 const base = process.env.CHESS_TEST_URL ?? 'http://127.0.0.1:18766';
 const live = JSON.parse(readFileSync(join(output, 'arena-readonly-snapshot.json'), 'utf8'));
 const registry = JSON.parse(readFileSync(new URL('../../candidates/registry.json', import.meta.url), 'utf8'));
+let fixtureRegistry = registry;
 const duel = await (await fetch(`${base}/api/duel/status`)).json();
 const review = await (await fetch(`${base}/api/duel/review/status`)).json();
 const physical = await (await fetch(`${base}/api/tournament/status`)).json();
 const info = await (await fetch(`${base}/api/info`)).json();
+let fixtureDuel = { ...duel, arenaBusy: true };
 let arenaState = live;
 let physicalState = {
   ...physical,
@@ -63,8 +65,8 @@ try {
     const pathname = new URL(route.request().url()).pathname;
     const states = {
       '/api/arena/status': arenaState,
-      '/api/candidates': registry,
-      '/api/duel/status': { ...duel, arenaBusy: true },
+      '/api/candidates': fixtureRegistry,
+      '/api/duel/status': fixtureDuel,
       '/api/duel/review/start': review,
       '/api/duel/review/status': review,
       '/api/tournament/status': physicalState,
@@ -81,6 +83,9 @@ try {
   });
   const mobile = async (name) => {
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
     const layout = await page.evaluate(() => ({
       width: innerWidth,
       scroll: document.documentElement.scrollWidth,
@@ -114,6 +119,8 @@ try {
     {
       ...run,
       id: 'fixture-progress',
+      planned: 8,
+      startedAt: new Date(Date.now() - 200000).toISOString(),
       status: 'running',
       finishedAt: null,
       completed: 2,
@@ -153,8 +160,34 @@ try {
   assert.match(await page.locator('#arena-error').textContent(), /fixture/);
   assert.equal(await page.locator('#batch-games').inputValue(), '8');
 
+  fixtureDuel = { ...duel, arenaBusy: false };
   await page.goto('http://controller.test/duel');
   await page.waitForFunction(() => document.querySelector('#white-name').textContent.length > 0);
+  await page.locator('#primary-candidate').selectOption('arthur-v5-nnue19');
+  await page.locator('#white-input').fill('Nome personalizado preservado');
+  fixtureRegistry = {
+    ...registry,
+    candidates: [
+      ...registry.candidates,
+      {
+        ...registry.candidates[0],
+        id: 'fixture-publicado',
+        label: 'Candidato publicado durante teste',
+      },
+    ],
+  };
+  await page.waitForFunction(
+    () =>
+      [...document.querySelector('#primary-candidate').options].some(
+        (option) => option.value === 'fixture-publicado',
+      ),
+    null,
+    { timeout: 15000 },
+  );
+  assert.equal(await page.locator('#primary-candidate').inputValue(), 'arthur-v5-nnue19');
+  assert.equal(await page.locator('#white-input').inputValue(), 'Nome personalizado preservado');
+  fixtureDuel = { ...duel, arenaBusy: true };
+  await page.waitForFunction(() => document.querySelector('#start').disabled);
   await page.locator('#time-mode').selectOption('25+0');
   assert(await page.locator('#move-time-setting').isHidden());
   assert.match(await page.locator('#time-mode-help').textContent(), /primeiro lance/);

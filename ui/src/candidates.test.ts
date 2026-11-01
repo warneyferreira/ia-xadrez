@@ -16,6 +16,14 @@ test('aliases resolvem versões fixas e baseline tem slot próprio', () => {
   expect(nnue19.build?.repository).toBe('https://github.com/official-stockfish/Stockfish.git');
   expect(nnue19.sourceCommit).toBe('ff7cee4244ec96ea488c402669e3674c0574dce6');
   expect(nnue19.preparedRepertoire).toBeUndefined();
+  const prepared19 = registry.get('arthur-v6-prepared');
+  expect(prepared19.engineId).toBe(nnue19.id);
+  expect(prepared19.engine).toBe(nnue19.engine);
+  expect(
+    createHash('sha256')
+      .update(readFileSync(new URL('../../' + prepared19.preparedRepertoire, import.meta.url)))
+      .digest('hex'),
+  ).toBe(prepared19.preparedSha256!);
   const prepared = registry.get('arthur-v4-prepared');
   expect(prepared.engineId).toBe('arthur-v2');
   expect(prepared.book).toBe(true);
@@ -73,6 +81,38 @@ test('manifesto rejeita executável substituído mesmo após consulta anterior',
   } finally {
     unlinkSync(binary);
     unlinkSync(manifest);
+    rmdirSync(dir);
+  }
+});
+
+test('novos candidatos aparecem sem reiniciar e cadastro inválido não é aceito', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'chess-catalog-'));
+  const path = join(dir, 'registry.json');
+  const initial = new Candidates('unused').list();
+  try {
+    writeFileSync(path, JSON.stringify(initial));
+    const live = new Candidates('unused', path);
+    expect(() => live.get('novo-candidato')).toThrow('desconhecido');
+    const next = {
+      ...initial,
+      candidates: [
+        ...initial.candidates,
+        {
+          ...initial.candidates[0]!,
+          id: 'novo-candidato',
+          label: 'Candidato de teste publicado',
+        },
+      ],
+    };
+    writeFileSync(path, JSON.stringify(next));
+    expect(live.get('novo-candidato').label).toBe('Candidato de teste publicado');
+    expect(live.get('arthur-v2').id).toBe('arthur-v2');
+    writeFileSync(path, JSON.stringify({ ...next, candidates: [...next.candidates, next.candidates[0]] }));
+    expect(() => live.list()).toThrow('IDs de candidatos inválidos');
+    writeFileSync(path, JSON.stringify(initial));
+    expect(live.list().candidates.length).toBe(initial.candidates.length);
+  } finally {
+    unlinkSync(path);
     rmdirSync(dir);
   }
 });

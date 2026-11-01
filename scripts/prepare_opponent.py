@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 import chess
 import chess.engine
+import chess.pgn
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'arena'))
@@ -22,16 +23,28 @@ def score(info, color):
 def fresh_analysis(engine, board, limit, *, multipv=None, root_moves=None, game=None):
     # AnalysisResult.info acumula dicionários: um limite antigo pode sobreviver
     # à próxima linha exata. Cada PV abaixo é a última linha completa, sem merge.
-    latest={}; completed={}
+    latest={}; completed={}; frame={}; frame_depth=None; complete_frame=None
     with engine.analysis(board,limit,multipv=multipv,root_moves=root_moves,game=game) as stream:
         for info in stream:
             if info.get('pv') and 'score' in info:
                 latest[info.get('multipv',1)]=info
                 if not info.get('lowerbound') and not info.get('upperbound'):
                     completed[info.get('multipv',1)]=info
+                if multipv is not None:
+                    rank=info.get('multipv',1)
+                    if rank==1:
+                        frame={};frame_depth=info.get('depth')
+                    if info.get('depth')==frame_depth and not info.get('lowerbound') and not info.get('upperbound'):
+                        frame[rank]=info
+                    if (set(frame)==set(range(1,multipv+1)) and
+                            len({row['pv'][0] for row in frame.values()})==multipv):
+                        complete_frame=[frame[k] for k in range(1,multipv+1)]
         stream.wait()
     if not latest: raise RuntimeError('Análise terminou sem PV e avaliação.')
-    return [completed.get(k,latest[k]) for k in sorted(latest)] if multipv is not None else completed.get(1,latest[1])
+    if multipv is not None:
+        if complete_frame is None: raise RuntimeError('MultiPV sem iteração completa, exata e sem lances duplicados.')
+        return complete_frame
+    return completed.get(1,latest[1])
 
 
 def main():
@@ -45,15 +58,28 @@ def main():
     parser.add_argument('--verify-seconds', type=float, default=3)
     parser.add_argument('--verify-depth', type=int, default=24)
     parser.add_argument('--max-loss-cp', type=int, default=20)
+    parser.add_argument('--seed-pgn',type=Path,help='partidas locais para incluir históricos de abertura realmente observados')
     args = parser.parse_args()
     times=[args.teacher_seconds,args.verify_seconds,*args.reply_seconds]
     if args.output.exists() or not 1<=args.positions<=200 or any(not math.isfinite(t) or not 0<t<=60 for t in times):
         parser.error('Use saída nova, 1–200 posições e tempos de 0 a 60 s.')
-    acquire(args.output)
-    args.output.mkdir(parents=True)
     entries, observations = {}, []
     # Posições iniciais próprias: o livro responde somente ao histórico realmente preparado.
     frontier=[[], ['e2e4'], ['d2d4'], ['c2c4'], ['g1f3']]
+    if args.seed_pgn:
+        seeded=[]
+        with args.seed_pgn.open(encoding='utf8') as handle:
+            while game:=chess.pgn.read_game(handle):
+                if game.errors or game.board().fen()!=chess.STARTING_FEN:
+                    raise ValueError('PGN de preparação inválido ou fora da posição inicial.')
+                prefix=[]
+                for move in game.mainline_moves():
+                    prefix.append(move.uci())
+                    if 8<=len(prefix)<=12: seeded.append(prefix.copy())
+                    if len(prefix)>=12:break
+        frontier=seeded+frontier
+    acquire(args.output)
+    args.output.mkdir(parents=True)
     seen=set()
     try:
         with chess.engine.SimpleEngine.popen_uci(str(args.engine.resolve())) as teacher, chess.engine.SimpleEngine.popen_uci(str(args.opponent.resolve())) as opponent:
@@ -68,7 +94,7 @@ def main():
                 for uci in moves: board.push_uci(uci)
                 if board.is_game_over() or board.is_repetition(2): continue
                 color=board.turn
-                infos=fresh_analysis(teacher,board,chess.engine.Limit(time=args.teacher_seconds),multipv=3,game=object())
+                infos=fresh_analysis(teacher,board,chess.engine.Limit(time=args.teacher_seconds),multipv=min(3,board.legal_moves.count()),game=object())
                 best=max(score(info,color) for info in infos)
                 choices=[]
                 for info in infos:
@@ -119,6 +145,8 @@ def main():
                 'teacherSeconds':args.teacher_seconds,'replySeconds':args.reply_seconds,
                 'verifySeconds':args.verify_seconds,'maxLossCp':args.max_loss_cp,
                 'verifyDepth':args.verify_depth,
+                'multiPVPolicy':'completed-exact-same-depth-distinct-v2',
+                'seedPgnSha256':hashlib.sha256(args.seed_pgn.read_bytes()).hexdigest() if args.seed_pgn else None,
                 'status':'EXPERIMENTAL: preparação específica; buscas limitadas e amostra não provam vantagem em 25+0.'}}
             atomic_json(args.output/'repertoire.json',data)
     finally: release()

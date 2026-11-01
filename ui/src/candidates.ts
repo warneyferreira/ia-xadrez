@@ -28,11 +28,21 @@ export class Candidates {
   private hashes = new Map<string, { stamp: string; sha: string }>();
   private root: string;
   private preparedPython: string | null = null;
-  constructor(private defaultEngine: string) {
-    const registry = existsSync('candidates/registry.json')
-      ? resolve('candidates/registry.json')
-      : resolve('../candidates/registry.json');
+  private registryPath: string;
+  private registryStamp: string;
+  constructor(
+    private defaultEngine: string,
+    registryPath?: string,
+  ) {
+    const registry =
+      registryPath ??
+      (existsSync('candidates/registry.json')
+        ? resolve('candidates/registry.json')
+        : resolve('../candidates/registry.json'));
     this.root = dirname(dirname(registry));
+    this.registryPath = registry;
+    const stat = statSync(registry);
+    this.registryStamp = `${stat.mtimeMs}:${stat.size}`;
     this.data = JSON.parse(readFileSync(registry, 'utf8'));
     const ids = new Set<string>();
     for (const c of this.data.candidates) {
@@ -68,12 +78,23 @@ export class Candidates {
     }
   }
   list() {
+    this.refresh();
     return this.data;
   }
   get(id: string) {
+    this.refresh();
     const c = this.data.candidates.find((c) => c.id === (this.data.aliases[id] ?? id));
     if (!c) throw new Error(`Candidato desconhecido: ${id}`);
     return c;
+  }
+  private refresh() {
+    const stat = statSync(this.registryPath);
+    const stamp = `${stat.mtimeMs}:${stat.size}`;
+    if (stamp !== this.registryStamp) {
+      const updated = new Candidates(this.defaultEngine, this.registryPath);
+      this.data = updated.data;
+      this.registryStamp = updated.registryStamp;
+    }
   }
   path(c: Candidate) {
     const path = c.engine === '$DEFAULT' ? this.defaultEngine : resolve(this.root, c.engine);
@@ -89,7 +110,8 @@ export class Candidates {
     const sha = this.hashes.get(path)!.sha;
     const manifest = resolve(dirname(path), 'build.json');
     const buildManifest = existsSync(manifest) ? JSON.parse(readFileSync(manifest, 'utf8')) : null;
-    if (c.build?.repository && !buildManifest)
+    const origin = c.build?.repository ?? (c.engineId ? this.get(c.engineId).build?.repository : undefined);
+    if (origin && !buildManifest)
       throw new Error(`Manifesto de origem ausente: ${c.id}. Reinstale o candidato.`);
     if (
       buildManifest &&
@@ -97,7 +119,7 @@ export class Candidates {
         buildManifest.id !== (c.engineId ?? c.id) ||
         typeof buildManifest.sourceCommit !== 'string' ||
         !buildManifest.sourceCommit.toLowerCase().startsWith(c.sourceCommit.toLowerCase()) ||
-        (c.build?.repository && buildManifest.repository !== c.build.repository))
+        (origin && buildManifest.repository !== origin))
     )
       throw new Error(`Binário diverge do manifesto: ${c.id}. Reinstale o candidato.`);
     let preparationSha256: string | null = null,

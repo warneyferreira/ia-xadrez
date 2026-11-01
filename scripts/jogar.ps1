@@ -10,6 +10,21 @@ if (-not $primary) { throw "Candidato desconhecido: $Candidate" }
 if ($Port -lt 1024 -or $Port -gt 65535) { throw 'Escolha uma porta entre 1024 e 65535.' }
 $enginePath = if ($primary.engine -eq '$DEFAULT') { Join-Path $projectRoot 'Stockfish\src\stockfish.exe' } else { Join-Path $projectRoot $primary.engine }
 if (-not (Test-Path -LiteralPath $enginePath)) { throw 'Binário do candidato ausente. Execute scripts/setup.ps1 ou compile a versão indicada em candidates/registry.json.' }
+$address = "http://127.0.0.1:$Port"
+$existing = $null
+try { $existing = Invoke-RestMethod -Uri "$address/api/info" -TimeoutSec 2 -ErrorAction Stop } catch { }
+if ($existing) {
+    $catalog = $null
+    try { $catalog = Invoke-RestMethod -Uri "$address/api/candidates" -TimeoutSec 2 -ErrorAction Stop } catch { }
+    $expectedIds = ($registry.candidates.id | Sort-Object) -join ','
+    $actualIds = ($catalog.candidates.id | Sort-Object) -join ','
+    if ($existing.candidate -eq $primary.label -and $existing.PSObject.Properties['preparedRepertoire'] -and $expectedIds -eq $actualIds) {
+        Write-Host "A interface atual já está aberta: $address/duel"
+        if (-not $NoOpen) { Start-Process -FilePath "$address/duel" -WindowStyle Hidden }
+        return
+    }
+    throw "A porta $Port está atendendo outra versão da interface. Encerre a janela antiga antes de reiniciar, ou escolha outra porta com -Port. Nenhuma partida foi interrompida."
+}
 $extraOptions = @()
 $syzygyPath = Join-Path $env:LOCALAPPDATA 'ChessChallenge\syzygy\3-4-5'
 if (Test-Path -LiteralPath (Join-Path $syzygyPath 'manifest.json')) { $extraOptions = @('--syzygy', $syzygyPath) }

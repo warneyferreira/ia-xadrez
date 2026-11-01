@@ -134,6 +134,16 @@ def result_for_side(result: str, side: chess.Color) -> str:
     return "loss"
 
 
+def annotate_search(node, move, info):
+    """Anota somente avaliação da própria busca, vinculada ao lance retornado."""
+    if (info.get('string','').startswith('PreparedRepertoire ') or
+            info.get('lowerbound') or info.get('upperbound')):
+        return
+    pv=info.get('pv',[])
+    if info.get('score') is not None and pv and pv[0]==move:
+        node.set_eval(info['score'],info.get('depth'))
+
+
 def run_game(
     white: Candidate,
     black: Candidate,
@@ -192,7 +202,7 @@ def run_game(
                 # Future.result limita a espera mesmo se o motor ignorar stop.
                 engine = engines[color]
                 pending = asyncio.run_coroutine_threadsafe(
-                    engine.protocol.play(board, limit, info=chess.engine.INFO_BASIC), engine.protocol.loop)
+                    engine.protocol.play(board, limit, info=chess.engine.INFO_BASIC | chess.engine.INFO_SCORE | chess.engine.INFO_PV), engine.protocol.loop)
                 try:
                     reply = pending.result(timeout=max(0, remaining[color]) + 1)
                 except TimeoutError:
@@ -221,6 +231,7 @@ def run_game(
             node = node.add_variation(reply.move)
             node.set_clock(remaining[color] + increment_seconds)
             node.set_emt(spent)
+            annotate_search(node,reply.move,reply.info)
             board.push(reply.move)
             remaining[color] += increment_seconds
         else:
@@ -244,7 +255,8 @@ def run_game(
 
     game.headers.update({"White": white.name, "Black": black.name, "Result": result,
                          "Event": "Chess Challenge Arena", "Opening": opening.label,
-                         "Termination": termination, "DrawPolicy": draw_policy})
+                         "Termination": termination, "DrawPolicy": draw_policy,
+                         "EvaluationSource": "native search; exact PV only; no extra analysis"})
     return game, {
         "white": white.name, "black": black.name, "opening": opening.label,
         "opening_key": hashlib.sha256((opening.initial_fen + " " + " ".join(m.uci() for m in opening.moves)).encode()).hexdigest(),

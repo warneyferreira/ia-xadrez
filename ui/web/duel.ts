@@ -483,17 +483,29 @@ el('save-report').addEventListener('click', () => {
 });
 async function loadCandidates() {
   const data = (await (await fetch('/api/candidates')).json()) as typeof catalog;
+  if (JSON.stringify(data) === JSON.stringify(catalog)) return;
+  const initial = catalog.candidates.length === 0;
   catalog = data;
   for (const [id, owner] of [
     ['primary-candidate', 'arthur'],
     ['opponent-candidate', 'vanderlei'],
   ]) {
     const select = el<HTMLSelectElement>(id!);
+    const previous = select.value;
     select.replaceChildren(
-      ...Object.keys(data.aliases).map((alias) => new Option(`${alias} → ${data.aliases[alias]}`, alias)),
-      ...data.candidates.map((c) => new Option(`${c.label} [${c.id}]`, c.id)),
+      ...Object.keys(data.aliases).map(
+        (alias) =>
+          new Option(
+            `Referência · ${data.candidates.find((c) => c.id === data.aliases[alias])?.label ?? alias}`,
+            alias,
+          ),
+      ),
+      ...data.candidates.map((c) => new Option(c.label, c.id)),
     );
-    select.value = `${owner}-latest`;
+    select.value =
+      !initial && [...select.options].some((option) => option.value === previous)
+        ? previous
+        : `${owner}-latest`;
   }
 }
 for (const [selectId, primary] of [
@@ -524,3 +536,4 @@ void loadCandidates()
     localError = `Falha ao carregar candidatos: ${(err as Error).message}`;
   })
   .finally(() => void poll());
+setInterval(() => void loadCandidates().catch(() => {}), 10000);

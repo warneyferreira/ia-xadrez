@@ -17,6 +17,9 @@
     "native-tests.log": "ec7f7ab29342a64e2d86a97a52852a28084f982b9864ab16a228985c8127a81f",
     "summary.json": "27995081096c942bd2cdea4c9227d4ff344727b53c4a261ad381d212766d6d1e",
     "v5-win-game-3.pgn": "1a8e9557128f8482e4976da5597a6a597ba7914a1f82e74a27b5737d71673671",
-    "competition-start.config.json": "6d25e7f06dc0e3cfa48630ea1e66be3cc5c135aa1df7b2f951f5f1c7d8b35700"
+    "competition-start.config.json": "6d25e7f06dc0e3cfa48630ea1e66be3cc5c135aa1df7b2f951f5f1c7d8b35700",
+    "competition-events.jsonl": "7b59292692e84e63f1e2f5843daa1b055d39bce5710c8724d3aafecf621f9a1c",
+    "competition-games.pgn": "2a103cbc6827e9fe2fa8a7ab34a67c0e0218d3d9c1ec4e3ee8ab172956af451e",
+    "competition-summary.json": "a8cc0f1e36baee6231565cf695a3cf1f073fefe424ff515c139e7d92ca2c71a3"
   }
 }

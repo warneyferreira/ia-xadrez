@@ -109,3 +109,16 @@ O cadastro fica separado da v4: não reutiliza automaticamente o repertório
 preparado para outra rede. `arthur-latest` continua na referência v2 até
 avaliação local. Consulte `experiments/2026-11-01-nnue19-v5.md` para resultados
 e limites; a aprovação dos testes upstream não garante vitória no torneio.
+
+## Arthur v6 · preparação NNUE19
+
+Mesmo núcleo da v5, com dez respostas próprias dessa rede, verificadas em
+profundidade 26. O cadastro compartilha o motor por `engineId` e registra o
+SHA do livro. Não usa o livro antigo da v4. Selecionável no duelo e na arena;
+para treino/tabuleiro físico: `scripts/jogar.ps1 -Candidate arthur-v6-prepared`.
+
+Novos candidatos aparecem no seletor do duelo em até dez segundos sem apagar
+o nome ou a seleção. Se uma aba antiga não tiver esse comportamento, atualize
+com F5. O endereço padrão atualizado é `http://127.0.0.1:18766`.
+A v6 é experimental: preparação poupa cálculo quando o histórico coincide;
+ganho de força precisa ser avaliado nas partidas.

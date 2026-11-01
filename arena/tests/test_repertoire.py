@@ -109,5 +109,26 @@ class RepertoireTests(unittest.TestCase):
         self.assertNotIn('lowerbound',result)
         self.assertNotIn('upperbound',result)
 
+    def test_multipv_uses_one_complete_depth_and_distinct_moves(self):
+        def row(depth,rank,move,**extra):
+            return {'depth':depth,'multipv':rank,'pv':[chess.Move.from_uci(move)],
+                    'score':chess.engine.PovScore(chess.engine.Cp(20),chess.WHITE),**extra}
+        lines=[row(20,1,'e2e4'),row(20,2,'d2d4'),row(20,3,'g1f3'),
+               row(21,1,'d2d4',lowerbound=True),row(21,2,'e2e4'),row(20,3,'g1f3'),
+               row(22,1,'e2e4'),row(22,2,'e2e4'),row(22,3,'g1f3')]
+        class Stream:
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def wait(self):pass
+            def __iter__(self):return iter(lines)
+        class Engine:
+            def analysis(self,*args,**kwargs):return Stream()
+        result=fresh_analysis(Engine(),chess.Board(),chess.engine.Limit(time=1),multipv=3)
+        self.assertEqual([i['depth'] for i in result],[20,20,20])
+        self.assertEqual([i['pv'][0].uci() for i in result],['e2e4','d2d4','g1f3'])
+        lines[:]=[row(21,1,'d2d4',lowerbound=True),row(21,2,'e2e4'),row(21,3,'g1f3')]
+        with self.assertRaisesRegex(RuntimeError,'MultiPV sem iteração'):
+            fresh_analysis(Engine(),chess.Board(),chess.engine.Limit(time=1),multipv=3)
+
 
 if __name__=='__main__':unittest.main()
