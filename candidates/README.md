@@ -56,3 +56,22 @@ continua podendo consultar as tabelas locais de finais.
 
 Mais velocidade não equivale a uma porcentagem igual de vitórias. Consulte
 `experiments/2026-10-31-pgo-clock.md` para resultado e limitações reais.
+
+## Arthur v3 · tempo crítico (experimental)
+
+Adiciona uma opção nativa própria, `Tournament Critical Time`, com limite de
+fator 1,20 para o orçamento alvo em posições instáveis. Não muda a NNUE nem
+relaxa o teto nativo. Fica desligada no executável por padrão; o cadastro ativa
+a opção apenas para `arthur-v3-critical`. V2 e baseline permanecem preservados.
+
+O seletor de duelo/arena permite testar a v3 após reiniciar o servidor. Para
+preparar uma interface física separada, sem trocar `arthur-latest`:
+
+```powershell
+.\scripts\jogar.ps1 -Candidate arthur-v3-critical -Port 18767
+```
+
+O perfil usa duas threads e Hash 256 MB. A mudança só atua em controle de
+relógio sem incremento; tempo fixo por lance não exercita a política. Ela
+permanece experimental até uma validação de força em 25+0. Consulte
+`experiments/2026-10-31-critical-time-v1.md`.

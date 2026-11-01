@@ -30,7 +30,7 @@ type State = {
     attempts: number;
     forcedReplies: number;
   };
-  engineConfiguration: { name: string; threads: number; hashMB: number };
+  engineConfiguration: { name: string; threads: number; hashMB: number; tournamentCriticalTime?: boolean };
   running: string | null;
   pending: {
     bestmove: string;
@@ -94,7 +94,7 @@ function sync(next: State) {
   el('time-policy').textContent =
     `Margem de operação: ${((next.timePolicy.operationMillis ?? next.timePolicy.overheadMillis) / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
   el('engine-configuration').textContent =
-    `${next.engineConfiguration.name} · ${next.engineConfiguration.threads} threads · Hash ${next.engineConfiguration.hashMB} MB. Lance único legal tem resposta imediata.`;
+    `${next.engineConfiguration.name} · ${next.engineConfiguration.threads} threads · Hash ${next.engineConfiguration.hashMB} MB${next.engineConfiguration.tournamentCriticalTime ? ' · tempo crítico experimental ativo' : ''}. Lance único legal tem resposta imediata.`;
   el('ponder-status').textContent = next.controller.thinking
     ? `Pensando durante a vez adversária · previsão ${next.controller.expected} · profundidade ${next.controller.depth ?? '…'}. Aguardando o lance real.`
     : next.controller.enabled

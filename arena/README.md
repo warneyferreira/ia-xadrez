@@ -88,3 +88,20 @@ PGNs também guardam tempo restante e tempo gasto por jogada. Limites de lances
 não viram empates; mate exatamente no limite conta. A espera por motor travado
 é limitada pelo relógio restante mais 1 s. Falhas de inicialização têm prazo
 separado de 15 s e entram no relatório.
+
+## Empate reclamável e repetição efetiva
+
+Novas séries usam `draw_policy: "played"`. O motor escolhe o próximo lance;
+a arena reclama empate quando a posição já ocorreu três vezes ou o contador
+de 50 lances chegou a 100 meios-lances. Resultados automáticos têm prioridade.
+Esta convenção é consistente com o duelo visual; não substitui o árbitro físico.
+
+As séries anteriores a essa correção usavam `claimable`: a arena reclamava
+assim que existia uma jogada futura que permitiria reclamar empate, mesmo
+que o motor pudesse preferir outra. Essa opção continua disponível apenas
+para reprodução. A política aparece no PGN, eventos, configuração e resumo.
+Não misture resultados das duas políticas para inferir ganho de força.
+
+`scripts/audit_repetitions.py` preserva o PGN de origem, identifica esses
+casos e pesquisa alternativas com histórico completo. Avaliação limitada
+próxima de zero não prova vitória perdida nem igualdade exata.

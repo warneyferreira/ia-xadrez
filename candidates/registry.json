@@ -3,6 +3,20 @@
   "aliases": { "arthur-latest": "arthur-v2", "vanderlei-latest": "vanderlei-base" },
   "candidates": [
     {
+      "id": "arthur-v3-critical",
+      "label": "Arthur v3 · tempo crítico (experimental)",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v3-critical/stockfish.exe",
+      "sourceCommit": "b888ad2fd819de53edf87b7da009a75a475b64ed",
+      "threads": 2,
+      "hashMB": 256,
+      "book": false,
+      "syzygy": true,
+      "tournamentCriticalTime": true,
+      "build": { "architecture": "auto", "pgo": true },
+      "notes": "Experimento de tempo: orçamento alvo até 20% maior com instabilidade, sem incremento e com ao menos 15 s restantes. Mantém teto nativo. Regressões aprovadas; ganho de força ainda não demonstrado. Não é a versão padrão."
+    },
+    {
       "id": "arthur-v2",
       "label": "Arthur v2 · PGO",
       "owner": "Arthur",

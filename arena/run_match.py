@@ -28,6 +28,7 @@ import chess.engine
 import chess.pgn
 from match_statistics import paired_summary
 from process_lock import acquire, release, atomic_json
+from adjudication import outcome as adjudicate, POLICIES
 
 
 @dataclass(frozen=True)
@@ -141,7 +142,10 @@ def run_game(
     increment_seconds: float,
     max_plies: int,
     on_progress=None,
+    draw_policy: str = "played",
 ) -> tuple[chess.pgn.Game, dict[str, Any]]:
+    if draw_policy not in POLICIES:
+        raise MatchError("draw_policy deve ser played ou claimable.")
     board = chess.Board(opening.initial_fen)
     game = chess.pgn.Game()
     if opening.initial_fen != chess.STARTING_FEN:
@@ -167,7 +171,7 @@ def run_game(
             engine.configure(engine_options(candidate))
             starting = None
         while len(board.move_stack) < max_plies:
-            outcome = board.outcome(claim_draw=True)
+            outcome = adjudicate(board, draw_policy)
             if outcome is not None:
                 result = outcome.result()
                 termination = outcome.termination.name.lower().replace("_", " ")
@@ -218,7 +222,7 @@ def run_game(
             board.push(reply.move)
             remaining[color] += increment_seconds
         else:
-            outcome = board.outcome(claim_draw=True)
+            outcome = adjudicate(board, draw_policy)
             if outcome is not None:
                 result = outcome.result()
                 termination = outcome.termination.name.lower().replace("_", " ")
@@ -238,13 +242,14 @@ def run_game(
 
     game.headers.update({"White": white.name, "Black": black.name, "Result": result,
                          "Event": "Chess Challenge Arena", "Opening": opening.label,
-                         "Termination": termination})
+                         "Termination": termination, "DrawPolicy": draw_policy})
     return game, {
         "white": white.name, "black": black.name, "opening": opening.label,
         "opening_key": hashlib.sha256((opening.initial_fen + " " + " ".join(m.uci() for m in opening.moves)).encode()).hexdigest(),
         "result": result, "termination": termination, "plies": len(board.move_stack),
         "white_seconds": round(elapsed[chess.WHITE], 3),
         "black_seconds": round(elapsed[chess.BLACK], 3), "crash": crash,
+        "draw_policy": draw_policy,
     }
 
 
@@ -268,6 +273,9 @@ def main() -> int:
         games = config.get("games")
         if not isinstance(games, int) or games < 2 or games % 2:
             raise MatchError("games precisa ser inteiro par e >= 2.")
+        draw_policy = config.get("draw_policy", "played")
+        if draw_policy not in POLICIES:
+            raise MatchError("draw_policy deve ser played ou claimable.")
         tc = config.get("time_control")
         if not isinstance(tc, dict):
             raise MatchError("time_control precisa ser um objeto.")
@@ -293,7 +301,7 @@ def main() -> int:
     random.Random(seed).shuffle(shuffled)
     schedule = [shuffled[(index // 2) % len(shuffled)] for index in range(games)]
     print(f"Match: {match_id}\nA: {candidate_a.name} | B: {candidate_b.name}")
-    print(f"Jogos: {games}; TC: {base_seconds}+{increment_seconds}; openings: {len(openings)}; seed: {seed}")
+    print(f"Jogos: {games}; TC: {base_seconds}+{increment_seconds}; openings: {len(openings)}; seed: {seed}; draw_policy: {draw_policy}")
     for index, opening in enumerate(schedule, start=1):
         white, black = (candidate_a, candidate_b) if index % 2 else (candidate_b, candidate_a)
         print(f"{index:>4}: White={white.name}; Black={black.name}; opening={opening.label}")
@@ -317,7 +325,8 @@ def main() -> int:
                                        "binarySha256": hashlib.sha256(executable.read_bytes()).hexdigest() if executable.is_file() else None}
     metadata = {"started_at": dt.datetime.now(dt.timezone.utc).isoformat(), "match_id": match_id,
                 "engines": fingerprints,
-                "git_revision": git_revision(), "python": sys.version, "platform": platform.platform(), "config": config}
+                "git_revision": git_revision(), "python": sys.version, "platform": platform.platform(),
+                "draw_policy": draw_policy, "config": config}
     (output_dir / "config.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
     scores = {candidate_a.name: {"win": 0, "draw": 0, "loss": 0}, candidate_b.name: {"win": 0, "draw": 0, "loss": 0}}
     crashes = {candidate_a.name: 0, candidate_b.name: 0}
@@ -334,7 +343,7 @@ def main() -> int:
             def on_progress(update):
                 progress.update(update)
                 atomic_json(output_dir / "progress.json", progress)
-            game, report = run_game(white, black, opening, base_seconds, increment_seconds, max_plies, on_progress)
+            game, report = run_game(white, black, opening, base_seconds, increment_seconds, max_plies, on_progress, draw_policy)
             report["game"] = index
             reports.append(report)
             progress.update({"completed": index, "phase": "between-games", "thinkingSince": None})
@@ -353,7 +362,7 @@ def main() -> int:
                 crashes[report["crash"]["candidate"]] += 1
     summary = {"finished_at": dt.datetime.now(dt.timezone.utc).isoformat(), "match_id": match_id,
                "paired": paired_summary(reports, candidate_a.name),
-               "scores": scores, "crashes": crashes, "games": games, "unfinished": unfinished,
+               "scores": scores, "crashes": crashes, "games": games, "unfinished": unfinished, "draw_policy": draw_policy,
                "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."}
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     progress.update({"phase": "finished", "finishedAt": summary["finished_at"]})

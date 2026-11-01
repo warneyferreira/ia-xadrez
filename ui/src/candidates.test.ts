@@ -10,6 +10,8 @@ test('aliases resolvem versões fixas e baseline tem slot próprio', () => {
   expect(registry.get('arthur-latest').id).toBe('arthur-v2');
   expect(registry.get('arthur-v2').engine).not.toBe(registry.get('arthur-v1').engine);
   expect(registry.get('arthur-v2').book).toBe(false);
+  expect(registry.get('arthur-v3-critical').tournamentCriticalTime).toBe(true);
+  expect(registry.get('arthur-v2').tournamentCriticalTime).toBeUndefined();
   expect(registry.get('vanderlei-latest').id).toBe('vanderlei-base');
   expect(registry.get('vanderlei-base').engine).toBe('bin/baseline-effdc3fd3/stockfish.exe');
   expect(() => registry.get('inexistente')).toThrow('desconhecido');

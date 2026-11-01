@@ -28,7 +28,9 @@ function Resolve-Candidate([string]$id) {
     if ($alias) { $id = [string]$alias.Value }
     $candidate = $registry.candidates | Where-Object { $_.id -eq $id } | Select-Object -First 1
     if (-not $candidate -or -not (Test-Path -LiteralPath $candidate.engine)) { throw "Candidato ausente: $id. Execute scripts/setup.ps1 antes." }
-    return @{ name = $candidate.label; command = @((Resolve-Path -LiteralPath $candidate.engine).Path); options = @{ Threads = $Threads; Hash = $HashMB; 'Move Overhead' = 20; Ponder = $false } }
+    $nativeOptions = @{ Threads = $Threads; Hash = $HashMB; 'Move Overhead' = 20; Ponder = $false }
+    if ($candidate.tournamentCriticalTime) { $nativeOptions['Tournament Critical Time'] = $true }
+    return @{ name = $candidate.label; command = @((Resolve-Path -LiteralPath $candidate.engine).Path); options = $nativeOptions }
 }
 $left = Resolve-Candidate $CandidateA
 $right = Resolve-Candidate $CandidateB
@@ -43,7 +45,7 @@ $config = @{
     match_id = "controlled-$stamp"; candidate_a = $left; candidate_b = $right; games = $Games
     time_control = @{ base_seconds = $BaseSeconds; increment_seconds = $IncrementSeconds }
     openings = @{ pgn = (Resolve-Path -LiteralPath $Openings).Path; seed = 20261031 }
-    max_plies = 2000; output_dir = $output
+    max_plies = 2000; output_dir = $output; draw_policy = 'played'
 }
 $config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configFile -Encoding utf8
 Write-Host "Teste de motores: mesmo Threads/Hash, sem repertório e sem Syzygy para ambos. Resultado em $output"

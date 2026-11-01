@@ -12,6 +12,7 @@ export type Candidate = {
   hashMB: number;
   book: boolean;
   syzygy: boolean;
+  tournamentCriticalTime?: boolean;
   notes: string;
   build?: { architecture: 'auto' | 'x86-64-avx2' | 'x86-64-avxvnni'; pgo: boolean };
 };
@@ -27,6 +28,8 @@ export class Candidates {
     this.data = JSON.parse(readFileSync(registry, 'utf8'));
     const ids = new Set<string>();
     for (const c of this.data.candidates) {
+      if (c.tournamentCriticalTime !== undefined && typeof c.tournamentCriticalTime !== 'boolean')
+        throw new Error(`Política de tempo inválida: ${c.id}`);
       if (!/^[a-z0-9-]+$/.test(c.id) || ids.has(c.id))
         throw new Error('IDs de candidatos inválidos ou duplicados.');
       if (

@@ -19,6 +19,14 @@ test('bateria antiga em andamento não aparece concluída nem inventa posição'
   expect(run.current).toBeNull();
   expect(run.legacy).toBe(true);
   expect(run.game).toBe(1);
+  expect(run.drawPolicy).toBe('claimable');
+  expect(run.note).toContain('Série antiga');
+});
+
+test('nova política registra somente repetição já ocorrida', () => {
+  const run = summarizeRun('new', { ...metadata, draw_policy: 'played' }, [], null, null, true);
+  expect(run.drawPolicy).toBe('played');
+  expect(run.note).toContain('após a posição repetir');
 });
 test('partida incompleta não vira empate e encerramento com falha é identificado', () => {
   const events = [

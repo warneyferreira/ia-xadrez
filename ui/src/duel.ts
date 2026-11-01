@@ -272,6 +272,7 @@ export class Duel {
         Threads: c.threads,
         Hash: i === 0 ? MEMORY_PROFILES[selectedMemory].hashMB : c.hashMB,
         Ponder: false,
+        'Tournament Critical Time': c.tournamentCriticalTime === true,
         SyzygyPath: c.syzygy && this.syzygy ? this.syzygy : null,
         book: i === 0 && c.book && this.config.useBook,
       },
@@ -357,6 +358,7 @@ export class Duel {
         Threads: c.threads,
         Hash: arthur ? MEMORY_PROFILES[this.config.memoryProfile].hashMB : c.hashMB,
         'Move Overhead': 20,
+        ...(c.tournamentCriticalTime ? { 'Tournament Critical Time': 'true' } : {}),
         ...(c.syzygy && this.syzygy ? { SyzygyPath: this.syzygy, Syzygy50MoveRule: 'true' } : {}),
       });
     }

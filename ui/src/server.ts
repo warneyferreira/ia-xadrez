@@ -79,6 +79,7 @@ const { values: args } = parseArgs({
     'no-training-book': { type: 'boolean', default: false },
     threads: { type: 'string' },
     'hash-mb': { type: 'string' },
+    'tournament-critical-time': { type: 'boolean', default: false },
   },
 });
 
@@ -265,6 +266,7 @@ async function startDuelReview() {
 try {
   // A UI de treino usa buscas curtas; o modo torneio recebe relógios por UCI.
   await engine.init({ Threads: engineThreads, Hash: engineHash, 'Move Overhead': 500 });
+  if (args['tournament-critical-time']) await engine.configure({ 'Tournament Critical Time': 'true' });
   if (args.syzygy) {
     const tableOptions = { SyzygyPath: resolve(args.syzygy), Syzygy50MoveRule: 'true' };
     await engine.init(tableOptions);
@@ -386,6 +388,7 @@ function tournamentSnapshot(): Record<string, unknown> {
       threads: engineThreads,
       hashMB: engineHash,
       syzygy: Boolean(args.syzygy),
+      tournamentCriticalTime: args['tournament-critical-time'],
     },
     gameOver: tournamentState.game.isGameOver(),
     outcome: tournamentState.game.isCheckmate()
@@ -590,6 +593,7 @@ const server = Bun.serve({
           hash: engineHash,
           syzygy: Boolean(args.syzygy),
           book: !args['no-training-book'] && Object.keys(preparedBook).length > 0,
+          tournamentCriticalTime: args['tournament-critical-time'],
         }),
     },
     '/api/prepare': {

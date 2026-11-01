@@ -48,6 +48,7 @@ export function summarizeRun(
     : alive
       ? 'running'
       : 'interrupted';
+  const drawPolicy = metadata.draw_policy ?? summary?.draw_policy ?? config.draw_policy ?? 'claimable';
   return {
     id,
     status,
@@ -61,6 +62,7 @@ export function summarizeRun(
     legacy: !progress,
     incomplete,
     failures,
+    drawPolicy,
     candidates: names.map((name, i) => ({
       name: displayName(name),
       options: config[i === 0 ? 'candidate_a' : 'candidate_b'].options,
@@ -72,9 +74,13 @@ export function summarizeRun(
       config.time_control.increment_seconds === 0
         ? (config.games * 2 * config.time_control.base_seconds) / 3600
         : null,
-    note: summary?.paired?.evidenceOfSuperiority
-      ? 'Há evidência inicial de superioridade nos critérios desta bateria; valide em novas aberturas.'
-      : 'Esta bateria mede resultados. Ela não treina a rede nem comprova superioridade com poucos jogos.',
+    note:
+      (summary?.paired?.evidenceOfSuperiority
+        ? 'Há evidência inicial de superioridade nos critérios desta bateria; valide em novas aberturas.'
+        : 'Esta bateria mede resultados. Ela não treina a rede nem comprova superioridade com poucos jogos.') +
+      (drawPolicy === 'claimable'
+        ? ' Série antiga: a arena reclamava empate assim que um lance futuro permitia a reclamação.'
+        : ' Empates por repetição são registrados após a posição repetir no tabuleiro.'),
   };
 }
 
@@ -211,14 +217,27 @@ export class ArenaService {
         candidate_a: {
           name: a.label,
           command: [this.candidates.path(a)],
-          options: { Threads: threads, Hash: hash, 'Move Overhead': 20, Ponder: false },
+          options: {
+            Threads: threads,
+            Hash: hash,
+            'Move Overhead': 20,
+            Ponder: false,
+            ...(a.tournamentCriticalTime ? { 'Tournament Critical Time': true } : {}),
+          },
         },
         candidate_b: {
           name: b.label,
           command: [this.candidates.path(b)],
-          options: { Threads: threads, Hash: hash, 'Move Overhead': 20, Ponder: false },
+          options: {
+            Threads: threads,
+            Hash: hash,
+            'Move Overhead': 20,
+            Ponder: false,
+            ...(b.tournamentCriticalTime ? { 'Tournament Critical Time': true } : {}),
+          },
         },
         games,
+        draw_policy: 'played',
         time_control:
           raw.timeControl === 'quick'
             ? { base_seconds: 60, increment_seconds: 0.1 }
