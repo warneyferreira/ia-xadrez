@@ -31,6 +31,8 @@ type Run = {
     draw: number;
     loss: number;
     options: { Threads: number; Hash: number };
+    prepared?: boolean;
+    bookMoves?: number;
   }[];
   timeControl: { base_seconds: number; increment_seconds: number };
   note: string;
@@ -41,6 +43,20 @@ let selected = '',
   actionError = '',
   latest: { busy: boolean; activeId: string | null; runs: Run[]; queue: any } | null = null;
 const board = Chessground(el('arena-board'), { viewOnly: true, animation: { enabled: false } });
+let catalogue: {
+  aliases: Record<string, string>;
+  candidates: { id: string; preparedRepertoire?: string }[];
+} | null = null;
+function describeBatch() {
+  const data = catalogue;
+  const prepared = ['batch-a', 'batch-b'].some((id) => {
+    const value = el<HTMLSelectElement>(id).value;
+    return data?.candidates.find((c) => c.id === (data.aliases[value] ?? value))?.preparedRepertoire;
+  });
+  el('batch-description').textContent = prepared
+    ? 'Mesmos Threads e Hash, sem Ponder ou Syzygy. O perfil preparado inclui seu repertório offline: esta bateria compara o sistema completo.'
+    : 'Os dois motores recebem os mesmos recursos, sem Ponder, repertório ou Syzygy. Esta comparação isola os motores; recursos de torneio precisam de testes próprios.';
+}
 const clock = (seconds: number) =>
   `${Math.floor(Math.max(0, seconds) / 60)
     .toString()
@@ -138,7 +154,7 @@ function render() {
         name = document.createElement('strong'),
         options = document.createElement('small');
       name.textContent = c.name;
-      options.textContent = `${c.options.Threads} threads · Hash ${c.options.Hash} MB`;
+      options.textContent = `${c.options.Threads} threads · Hash ${c.options.Hash} MB${c.prepared ? ` · preparação offline · ${c.bookMoves ?? 0} lances preparados` : ''}`;
       label.append(name, options);
       row.append(label);
       for (const value of [c.win, c.draw, c.loss, c.win * 3 + c.draw]) {
@@ -225,6 +241,7 @@ el('batch-form').addEventListener('submit', async (event) => {
 });
 try {
   const data = await (await fetch('/api/candidates')).json();
+  catalogue = data;
   for (const [id, value] of [
     ['batch-a', 'arthur-latest'],
     ['batch-b', 'vanderlei-latest'],
@@ -237,7 +254,9 @@ try {
       ...data.candidates.map((c: { id: string; label: string }) => new Option(c.label, c.id)),
     );
     input.value = value!;
+    input.addEventListener('change', describeBatch);
   }
+  describeBatch();
 } catch {
   el('arena-error').textContent = 'Não foi possível carregar os candidatos.';
 }

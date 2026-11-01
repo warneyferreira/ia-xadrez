@@ -1,7 +1,25 @@
 {
   "schema": 1,
-  "aliases": { "arthur-latest": "arthur-v2", "vanderlei-latest": "vanderlei-base" },
+  "aliases": {
+    "arthur-latest": "arthur-v2",
+    "vanderlei-latest": "vanderlei-base"
+  },
   "candidates": [
+    {
+      "id": "arthur-v4-prepared",
+      "label": "Arthur v4 · preparação offline",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v2/stockfish.exe",
+      "engineId": "arthur-v2",
+      "sourceCommit": "db2cf72047c7e88a267c4b690f40dc1763efd318",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "preparedRepertoire": "openings/arthur-v4-prepared.json",
+      "preparedSha256": "9e24f2c5c1d9a9bf9385b4df7f63d69e60975707e6fa2d4527d6ee447967fe2a",
+      "notes": "39 respostas offline verificadas em profundidade 24 contra a referência do repositório. Histórico exato, fallback normal e preparação opcional. Ganho em 25+0 ainda depende das partidas."
+    },
     {
       "id": "arthur-v3-critical",
       "label": "Arthur v3 · tempo crítico (experimental)",
@@ -13,7 +31,10 @@
       "book": false,
       "syzygy": true,
       "tournamentCriticalTime": true,
-      "build": { "architecture": "auto", "pgo": true },
+      "build": {
+        "architecture": "auto",
+        "pgo": true
+      },
       "notes": "Experimento de tempo: orçamento alvo até 20% maior com instabilidade, sem incremento e com ao menos 15 s restantes. Mantém teto nativo. Regressões aprovadas; ganho de força ainda não demonstrado. Não é a versão padrão."
     },
     {
@@ -26,7 +47,10 @@
       "hashMB": 256,
       "book": false,
       "syzygy": true,
-      "build": { "architecture": "auto", "pgo": true },
+      "build": {
+        "architecture": "auto",
+        "pgo": true
+      },
       "notes": "Compilação PGO; usa AVX-VNNI quando suportado, senão AVX2. Ganho local de velocidade medido; ganho de Elo ainda não demonstrado. Repertório preliminar desativado para isolar a busca."
     },
     {

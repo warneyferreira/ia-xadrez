@@ -16,7 +16,8 @@ export type SearchResult = {
   pv?: string[];
   ponderHit?: boolean;
   ponderMillis?: number;
-  source?: 'search' | 'forced' | 'ponder-hit';
+  source?: 'search' | 'forced' | 'ponder-hit' | 'book';
+  preparationSha256?: string;
 };
 export type SearchInfo = Omit<SearchResult, 'bestmove'>;
 export type PonderSearch = {
@@ -218,6 +219,7 @@ export class Engine {
       let depth = 0;
       let score: Score | null = null;
       let tbhits = 0;
+      let preparationSha256: string | undefined;
       const telemetry: {
         nodes?: number;
         nps?: number;
@@ -228,6 +230,14 @@ export class Engine {
       const done = this.waitFor(
         (l) => l.startsWith('bestmove '),
         (l) => {
+          const prepared = /^info string PreparedRepertoire ([a-f0-9]{64})$/.exec(l);
+          if (prepared) {
+            preparationSha256 = prepared[1];
+            score = null;
+            tbhits = 0;
+            for (const key of Object.keys(telemetry)) delete (telemetry as Record<string, unknown>)[key];
+            return;
+          }
           if (!l.startsWith('info ') || !l.includes(' pv ')) return;
           const d = /\bdepth (\d+)/.exec(l);
           const s = /\bscore (cp|mate) (-?\d+)/.exec(l);
@@ -267,8 +277,12 @@ export class Engine {
           score,
           tbhits,
           ...telemetry,
+          ...(preparationSha256 ? { source: 'book' as const, preparationSha256 } : {}),
           ...(ponder
-            ? { ponderHit, ponderMillis: ponderHit ? ponderMillis : performance.now() - started }
+            ? {
+                ponderHit: preparationSha256 ? false : ponderHit,
+                ponderMillis: ponderHit ? ponderMillis : performance.now() - started,
+              }
             : {}),
         };
       } finally {

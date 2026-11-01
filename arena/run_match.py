@@ -159,6 +159,7 @@ def run_game(
 
     remaining = {chess.WHITE: base_seconds, chess.BLACK: base_seconds}
     elapsed = {chess.WHITE: 0.0, chess.BLACK: 0.0}
+    book_hits = {chess.WHITE: 0, chess.BLACK: 0}
     engines: dict[chess.Color, chess.engine.SimpleEngine] = {}
     crash: dict[str, Any] | None = None
     termination, result = "max plies", "*"
@@ -191,7 +192,7 @@ def run_game(
                 # Future.result limita a espera mesmo se o motor ignorar stop.
                 engine = engines[color]
                 pending = asyncio.run_coroutine_threadsafe(
-                    engine.protocol.play(board, limit, info=chess.engine.INFO_NONE), engine.protocol.loop)
+                    engine.protocol.play(board, limit, info=chess.engine.INFO_BASIC), engine.protocol.loop)
                 try:
                     reply = pending.result(timeout=max(0, remaining[color]) + 1)
                 except TimeoutError:
@@ -204,6 +205,7 @@ def run_game(
                 termination = "engine failure"
                 break
             spent = time.monotonic() - started
+            if reply.info.get('string','').startswith('PreparedRepertoire '): book_hits[color] += 1
             elapsed[color] += spent
             remaining[color] -= spent
             if remaining[color] < 0:
@@ -250,6 +252,7 @@ def run_game(
         "white_seconds": round(elapsed[chess.WHITE], 3),
         "black_seconds": round(elapsed[chess.BLACK], 3), "crash": crash,
         "draw_policy": draw_policy,
+        "book_hits": {"white": book_hits[chess.WHITE], "black": book_hits[chess.BLACK]},
     }
 
 

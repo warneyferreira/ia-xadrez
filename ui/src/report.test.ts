@@ -33,6 +33,8 @@ test('relatório separa tempos e não inventa erro sem revisão', () => {
   );
   expect(report.sides[0]!.interruptedSearchMillis).toBe(100);
   expect(report.sides[0]!.meanLossCp).toBeNull();
+  expect(report.sides[0]!.maxDepth).toBeNull();
+  expect(report.sides[0]!.maxPreparedDepth).toBe(18);
   expect(report.sides[1]!.nodes).toBe(1000);
   expect(report.sides[1]!.tablebaseHits).toBe(2);
 });

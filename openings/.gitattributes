@@ -1,0 +1,2 @@
+# Prepared repertoire fingerprints must survive Windows/Linux checkouts.
+arthur-v4-prepared.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

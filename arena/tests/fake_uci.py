@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import os
 
 import chess
 
@@ -21,6 +22,10 @@ def position_from_command(command: str) -> chess.Board:
 
 def main() -> int:
     board = chess.Board()
+    pending = False
+    if '--pid-file' in sys.argv:
+        from pathlib import Path
+        Path(sys.argv[sys.argv.index('--pid-file')+1]).write_text(str(os.getpid()))
     for raw in sys.stdin:
         command = raw.strip()
         if command == "uci":
@@ -37,8 +42,15 @@ def main() -> int:
         elif command.startswith("go "):
             if "--stall" in sys.argv:
                 continue
+            if 'ponder' in command.split():
+                pending=True
+                continue
             legal = list(board.legal_moves)
             print(f"bestmove {legal[0].uci() if legal else '0000'}", flush=True)
+        elif command in ['ponderhit','stop'] and pending:
+            pending=False
+            legal=list(board.legal_moves)
+            print(f"bestmove {legal[0].uci() if legal else '0000'}",flush=True)
         elif command == "quit":
             return 0
     return 0

@@ -80,6 +80,8 @@ const { values: args } = parseArgs({
     threads: { type: 'string' },
     'hash-mb': { type: 'string' },
     'tournament-critical-time': { type: 'boolean', default: false },
+    'prepared-repertoire': { type: 'string' },
+    'prepared-sha256': { type: 'string' },
   },
 });
 
@@ -112,7 +114,15 @@ const duel = new Duel(enginePath, preparedBook, args.syzygy ? resolve(args.syzyg
   void startDuelReview().catch((err) => console.error('Revisão automática:', (err as Error).message));
 });
 const arena = new ArenaService(process.cwd(), duel.registry);
-const engine = new Engine(enginePath);
+const engine = new Engine(
+  args['prepared-repertoire']
+    ? duel.registry.wrapPrepared(
+        enginePath,
+        resolve(args['prepared-repertoire']),
+        args['prepared-sha256'] ?? '',
+      )
+    : enginePath,
+);
 let tournamentBrain = new TournamentBrain(engine, { ponder: false, forcedMoves: true });
 let liveTournamentSearch: SearchInfo | null = null;
 let reviewer: Engine | null = null;
@@ -243,7 +253,7 @@ async function startDuelReview() {
         state.rows[i]?.source === 'Repertório'
           ? {
               ...r,
-              label: 'Livro',
+              label: ['Imprecisão', 'Erro', 'Gafe'].includes(r.label) ? r.label : 'Livro',
               explanation: `Escolhida do repertório local preparado antes da partida. ${r.explanation}`,
             }
           : r,
@@ -389,6 +399,7 @@ function tournamentSnapshot(): Record<string, unknown> {
       hashMB: engineHash,
       syzygy: Boolean(args.syzygy),
       tournamentCriticalTime: args['tournament-critical-time'],
+      preparedRepertoire: Boolean(args['prepared-repertoire']),
     },
     gameOver: tournamentState.game.isGameOver(),
     outcome: tournamentState.game.isCheckmate()
@@ -592,7 +603,10 @@ const server = Bun.serve({
           threads: engineThreads,
           hash: engineHash,
           syzygy: Boolean(args.syzygy),
-          book: !args['no-training-book'] && Object.keys(preparedBook).length > 0,
+          book:
+            !args['no-training-book'] &&
+            (Boolean(args['prepared-repertoire']) || Object.keys(preparedBook).length > 0),
+          preparedRepertoire: Boolean(args['prepared-repertoire']),
           tournamentCriticalTime: args['tournament-critical-time'],
         }),
     },
@@ -695,7 +709,11 @@ const server = Bun.serve({
           );
         }
         try {
-          if (body?.book === true && !args['no-training-book']) {
+          if (args['prepared-repertoire']) {
+            engine.stop();
+            await engine.configure({ 'Use Prepared Repertoire': body?.book === true ? 'true' : 'false' });
+          }
+          if (!args['prepared-repertoire'] && body?.book === true && !args['no-training-book']) {
             const board = new Chess();
             for (const move of moves as string[]) board.move(move);
             const entry = preparedBook[board.fen().split(' ').slice(0, 4).join(' ')];
@@ -759,6 +777,7 @@ const server = Bun.serve({
           await engine.newGame();
           await engine.configure({
             Ponder: body?.ponder === true ? 'true' : 'false',
+            ...(args['prepared-repertoire'] ? { 'Use Prepared Repertoire': 'true' } : {}),
             'Move Overhead': physicalTimePolicy.overheadMillis,
           });
           appendTournamentLog('new-game-ready', { ...tournamentSnapshot() });

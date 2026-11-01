@@ -274,7 +274,11 @@ export class Duel {
         Ponder: false,
         'Tournament Critical Time': c.tournamentCriticalTime === true,
         SyzygyPath: c.syzygy && this.syzygy ? this.syzygy : null,
-        book: i === 0 && c.book && this.config.useBook,
+        book: c.preparedRepertoire
+          ? i === 0
+            ? this.config.useBook
+            : true
+          : i === 0 && c.book && this.config.useBook,
       },
     }));
     this.game.header(
@@ -352,13 +356,16 @@ export class Duel {
     for (let side = 0; side < 2; side++) {
       const arthur = (side === 0) === this.config.arthurWhite;
       const c = this.registry.get(arthur ? this.config.arthurCandidate : this.config.opponentCandidate);
-      const native = new Engine(this.registry.path(c));
+      const native = new Engine(this.registry.command(c));
       this.engines.push(native);
       await native.init({
         Threads: c.threads,
         Hash: arthur ? MEMORY_PROFILES[this.config.memoryProfile].hashMB : c.hashMB,
         'Move Overhead': 20,
         ...(c.tournamentCriticalTime ? { 'Tournament Critical Time': 'true' } : {}),
+        ...(c.preparedRepertoire
+          ? { 'Use Prepared Repertoire': arthur && !this.config.useBook ? 'false' : 'true' }
+          : {}),
         ...(c.syzygy && this.syzygy ? { SyzygyPath: this.syzygy, Syzygy50MoveRule: 'true' } : {}),
       });
     }
@@ -412,7 +419,7 @@ export class Duel {
           arthur ? this.config.arthurCandidate : this.config.opponentCandidate,
         );
         const entry =
-          candidate.book && arthur && this.config.useBook
+          candidate.book && !candidate.preparedRepertoire && arthur && this.config.useBook
             ? this.book[this.game.fen().split(' ').slice(0, 4).join(' ')]
             : undefined;
         const whiteUsed = this.spent.white,
@@ -453,7 +460,7 @@ export class Duel {
           uci: move.lan,
           whiteCp: value,
           depth: reply.depth,
-          source: entry ? 'Repertório' : 'Busca',
+          source: entry || reply.source === 'book' ? 'Repertório' : 'Busca',
           tbhits: reply.tbhits ?? 0,
           fen: this.game.fen(),
           elapsedMillis,

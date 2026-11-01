@@ -121,9 +121,11 @@ function sync(next: State) {
     ? `${next.pending.bestmove.slice(0, 2)} → ${next.pending.bestmove.slice(2, 4)}${next.pending.bestmove[4] ? ` = ${next.pending.bestmove[4].toUpperCase()}` : ''}`
     : '—';
   el('engine-detail').textContent = next.pending
-    ? next.pending.source === 'forced'
-      ? `${san} · único lance legal; sem gastar tempo em nova busca.`
-      : `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}${next.pending.source === 'ponder-hit' ? ` · cálculo antecipado reaproveitado (${((next.pending.ponderMillis ?? 0) / 1000).toFixed(1)} s)` : ''}`
+    ? next.pending.source === 'book'
+      ? `${san} · resposta preparada offline; sem nova busca. Confira a jogada no tabuleiro.`
+      : next.pending.source === 'forced'
+        ? `${san} · único lance legal; sem gastar tempo em nova busca.`
+        : `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}${next.pending.source === 'ponder-hit' ? ` · cálculo antecipado reaproveitado (${((next.pending.ponderMillis ?? 0) / 1000).toFixed(1)} s)` : ''}`
     : next.search && next.phase === 'engine-thinking'
       ? `Calculando agora · profundidade ${next.search.depth} · ${(next.search.nodes ?? 0).toLocaleString('pt-BR')} nós`
       : 'Aguardando a vez da nossa IA.';

@@ -66,6 +66,11 @@ export function summarizeRun(
     candidates: names.map((name, i) => ({
       name: displayName(name),
       options: config[i === 0 ? 'candidate_a' : 'candidate_b'].options,
+      prepared: config[i === 0 ? 'candidate_a' : 'candidate_b'].prepared_repertoire === true,
+      bookMoves: events.reduce(
+        (sum, e) => sum + (e.book_hits?.[e.white === name ? 'white' : 'black'] ?? 0),
+        0,
+      ),
       ...scores[name],
     })),
     timeControl: config.time_control,
@@ -216,7 +221,8 @@ export class ArenaService {
         match_id: id,
         candidate_a: {
           name: a.label,
-          command: [this.candidates.path(a)],
+          prepared_repertoire: Boolean(a.preparedRepertoire),
+          command: this.candidates.command(a),
           options: {
             Threads: threads,
             Hash: hash,
@@ -227,7 +233,8 @@ export class ArenaService {
         },
         candidate_b: {
           name: b.label,
-          command: [this.candidates.path(b)],
+          prepared_repertoire: Boolean(b.preparedRepertoire),
+          command: this.candidates.command(b),
           options: {
             Threads: threads,
             Hash: hash,

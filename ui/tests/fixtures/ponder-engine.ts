@@ -14,7 +14,10 @@ function reply(depth: number) {
     copy.move(best);
     predicted = copy.moves({ verbose: true })[0]?.lan ?? '';
   }
-  console.log(`info depth ${depth} score cp 20 nodes ${depth * 100} nps 10000 time 10 pv ${best}`);
+  if (process.argv.includes('--prepared')) {
+    console.log(`info string PreparedRepertoire ${'a'.repeat(64)}`);
+    console.log(`info depth 24 nodes 0 time 0 pv ${best}`);
+  } else console.log(`info depth ${depth} score cp 20 nodes ${depth * 100} nps 10000 time 10 pv ${best}`);
   console.log(`bestmove ${best}${predicted ? ` ponder ${predicted}` : ''}`);
 }
 for await (const raw of console) {

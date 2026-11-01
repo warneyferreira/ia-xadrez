@@ -143,13 +143,15 @@ export class TournamentBrain {
       this.stats.hits++;
       const reply = await forecast.handle.result;
       this.stats.ponderMillis += reply.ponderMillis ?? 0;
-      return { ...reply, source: 'ponder-hit' };
+      if (reply.source === 'book') this.stats.discardedPonderMillis += reply.ponderMillis ?? 0;
+      return { ...reply, source: reply.source === 'book' ? 'book' : 'ponder-hit' };
     }
     if (forecast) this.stats.misses++;
     const stopping = this.stop();
     const afterStop = this.generation;
     await stopping;
     if (afterStop !== this.generation) throw new Error('Busca cancelada.');
-    return { ...(await this.engine.searchWithClocks(moves, limits, onInfo)), source: 'search' };
+    const reply = await this.engine.searchWithClocks(moves, limits, onInfo);
+    return { ...reply, source: reply.source === 'book' ? 'book' : 'search' };
   }
 }

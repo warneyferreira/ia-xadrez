@@ -15,5 +15,6 @@ $syzygyPath = Join-Path $env:LOCALAPPDATA 'ChessChallenge\syzygy\3-4-5'
 if (Test-Path -LiteralPath (Join-Path $syzygyPath 'manifest.json')) { $extraOptions = @('--syzygy', $syzygyPath) }
 if (-not $primary.book) { $extraOptions += '--no-training-book' }
 if ($primary.tournamentCriticalTime) { $extraOptions += '--tournament-critical-time' }
+if ($primary.preparedRepertoire) { $extraOptions += @('--prepared-repertoire', (Join-Path $projectRoot $primary.preparedRepertoire), '--prepared-sha256', $primary.preparedSha256) }
 if ($NoOpen) { $extraOptions += '--no-open' }
 & "$projectRoot\ui\node_modules\bun\bin\bun.exe" "$projectRoot\ui\src\server.ts" --engine $enginePath --threads $primary.threads --hash-mb $primary.hashMB --candidate-name $primary.label --port $Port --book "$projectRoot\openings\arthur-prepared.json" @extraOptions

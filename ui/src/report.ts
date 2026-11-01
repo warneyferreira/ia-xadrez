@@ -17,6 +17,8 @@ export function performanceReport(state: { rows: Sample[]; [key: string]: unknow
     const samples = state.rows.filter((_, i) => i % 2 === parity);
     const judged = analysis.filter((_, i) => i % 2 === parity);
     const times = samples.map((r) => r.elapsedMillis ?? 0);
+    const searched = samples.filter((r) => r.source !== 'Repertório');
+    const prepared = samples.filter((r) => r.source === 'Repertório');
     const measured = state[color === 'white' ? 'whiteSearchMillis' : 'blackSearchMillis'];
     return {
       color,
@@ -30,7 +32,8 @@ export function performanceReport(state: { rows: Sample[]; [key: string]: unknow
       meanNps: samples.filter((r) => r.nps !== undefined).length
         ? samples.reduce((a, b) => a + (b.nps ?? 0), 0) / samples.filter((r) => r.nps !== undefined).length
         : null,
-      maxDepth: samples.length ? Math.max(...samples.map((r) => r.depth)) : null,
+      maxDepth: searched.length ? Math.max(...searched.map((r) => r.depth)) : null,
+      maxPreparedDepth: prepared.length ? Math.max(...prepared.map((r) => r.depth)) : null,
       maxHashfullPermille: samples.length ? Math.max(...samples.map((r) => r.hashfull ?? 0)) : null,
       tablebaseHits: samples.reduce((a, b) => a + b.tbhits, 0),
       bookMoves: samples.filter((r) => r.source === 'Repertório').length,

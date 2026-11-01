@@ -30,7 +30,13 @@ function Resolve-Candidate([string]$id) {
     if (-not $candidate -or -not (Test-Path -LiteralPath $candidate.engine)) { throw "Candidato ausente: $id. Execute scripts/setup.ps1 antes." }
     $nativeOptions = @{ Threads = $Threads; Hash = $HashMB; 'Move Overhead' = 20; Ponder = $false }
     if ($candidate.tournamentCriticalTime) { $nativeOptions['Tournament Critical Time'] = $true }
-    return @{ name = $candidate.label; command = @((Resolve-Path -LiteralPath $candidate.engine).Path); options = $nativeOptions }
+    $command = @((Resolve-Path -LiteralPath $candidate.engine).Path)
+    if ($candidate.preparedRepertoire) {
+        $interpreter = & arena/.venv/Scripts/python.exe -c 'import sys;print(sys._base_executable)'
+        if ($LASTEXITCODE -ne 0) { throw 'Ambiente Python indisponível.' }
+        $command = @($interpreter.Trim(), '-u', (Join-Path $projectRoot 'scripts/prepared_engine.py'), '--site-packages', (Join-Path $projectRoot 'arena/.venv/Lib/site-packages'), '--engine', $command[0], '--repertoire', (Join-Path $projectRoot $candidate.preparedRepertoire), '--sha256', $candidate.preparedSha256)
+    }
+    return @{ name = $candidate.label; command = $command; options = $nativeOptions }
 }
 $left = Resolve-Candidate $CandidateA
 $right = Resolve-Candidate $CandidateB

@@ -87,7 +87,7 @@ let reviewPolling = false;
 let seenId = '';
 let catalog: {
   aliases: Record<string, string>;
-  candidates: { id: string; label: string; owner: string; book: boolean }[];
+  candidates: { id: string; label: string; owner: string; book: boolean; preparedRepertoire?: string }[];
 } = { aliases: {}, candidates: [] };
 function selectedCandidate(selectId: string) {
   const id = el<HTMLSelectElement>(selectId).value;
@@ -99,7 +99,9 @@ function bookAvailability(locked = false) {
   input.disabled = locked || !candidate?.book;
   if (!candidate?.book) input.checked = false;
   el('book-availability').textContent = candidate?.book
-    ? 'Repertório preliminar. Desative para comparar apenas os motores.'
+    ? candidate.preparedRepertoire
+      ? 'Preparação offline específica deste candidato. Fora das sequências preparadas, a IA calcula normalmente.'
+      : 'Repertório preliminar. Desative para comparar apenas os motores.'
     : 'Este candidato joga sem repertório: as aberturas preparadas ainda precisam passar pela validação em partidas.';
 }
 function timeControls(locked = false) {
@@ -500,6 +502,7 @@ for (const [selectId, primary] of [
 ] as const) {
   el(selectId).addEventListener('change', () => {
     const candidate = selectedCandidate(selectId);
+    if (primary && candidate?.preparedRepertoire) el<HTMLInputElement>('duel-book').checked = true;
     const primaryWhite = el<HTMLSelectElement>('arthur-side').value === 'white';
     if (candidate)
       el<HTMLInputElement>(primary === primaryWhite ? 'white-input' : 'black-input').value = candidate.label;
