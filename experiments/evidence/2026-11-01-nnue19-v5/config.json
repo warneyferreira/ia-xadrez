@@ -1,0 +1,73 @@
+{
+  "started_at": "2026-11-01T06:18:57.880563+00:00",
+  "match_id": "nnue19-v5-pilot",
+  "engines": {
+    "Arthur v5 - NNUE19": {
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5"
+    },
+    "Arthur v2 - referencia anterior": {
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "0fb8bad74395621e9323a374e9bd439c5e2775d9ea9a1421d0aa85c62539b2fa"
+    }
+  },
+  "git_revision": "a4735a7fd2c8f01f76c09cf40848c92d48f25283",
+  "python": "3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "draw_policy": "played",
+  "config": {
+    "match_id": "nnue19-v5-pilot",
+    "candidate_a": {
+      "name": "Arthur v5 - NNUE19",
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      }
+    },
+    "candidate_b": {
+      "name": "Arthur v2 - referencia anterior",
+      "command": [
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v2\\stockfish.exe"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      }
+    },
+    "games": 8,
+    "time_control": {
+      "base_seconds": 20,
+      "increment_seconds": 0
+    },
+    "openings": {
+      "pgn": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\validation-holdout.pgn",
+      "seed": 20261101
+    },
+    "draw_policy": "played",
+    "max_plies": 2000,
+    "output_dir": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\results\\arena\\nnue19-v5-pilot"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "finished_at": "2026-11-01T06:22:30.678682+00:00",
+  "match_id": "nnue19-v5-pilot",
+  "paired": {
+    "completedPairs": 4,
+    "distinctOpeningClusters": 4,
+    "pairScore": 0.5625,
+    "score95": [
+      0.0,
+      1.0
+    ],
+    "competitionPoints": 10,
+    "stable": true,
+    "evidenceOfSuperiority": false,
+    "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+  },
+  "scores": {
+    "Arthur v5 - NNUE19": {
+      "win": 1,
+      "draw": 7,
+      "loss": 0
+    },
+    "Arthur v2 - referencia anterior": {
+      "win": 0,
+      "draw": 7,
+      "loss": 1
+    }
+  },
+  "crashes": {
+    "Arthur v5 - NNUE19": 0,
+    "Arthur v2 - referencia anterior": 0
+  },
+  "games": 8,
+  "unfinished": 0,
+  "draw_policy": "played",
+  "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+}
