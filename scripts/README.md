@@ -1,5 +1,12 @@
 # Scripts reproduzíveis
 
+`study_middlegame.py collect <pasta-da-bateria> --output <casos.json>` extrai
+decisões de partidas concluídas, com históricos completos e alternativas
+legais de captura/sem captura. `analyze <casos.json> --output <pasta-nova>
+--depth 26 --maximum 8` compara esses grupos em pesquisa offline. `--dry-run`
+valida os casos sem motor. A análise real exige a arena livre; não aplica
+nenhum bônus por manter peças nem altera candidatos automaticamente.
+
 `report_match.py <pasta-da-bateria>` lê os PGNs/eventos e grava um relatório
 compacto em `results/analysis`. Não executa motores nem altera os arquivos
 da partida. Inclui tempos, avaliações disponíveis, material, respostas
