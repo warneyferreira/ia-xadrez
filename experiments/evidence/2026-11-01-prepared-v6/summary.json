@@ -1,0 +1,37 @@
+{
+  "finished_at": "2026-11-01T15:31:37.159924+00:00",
+  "match_id": "prepared-v6-pilot",
+  "paired": {
+    "completedPairs": 2,
+    "distinctOpeningClusters": 1,
+    "pairScore": 0.5,
+    "score95": [
+      0.0,
+      1.0
+    ],
+    "competitionPoints": 4,
+    "stable": true,
+    "evidenceOfSuperiority": false,
+    "method": "95% Hoeffding sobre escore por par agrupado por posição inicial; pressupõe grupos independentes. Aberturas repetidas não aumentam a amostra efetiva. Não é Elo nem SPRT; seleção posterior do vencedor limita a inferência."
+  },
+  "scores": {
+    "Arthur v6 - preparação ON": {
+      "win": 0,
+      "draw": 4,
+      "loss": 0
+    },
+    "Mesmo NNUE19 - preparação OFF": {
+      "win": 0,
+      "draw": 4,
+      "loss": 0
+    }
+  },
+  "crashes": {
+    "Arthur v6 - preparação ON": 0,
+    "Mesmo NNUE19 - preparação OFF": 0
+  },
+  "games": 4,
+  "unfinished": 0,
+  "draw_policy": "played",
+  "note": "Relate W/D/L e crashes; não declare Elo sem amostra e análise estatística adequadas."
+}

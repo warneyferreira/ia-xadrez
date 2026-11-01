@@ -2,8 +2,18 @@
   "publishedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
   "generatorSha256CanonicalLf": "910b4894f57ffaa49f67d03142adc1417929098773b6942175d7c70cb68b98ba",
   "files": {
+    "config.json": "e5a020977bf9f1885afc6c7a99656af98bb4905945910af937eca02e99299c7a",
+    "events.jsonl": "d40cfc7f9d3195e83b9561181d5a19501bea39774830bc5fcfdff2eca7b0e5d4",
+    "games.pgn": "a85dc98397f40f4aa3acee756e967e0ef3bd84ea7346aabc0807a3583a387061",
     "observations.json": "b3832a551ba031011c55cf20d53af390b4ac257c9d890120b0aebef979d76a79",
     "progress.json": "c67a63ed1a6a203d4617f2c9b34c55b08ebbd98489a853043972420e8c01fc89",
-    "repertoire.json": "7e1262e5219a1a47c0abf062c6073a54da4d2f96653ff6b03dae790c2faa2dca"
-  }
+    "repertoire.json": "7e1262e5219a1a47c0abf062c6073a54da4d2f96653ff6b03dae790c2faa2dca",
+    "summary.json": "73de575d84a750d2bbd5949b3b050638cb3df8b5540102fb08da9cca742fe901"
+  },
+  "bookHits": {
+    "Arthur v6 - preparação ON": 4,
+    "Mesmo NNUE19 - preparação OFF": 0
+  },
+  "positions": 435,
+  "positionsWithNativeEvaluation": 430
 }
