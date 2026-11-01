@@ -1,5 +1,19 @@
 # Scripts reproduzíveis
 
+`report_match.py <pasta-da-bateria>` lê os PGNs/eventos e grava um relatório
+compacto em `results/analysis`. Não executa motores nem altera os arquivos
+da partida. Inclui tempos, avaliações disponíveis, material, respostas
+forçadas, cobertura de repertório e posições prioritárias para revisão.
+`--wait` aguarda a bateria terminar (até quatro horas) e então gera o arquivo.
+Interrupção permanece interrupção; partidas parciais não viram empates.
+
+Para ampliar um repertório com `prepare_opponent.py`, `--extend-repertoire`
+preserva entradas verificadas do mesmo executável/rede. Rejeita origem ou
+qualidade incompatível. `--seed-min-ply 2 --seed-max-ply 12` inclui lacunas
+desde os primeiros lances dos PGNs; a extensão prioriza históricos curtos
+e continuações antes de aprofundar outras linhas. Ela continua exigindo o
+lock da arena e só pode calcular quando a bateria estiver livre.
+
 Para um núcleo oficial mais recente, `build_candidate.py --repository` aceita
 apenas o repositório oficial e exige o SHA completo. A rede é obtida dos
 servidores oficiais (com alternativa GitHub/LFS), conferida e embutida durante

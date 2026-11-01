@@ -15,7 +15,7 @@ sys.path.insert(0,str(ROOT/'arena'))
 sys.path.insert(0,str(ROOT/'scripts'))
 from repertoire import Repertoire
 from process_lock import pid_alive
-from prepare_opponent import fresh_analysis
+from prepare_opponent import fresh_analysis, seed_histories, inherited_entries, terminal_score
 
 
 def entry(moves,move,ponder=None):
@@ -129,6 +129,40 @@ class RepertoireTests(unittest.TestCase):
         lines[:]=[row(21,1,'d2d4',lowerbound=True),row(21,2,'e2e4'),row(21,3,'g1f3')]
         with self.assertRaisesRegex(RuntimeError,'MultiPV sem iteração'):
             fresh_analysis(Engine(),chess.Board(),chess.engine.Limit(time=1),multipv=3)
+
+    def test_extension_preserves_verified_entries_and_rejects_wrong_engine_or_quality(self):
+        data=json.loads(self.path.read_text())
+        data['metadata']={'engineSha256':'a'*64}
+        for e in data['entries'].values():e['gapCp']=0
+        self.path.write_text(json.dumps(data))
+        before=self.path.read_bytes()
+        entries,digest=inherited_entries(self.path,'a'*64,24,5)
+        self.assertEqual(entries['']['move'],'e2e4')
+        self.assertEqual(digest,hashlib.sha256(before).hexdigest())
+        self.assertEqual(self.path.read_bytes(),before)
+        with self.assertRaisesRegex(ValueError,'mesma rede'):
+            inherited_entries(self.path,'b'*64,24,5)
+        with self.assertRaisesRegex(ValueError,'qualidade'):
+            inherited_entries(self.path,'a'*64,26,5)
+        data['entries']['']['gapCp']=6;self.path.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,'qualidade'):
+            inherited_entries(self.path,'a'*64,24,5)
+
+    def test_seed_prefixes_fill_early_gaps_without_duplicates(self):
+        pgn=Path(self.temp.name)/'seeds.pgn'
+        pgn.write_text('1. e4 e5 2. Nf3 Nc6 *\n\n1. d4 d5 2. c4 e6 *\n\n1. e4 e5 2. Nf3 Nc6 *\n\n')
+        histories=seed_histories(pgn,2,4)
+        self.assertEqual([len(h) for h in histories],[2,2,3,3,4,4])
+        self.assertIn(['e2e4','e7e5'],histories)
+        self.assertIn(['d2d4','d7d5'],histories)
+
+    def test_terminal_positions_need_no_engine_pv(self):
+        board=chess.Board()
+        self.assertIsNone(terminal_score(board,chess.WHITE))
+        for move in ['f2f3','e7e5','g2g4','d8h4']:board.push_uci(move)
+        self.assertEqual(terminal_score(board,chess.WHITE),-10000)
+        self.assertEqual(terminal_score(board,chess.BLACK),10000)
+        self.assertEqual(terminal_score(chess.Board('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1'),chess.WHITE),0)
 
 
 if __name__=='__main__':unittest.main()
