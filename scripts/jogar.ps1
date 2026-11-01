@@ -18,7 +18,8 @@ if ($existing) {
     try { $catalog = Invoke-RestMethod -Uri "$address/api/candidates" -TimeoutSec 2 -ErrorAction Stop } catch { }
     $expectedIds = ($registry.candidates.id | Sort-Object) -join ','
     $actualIds = ($catalog.candidates.id | Sort-Object) -join ','
-    if ($existing.candidate -eq $primary.label -and $existing.PSObject.Properties['preparedRepertoire'] -and $expectedIds -eq $actualIds) {
+    $sameRequestedProfile = (-not $PSBoundParameters.ContainsKey('Candidate')) -or $existing.candidate -eq $primary.label
+    if ($sameRequestedProfile -and $existing.PSObject.Properties['preparedRepertoire'] -and $expectedIds -eq $actualIds) {
         Write-Host "A interface atual já está aberta: $address/duel"
         if (-not $NoOpen) { Start-Process -FilePath "$address/duel" -WindowStyle Hidden }
         return
