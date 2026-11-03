@@ -6,6 +6,21 @@
   },
   "candidates": [
     {
+      "id": "arthur-v8-deep",
+      "label": "Arthur v8 · preparação profunda (experimental)",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: 61 respostas conectadas, verificadas em profundidade 26. Mesmo motor NNUE19 da v5. Piloto em validação; ganho de força não comprovado.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v8-deep.json",
+      "preparedSha256": "5ae50a79a886f541c8c6f86d347eeb2f33421054905eecd102848348acb66eb3"
+    },
+    {
       "id": "arthur-v7-connected",
       "label": "Arthur v7 · preparação conectada (experimental)",
       "owner": "Arthur",
