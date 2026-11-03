@@ -122,3 +122,22 @@ o nome ou a seleção. Se uma aba antiga não tiver esse comportamento, atualize
 com F5. O endereço padrão atualizado é `http://127.0.0.1:18766`.
 A v6 é experimental: preparação poupa cálculo quando o histórico coincide;
 ganho de força precisa ser avaliado nas partidas.
+
+## Arthur v7 · preparação conectada (experimental)
+
+Expande a v6 de dez para **29 respostas verificadas**, preservando o motor
+NNUE19 e todas as dez entradas anteriores. As 19 novas respostas passaram
+por confirmações em profundidade 26, com diferença estimada máxima de 5 cp.
+O gerador agora atravessa nós herdados e estuda respostas alternativas do
+adversário, priorizando caminhos compatíveis com as escolhas do candidato.
+
+No duelo, selecione **Arthur v7 · preparação conectada (experimental)** e
+mantenha a preparação ligada. Para treino e tabuleiro físico:
+
+```powershell
+.\scripts\jogar.ps1 -Candidate arthur-v7-connected
+```
+
+Mais respostas não significam mais Elo. O alias `arthur-latest` permanece
+na referência anterior; o perfil v7 deve ser escolhido pelo nome explícito.
+[Experimento e resultados](../experiments/2026-11-01-connected-v7.md).

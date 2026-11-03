@@ -1,0 +1,899 @@
+{
+  "schema": "chess-arena-diagnostics-v1",
+  "generatedAt": "2026-11-03T04:39:19.912414+00:00",
+  "matchId": "arthur-v7-connected-pilot-20261103-043315",
+  "status": "finished",
+  "plannedGames": 8,
+  "recordedGames": 8,
+  "unfinishedGames": 0,
+  "currentGame": null,
+  "failures": 0,
+  "timeControl": {
+    "base_seconds": 30,
+    "increment_seconds": 0
+  },
+  "scores": {
+    "Arthur v7 · preparação conectada (experimental)": {
+      "wins": 0,
+      "draws": 8,
+      "losses": 0,
+      "competitionPoints": 8,
+      "preparedMoves": 20,
+      "movesWithPGN": 481,
+      "evaluatedMoves": 458,
+      "preparedCoveragePercent": 4.16
+    },
+    "Arthur v6 · preparação NNUE19": {
+      "wins": 0,
+      "draws": 8,
+      "losses": 0,
+      "competitionPoints": 8,
+      "preparedMoves": 8,
+      "movesWithPGN": 479,
+      "evaluatedMoves": 470,
+      "preparedCoveragePercent": 1.67
+    }
+  },
+  "identities": [
+    {
+      "id": "arthur-v7-connected",
+      "label": "Arthur v7 · preparação conectada (experimental)",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: 29 respostas conectadas, verificadas em profundidade 26. Mesmo motor NNUE19 da v5. Piloto em validação; ganho de força não comprovado.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v7-connected.json",
+      "preparedSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d",
+      "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+      "preparationSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+    },
+    {
+      "id": "arthur-v6-prepared",
+      "label": "Arthur v6 · preparação NNUE19",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: mesmo motor/rede da v5, com 10 respostas preparadas pela NNUE19 e verificadas em profundidade 26. MultiPV coerente; perda estimada de até 5 cp na publicação. Inclui históricos de partidas 25+0. Ganho de vitórias ainda em teste.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v6-prepared.json",
+      "preparedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+      "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+      "preparationSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+    }
+  ],
+  "developmentOverlap": false,
+  "drawPolicy": "played",
+  "games": [
+    {
+      "white": "Arthur v7 · preparação conectada (experimental)",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 125,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/5k2/5pp1/p2K4/Pb2P3/3B3P/1P6/8 b - - 35 63",
+      "finalMaterial": {
+        "Arthur v7 · preparação conectada (experimental)": 7,
+        "Arthur v6 · preparação NNUE19": 6
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 63,
+          "evaluatedMoves": 60,
+          "forcedReplies": 1,
+          "slowestMoves": [
+            {
+              "ply": 11,
+              "san": "Bxf6",
+              "seconds": 1.999,
+              "percentInitialClock": 6.66,
+              "remainingSeconds": 26.486,
+              "fenAfter": "rnbqk2r/ppp2pp1/4pB1p/3p4/1bPP4/2N2N2/PP2PPPP/R2QKB1R b KQkq - 0 6"
+            },
+            {
+              "ply": 13,
+              "san": "e3",
+              "seconds": 1.629,
+              "percentInitialClock": 5.43,
+              "remainingSeconds": 24.857,
+              "fenAfter": "rnb1k2r/ppp2pp1/4pq1p/3p4/1bPP4/2N1PN2/PP3PPP/R2QKB1R b KQkq - 0 7"
+            },
+            {
+              "ply": 67,
+              "san": "Bc6",
+              "seconds": 1.465,
+              "percentInitialClock": 4.88,
+              "remainingSeconds": 9.83,
+              "fenAfter": "8/2b2pk1/1pB1p1p1/p7/5P1n/P3P2P/1P1N1K2/8 b - - 1 34"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 22,
+          "lastOwnCp": {
+            "ply": 125,
+            "san": "Bd3",
+            "cp": 0,
+            "depth": 77
+          },
+          "lastClockSeconds": 4.983,
+          "recordedMoveSeconds": 25.015,
+          "medianMoveSeconds": 0.183
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 62,
+          "evaluatedMoves": 61,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 8,
+              "san": "Bb4",
+              "seconds": 2.905,
+              "percentInitialClock": 9.68,
+              "remainingSeconds": 26.109,
+              "fenAfter": "rnbqk2r/ppp2ppp/4pn2/3p4/1bPP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq - 2 5"
+            },
+            {
+              "ply": 38,
+              "san": "a5",
+              "seconds": 1.643,
+              "percentInitialClock": 5.48,
+              "remainingSeconds": 18.66,
+              "fenAfter": "3r2k1/4qpp1/1p2pn1p/pBb5/8/4PN2/PPQ2PPP/2R3K1 w - - 0 20"
+            },
+            {
+              "ply": 42,
+              "san": "Kg7",
+              "seconds": 1.489,
+              "percentInitialClock": 4.96,
+              "remainingSeconds": 16.477,
+              "fenAfter": "3r4/4qpk1/1p2pnpp/pBb5/8/P3PNP1/1PQ2P1P/2R3K1 w - - 1 22"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 8,
+          "lastOwnCp": {
+            "ply": 124,
+            "san": "Bb4",
+            "cp": 0,
+            "depth": 59
+          },
+          "lastClockSeconds": 5.441,
+          "recordedMoveSeconds": 24.562,
+          "medianMoveSeconds": 0.277
+        }
+      }
+    },
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Arthur v7 · preparação conectada (experimental)",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 68,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "2R5/5ppk/p4r1p/1b1B4/8/6PP/P4P2/6K1 w - - 9 35",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 12,
+        "Arthur v7 · preparação conectada (experimental)": 12
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 34,
+          "evaluatedMoves": 31,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 6,
+              "san": "d5",
+              "seconds": 3.61,
+              "percentInitialClock": 12.03,
+              "remainingSeconds": 26.327,
+              "fenAfter": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 0 4"
+            },
+            {
+              "ply": 14,
+              "san": "c5",
+              "seconds": 1.699,
+              "percentInitialClock": 5.66,
+              "remainingSeconds": 23.289,
+              "fenAfter": "rnb1k2r/pp3pp1/4pq1p/2pp4/1bPP4/2N1PN2/PP3PPP/R2QKB1R w KQkq - 0 8"
+            },
+            {
+              "ply": 10,
+              "san": "h6",
+              "seconds": 0.963,
+              "percentInitialClock": 3.21,
+              "remainingSeconds": 25.174,
+              "fenAfter": "rnbqk2r/ppp2pp1/4pn1p/3p2B1/1bPP4/2N2N2/PP2PPPP/R2QKB1R w KQkq - 0 6"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 0,
+          "lastOwnCp": {
+            "ply": 68,
+            "san": "Kh7",
+            "cp": 0,
+            "depth": 72
+          },
+          "lastClockSeconds": 13.756,
+          "recordedMoveSeconds": 16.244,
+          "medianMoveSeconds": 0.2525
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 34,
+          "evaluatedMoves": 33,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 15,
+              "san": "cxd5",
+              "seconds": 2.413,
+              "percentInitialClock": 8.04,
+              "remainingSeconds": 24.689,
+              "fenAfter": "rnb1k2r/pp3pp1/4pq1p/2pP4/1b1P4/2N1PN2/PP3PPP/R2QKB1R b KQkq - 0 8"
+            },
+            {
+              "ply": 23,
+              "san": "dxc5",
+              "seconds": 1.464,
+              "percentInitialClock": 4.88,
+              "remainingSeconds": 21.958,
+              "fenAfter": "rnb2rk1/pp2qpp1/7p/2Pp4/8/2P1PN2/P3BPPP/R2Q1RK1 b - - 0 12"
+            },
+            {
+              "ply": 29,
+              "san": "Nd4",
+              "seconds": 1.096,
+              "percentInitialClock": 3.65,
+              "remainingSeconds": 20.258,
+              "fenAfter": "r1br2k1/pp3pp1/2n4p/2qp4/3N4/1QP1P3/P3BPPP/R2R2K1 b - - 5 15"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 25,
+          "lastOwnCp": {
+            "ply": 67,
+            "san": "Rc8+",
+            "cp": 0,
+            "depth": 55
+          },
+          "lastClockSeconds": 13.195,
+          "recordedMoveSeconds": 16.801,
+          "medianMoveSeconds": 0.3505
+        }
+      }
+    },
+    {
+      "white": "Arthur v7 · preparação conectada (experimental)",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "fifty moves",
+      "opening": "startpos",
+      "plies": 229,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/6k1/7p/7P/6P1/1b2B1K1/8/8 b - - 100 115",
+      "finalMaterial": {
+        "Arthur v7 · preparação conectada (experimental)": 5,
+        "Arthur v6 · preparação NNUE19": 4
+      },
+      "threefoldOnBoard": false,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 115,
+          "evaluatedMoves": 111,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 65,
+              "san": "h3",
+              "seconds": 3.07,
+              "percentInitialClock": 10.23,
+              "remainingSeconds": 9.754,
+              "fenAfter": "8/5ppk/4b2p/8/2q1PQP1/r4P1P/5BK1/4R3 b - - 0 33"
+            },
+            {
+              "ply": 55,
+              "san": "f3",
+              "seconds": 2.131,
+              "percentInitialClock": 7.1,
+              "remainingSeconds": 15.401,
+              "fenAfter": "6k1/2Q2pp1/2b1q2p/8/3BP3/5PP1/r6P/4R1K1 b - - 0 28"
+            },
+            {
+              "ply": 47,
+              "san": "Bd4",
+              "seconds": 1.881,
+              "percentInitialClock": 6.27,
+              "remainingSeconds": 18.508,
+              "fenAfter": "r5k1/2p2ppp/8/3bq3/3B4/6P1/2Q1PP1P/3R2K1 b - - 2 24"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 32,
+          "lastOwnCp": {
+            "ply": 229,
+            "san": "Kg3",
+            "cp": 0,
+            "depth": 85
+          },
+          "lastClockSeconds": 1.381,
+          "recordedMoveSeconds": 28.62,
+          "medianMoveSeconds": 0.057
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 114,
+          "evaluatedMoves": 113,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 64,
+              "san": "Be6",
+              "seconds": 2.885,
+              "percentInitialClock": 9.62,
+              "remainingSeconds": 11.494,
+              "fenAfter": "8/5ppk/4b2p/8/2q1PQP1/r4P2/5BKP/4R3 w - - 5 33"
+            },
+            {
+              "ply": 46,
+              "san": "Bd5",
+              "seconds": 2.057,
+              "percentInitialClock": 6.86,
+              "remainingSeconds": 18.362,
+              "fenAfter": "r5k1/B1p2ppp/8/3bq3/8/6P1/2Q1PP1P/3R2K1 w - - 1 24"
+            },
+            {
+              "ply": 84,
+              "san": "Rd3",
+              "seconds": 1.49,
+              "percentInitialClock": 4.97,
+              "remainingSeconds": 7.873,
+              "fenAfter": "8/5ppk/1Q2b2p/8/4P1P1/q2rBPKP/8/4R3 w - - 19 43"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 4,
+          "lastOwnCp": {
+            "ply": 228,
+            "san": "Kg7",
+            "cp": 0,
+            "depth": 44
+          },
+          "lastClockSeconds": 1.689,
+          "recordedMoveSeconds": 28.314,
+          "medianMoveSeconds": 0.077
+        }
+      }
+    },
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Arthur v7 · preparação conectada (experimental)",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 54,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "4bk2/p1r1npp1/1pp1p2p/8/r1NPP3/1RP5/P3BPPP/R4K2 w - - 11 28",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 23,
+        "Arthur v7 · preparação conectada (experimental)": 23
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 27,
+          "evaluatedMoves": 25,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 34,
+              "san": "Kf8",
+              "seconds": 2.042,
+              "percentInitialClock": 6.81,
+              "remainingSeconds": 19.113,
+              "fenAfter": "r2rbk2/p1p1npp1/1p2p2p/8/3P4/1RP1PN2/P3BPPP/R5K1 w - - 2 18"
+            },
+            {
+              "ply": 36,
+              "san": "c6",
+              "seconds": 2.042,
+              "percentInitialClock": 6.81,
+              "remainingSeconds": 17.071,
+              "fenAfter": "r2rbk2/p3npp1/Bpp1p2p/8/3P4/1RP1PN2/P4PPP/R5K1 w - - 0 19"
+            },
+            {
+              "ply": 26,
+              "san": "Be8",
+              "seconds": 2.033,
+              "percentInitialClock": 6.78,
+              "remainingSeconds": 21.942,
+              "fenAfter": "r2rb1k1/ppp2pp1/2n1pq1p/8/Q2P4/2P1PN2/P3BPPP/R4RK1 w - - 3 14"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 3,
+          "lastOwnCp": {
+            "ply": 54,
+            "san": "Ra4",
+            "cp": 0,
+            "depth": 39
+          },
+          "lastClockSeconds": 13.727,
+          "recordedMoveSeconds": 16.272,
+          "medianMoveSeconds": 0.293
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 27,
+          "evaluatedMoves": 26,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 3,
+              "san": "c4",
+              "seconds": 2.328,
+              "percentInitialClock": 7.76,
+              "remainingSeconds": 27.647,
+              "fenAfter": "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2"
+            },
+            {
+              "ply": 11,
+              "san": "Bxf6",
+              "seconds": 1.986,
+              "percentInitialClock": 6.62,
+              "remainingSeconds": 24.257,
+              "fenAfter": "rnbqk2r/ppp2pp1/4pB1p/3p4/1bPP4/2N2N2/PP2PPPP/R2QKB1R b KQkq - 0 6"
+            },
+            {
+              "ply": 35,
+              "san": "Ba6",
+              "seconds": 1.188,
+              "percentInitialClock": 3.96,
+              "remainingSeconds": 17.412,
+              "fenAfter": "r2rbk2/p1p1npp1/Bp2p2p/8/3P4/1RP1PN2/P4PPP/R5K1 b - - 3 18"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 24,
+          "lastOwnCp": {
+            "ply": 53,
+            "san": "Nc4",
+            "cp": 0,
+            "depth": 38
+          },
+          "lastClockSeconds": 13.445,
+          "recordedMoveSeconds": 16.556,
+          "medianMoveSeconds": 0.312
+        }
+      }
+    },
+    {
+      "white": "Arthur v7 · preparação conectada (experimental)",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 109,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/2R2k2/1p3pp1/4r2p/1P2p1PP/4P3/4KP2/8 b - - 9 55",
+      "finalMaterial": {
+        "Arthur v7 · preparação conectada (experimental)": 10,
+        "Arthur v6 · preparação NNUE19": 10
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 55,
+          "evaluatedMoves": 52,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 7,
+              "san": "Nc3",
+              "seconds": 3.609,
+              "percentInitialClock": 12.03,
+              "remainingSeconds": 26.362,
+              "fenAfter": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R b KQkq - 1 4"
+            },
+            {
+              "ply": 31,
+              "san": "Bxd7",
+              "seconds": 1.48,
+              "percentInitialClock": 4.93,
+              "remainingSeconds": 18.61,
+              "fenAfter": "1r1r2k1/pppBnpp1/4p2p/8/3P4/2P1PN2/P4PPP/R4RK1 b - - 0 16"
+            },
+            {
+              "ply": 25,
+              "san": "Qa3",
+              "seconds": 1.411,
+              "percentInitialClock": 4.7,
+              "remainingSeconds": 20.999,
+              "fenAfter": "r2r2k1/pppb1pp1/2n1pq1p/8/2BP4/Q1P1PN2/P4PPP/R4RK1 b - - 2 13"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 24,
+          "lastOwnCp": {
+            "ply": 109,
+            "san": "Rc7+",
+            "cp": 0,
+            "depth": 41
+          },
+          "lastClockSeconds": 7.482,
+          "recordedMoveSeconds": 22.518,
+          "medianMoveSeconds": 0.252
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 54,
+          "evaluatedMoves": 53,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 26,
+              "san": "Rab8",
+              "seconds": 2.548,
+              "percentInitialClock": 8.49,
+              "remainingSeconds": 22.137,
+              "fenAfter": "1r1r2k1/pppb1pp1/2n1pq1p/8/2BP4/Q1P1PN2/P4PPP/R4RK1 w - - 3 14"
+            },
+            {
+              "ply": 8,
+              "san": "Bb4",
+              "seconds": 1.565,
+              "percentInitialClock": 5.22,
+              "remainingSeconds": 27.264,
+              "fenAfter": "rnbqk2r/ppp2ppp/4pn2/3p4/1bPP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq - 2 5"
+            },
+            {
+              "ply": 68,
+              "san": "Rb5",
+              "seconds": 0.944,
+              "percentInitialClock": 3.15,
+              "remainingSeconds": 13.819,
+              "fenAfter": "8/5kp1/1pR2p1p/1r6/1P2p3/4P2P/4KPP1/8 w - - 3 35"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 3,
+          "lastOwnCp": {
+            "ply": 108,
+            "san": "Re5",
+            "cp": 0,
+            "depth": 40
+          },
+          "lastClockSeconds": 8.977,
+          "recordedMoveSeconds": 21.022,
+          "medianMoveSeconds": 0.2645
+        }
+      }
+    },
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Arthur v7 · preparação conectada (experimental)",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 91,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/5p2/6r1/2k2r1p/p1P2P2/R1K3PR/8/8 b - - 12 46",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 13,
+        "Arthur v7 · preparação conectada (experimental)": 13
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 45,
+          "evaluatedMoves": 43,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 54,
+              "san": "a5",
+              "seconds": 1.593,
+              "percentInitialClock": 5.31,
+              "remainingSeconds": 14.778,
+              "fenAfter": "3r1k2/5pp1/2r4p/p7/2P1R3/4K1P1/5P1P/2R5 w - - 0 28"
+            },
+            {
+              "ply": 48,
+              "san": "a6",
+              "seconds": 1.565,
+              "percentInitialClock": 5.22,
+              "remainingSeconds": 18.538,
+              "fenAfter": "2rr2k1/5pp1/p6p/1R6/2P1p3/4K3/5PPP/2R5 w - - 0 25"
+            },
+            {
+              "ply": 6,
+              "san": "d5",
+              "seconds": 1.438,
+              "percentInitialClock": 4.79,
+              "remainingSeconds": 28.498,
+              "fenAfter": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 0 4"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 7,
+          "lastOwnCp": {
+            "ply": 90,
+            "san": "Rg6",
+            "cp": 0,
+            "depth": 50
+          },
+          "lastClockSeconds": 9.17,
+          "recordedMoveSeconds": 20.829,
+          "medianMoveSeconds": 0.313
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 46,
+          "evaluatedMoves": 45,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 3,
+              "san": "c4",
+              "seconds": 2.247,
+              "percentInitialClock": 7.49,
+              "remainingSeconds": 27.73,
+              "fenAfter": "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2"
+            },
+            {
+              "ply": 13,
+              "san": "Qb3",
+              "seconds": 2.188,
+              "percentInitialClock": 7.29,
+              "remainingSeconds": 23.755,
+              "fenAfter": "rnb1k2r/ppp2pp1/4pq1p/3p4/1bPP4/1QN2N2/PP2PPPP/R3KB1R b KQkq - 1 7"
+            },
+            {
+              "ply": 57,
+              "san": "h4",
+              "seconds": 1.464,
+              "percentInitialClock": 4.88,
+              "remainingSeconds": 14.126,
+              "fenAfter": "3r1k2/5pp1/7p/p1r5/2P1R2P/4K1P1/5P2/R7 b - - 0 29"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 27,
+          "lastOwnCp": {
+            "ply": 91,
+            "san": "Rh3",
+            "cp": 0,
+            "depth": 50
+          },
+          "lastClockSeconds": 8.66,
+          "recordedMoveSeconds": 21.342,
+          "medianMoveSeconds": 0.29
+        }
+      }
+    },
+    {
+      "white": "Arthur v7 · preparação conectada (experimental)",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "insufficient material",
+      "opening": "startpos",
+      "plies": 130,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/8/4k2n/2K5/8/8/8/8 w - - 0 66",
+      "finalMaterial": {
+        "Arthur v7 · preparação conectada (experimental)": 0,
+        "Arthur v6 · preparação NNUE19": 3
+      },
+      "threefoldOnBoard": false,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 65,
+          "evaluatedMoves": 61,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 37,
+              "san": "Ra4",
+              "seconds": 2.541,
+              "percentInitialClock": 8.47,
+              "remainingSeconds": 18.363,
+              "fenAfter": "3rr1k1/1p1nqpp1/p1p1pn2/P6p/R2P1Q2/2N3P1/1P2PPBP/3R2K1 b - - 3 19"
+            },
+            {
+              "ply": 51,
+              "san": "Qe3",
+              "seconds": 2.228,
+              "percentInitialClock": 7.43,
+              "remainingSeconds": 13.971,
+              "fenAfter": "3rr1k1/1p3pp1/p4n2/P1qP3p/R1P1p3/4Q1P1/5PBP/3R2K1 b - - 1 26"
+            },
+            {
+              "ply": 33,
+              "san": "Red1",
+              "seconds": 1.212,
+              "percentInitialClock": 4.04,
+              "remainingSeconds": 21.202,
+              "fenAfter": "r3r1k1/1p1nqppp/p1p1pn2/P7/3P1Q2/2N2BP1/1P2PP1P/R2R2K1 b - - 2 17"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 37,
+          "lastOwnCp": {
+            "ply": 129,
+            "san": "h6",
+            "cp": 0,
+            "depth": 40
+          },
+          "lastClockSeconds": 5.369,
+          "recordedMoveSeconds": 24.632,
+          "medianMoveSeconds": 0.233
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 65,
+          "evaluatedMoves": 63,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 22,
+              "san": "Qe7",
+              "seconds": 4.202,
+              "percentInitialClock": 14.01,
+              "remainingSeconds": 22.423,
+              "fenAfter": "rn3rk1/1pp1qppp/p1bbpn2/8/P2P1B2/5NP1/1P2PPBP/RNQ2RK1 w - - 5 12"
+            },
+            {
+              "ply": 64,
+              "san": "e3",
+              "seconds": 1.421,
+              "percentInitialClock": 4.74,
+              "remainingSeconds": 12.036,
+              "fenAfter": "3rr3/5pk1/R7/P2P2pp/R1P5/4p1P1/2n4P/5BK1 w - - 0 33"
+            },
+            {
+              "ply": 24,
+              "san": "Nbd7",
+              "seconds": 1.251,
+              "percentInitialClock": 4.17,
+              "remainingSeconds": 21.171,
+              "fenAfter": "r4rk1/1ppnqppp/p1bbpn2/8/P2P1B2/5NP1/1P2PPBP/RNQ1R1K1 w - - 7 13"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 0,
+          "lastOwnCp": {
+            "ply": 130,
+            "san": "Nxh6",
+            "cp": 0,
+            "depth": 38
+          },
+          "lastClockSeconds": 6.324,
+          "recordedMoveSeconds": 23.673,
+          "medianMoveSeconds": 0.218
+        }
+      }
+    },
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Arthur v7 · preparação conectada (experimental)",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "startpos",
+      "plies": 154,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "1k6/8/1p4Bp/2n2pp1/pK6/P3P2P/2R2PP1/1r6 w - - 10 78",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 13,
+        "Arthur v7 · preparação conectada (experimental)": 13
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v7 · preparação conectada (experimental)": {
+          "moves": 77,
+          "evaluatedMoves": 75,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 6,
+              "san": "d5",
+              "seconds": 1.761,
+              "percentInitialClock": 5.87,
+              "remainingSeconds": 28.173,
+              "fenAfter": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 0 4"
+            },
+            {
+              "ply": 62,
+              "san": "Ke7",
+              "seconds": 1.043,
+              "percentInitialClock": 3.48,
+              "remainingSeconds": 15.228,
+              "fenAfter": "1r2b3/2p1k1p1/1p3p1p/n7/p2P4/P2BPN2/1R2KPPP/8 w - - 3 32"
+            },
+            {
+              "ply": 34,
+              "san": "Kf8",
+              "seconds": 1.0,
+              "percentInitialClock": 3.33,
+              "remainingSeconds": 21.78,
+              "fenAfter": "r2rbk2/p1p1npp1/1p2p2p/8/3P4/1RP1PN2/P3BPPP/R5K1 w - - 2 18"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 0,
+          "lastOwnCp": {
+            "ply": 154,
+            "san": "Rb1+",
+            "cp": 0,
+            "depth": 42
+          },
+          "lastClockSeconds": 4.779,
+          "recordedMoveSeconds": 25.22,
+          "medianMoveSeconds": 0.247
+        },
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 77,
+          "evaluatedMoves": 76,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 39,
+              "san": "Be2",
+              "seconds": 3.372,
+              "percentInitialClock": 11.24,
+              "remainingSeconds": 16.893,
+              "fenAfter": "1r1rbk2/p1p1npp1/1p2p2p/8/3P4/1RP1PN2/P3BPPP/R4K2 b - - 7 20"
+            },
+            {
+              "ply": 5,
+              "san": "Nf3",
+              "seconds": 1.511,
+              "percentInitialClock": 5.04,
+              "remainingSeconds": 27.858,
+              "fenAfter": "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3"
+            },
+            {
+              "ply": 13,
+              "san": "Qa4+",
+              "seconds": 1.138,
+              "percentInitialClock": 3.79,
+              "remainingSeconds": 25.435,
+              "fenAfter": "rnb1k2r/ppp2pp1/4pq1p/3p4/QbPP4/2N2N2/PP2PPPP/R3KB1R b KQkq - 1 7"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 26,
+          "lastOwnCp": {
+            "ply": 153,
+            "san": "Kb4",
+            "cp": 0,
+            "depth": 38
+          },
+          "lastClockSeconds": 4.754,
+          "recordedMoveSeconds": 25.244,
+          "medianMoveSeconds": 0.233
+        }
+      }
+    }
+  ],
+  "warnings": [],
+  "sourceSha256": {
+    "config.json": "507e56031c7cf017103c14ed9c84b26198e00cd526a99a99ed3d1ce72847853e",
+    "events.jsonl": "88291a08a42a702476c5450b70b6d7a4facd7a93bc3b5934330800b59462d7bc",
+    "games.pgn": "fdc482eb001fd752038877982cae913a4a194a5a6044dcc7ccf5af16a03069be",
+    "summary.json": "2b494ba1cdea49409fb55cb8b9547d1e9bc3d4d186ae7b358bbf4c501f8fb1d1",
+    "progress.json": "c9ff6df1e644b8115c12821b585076e57efda1250a581f231bd69ffa1f7b30b0"
+  },
+  "interpretation": [
+    "Ler o relatório não treina a rede nem executa buscas adicionais.",
+    "Queda de avaliação entre buscas próprias é uma prioridade de revisão, não prova de erro: a resposta adversária também mudou a posição.",
+    "Avaliações são estimativas das buscas registradas; ausência de avaliação não significa lance ruim. Material final não decide o vencedor.",
+    "Livro e escalas de motores diferentes não são tratados como uma mesma série de avaliações. Este relatório não estima Elo."
+  ]
+}

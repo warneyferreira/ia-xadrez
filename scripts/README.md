@@ -110,3 +110,16 @@ foi filtrada para perda estimada máxima de 10 centipeões, antes das partidas.
 local e encaminha a busca quando a linha não está preparada. O lançador usa
 o interpretador base e protege o filho por Job Object no Windows. Prefira
 `jogar.ps1 -Candidate arthur-v4-prepared`, que monta esses argumentos e hashes.
+
+Para uma extensão compatível, `prepare_opponent.py --extend-repertoire`
+preserva entradas verificadas da mesma rede e expande suas continuações.
+`--branch-replies 3` inclui alternativas do adversário. O gerador é offline;
+o motor da partida não executa essas buscas extras.
+
+`validate_prepared_candidate.py` pode aguardar essa preparação, validar as
+observações e cadastrar um **novo** candidato experimental. Executa então
+o piloto fixo de oito jogos 30+0 contra a referência, com cores trocadas,
+e salva relatório. Não muda aliases, não sobrescreve versões e não promete
+melhoria de força. Veja a receita e os critérios em
+`experiments/2026-11-01-connected-v7.md`. A Arena mostra o estado da fila;
+as buscas e partidas locais não usam GPT.

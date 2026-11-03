@@ -1,0 +1,21 @@
+{
+  "candidate": "arthur-v7-connected",
+  "entries": 29,
+  "inherited": 10,
+  "new": 19,
+  "depths": [
+    26
+  ],
+  "maxNewGapCp": 5,
+  "bookSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d",
+  "engineSha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+  "inheritedUnchanged": true,
+  "newHistoryPlies": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "policy": "Experimental. Sem promocao de alias; nenhum ganho de Elo inferido."
+}

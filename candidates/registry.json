@@ -6,6 +6,21 @@
   },
   "candidates": [
     {
+      "id": "arthur-v7-connected",
+      "label": "Arthur v7 · preparação conectada (experimental)",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: 29 respostas verificadas em profundidade 26. Piloto contra v6: 0V/8E/0D, sem falhas; 20 lances preparados contra 8. Ganho de força em 25+0 ainda não demonstrado.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v7-connected.json",
+      "preparedSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+    },
+    {
       "id": "arthur-v6-prepared",
       "label": "Arthur v6 · preparação NNUE19",
       "owner": "Arthur",

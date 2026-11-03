@@ -1,0 +1,159 @@
+{
+  "started_at": "2026-11-03T04:33:16.885879+00:00",
+  "match_id": "arthur-v7-connected-pilot-20261103-043315",
+  "engines": {
+    "Arthur v7 · preparação conectada (experimental)": {
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v7-connected.json",
+        "--sha256",
+        "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125"
+    },
+    "Arthur v6 · preparação NNUE19": {
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v6-prepared.json",
+        "--sha256",
+        "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "binarySha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125"
+    }
+  },
+  "git_revision": "543c7141fc3200c5a803486b41d8dc8d5ecdafcc",
+  "python": "3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "draw_policy": "played",
+  "config": {
+    "match_id": "arthur-v7-connected-pilot-20261103-043315",
+    "candidate_a": {
+      "name": "Arthur v7 · preparação conectada (experimental)",
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v7-connected.json",
+        "--sha256",
+        "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "prepared_repertoire": true
+    },
+    "candidate_b": {
+      "name": "Arthur v6 · preparação NNUE19",
+      "command": [
+        "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+        "--site-packages",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+        "--engine",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+        "--repertoire",
+        "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v6-prepared.json",
+        "--sha256",
+        "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+      ],
+      "options": {
+        "Threads": 2,
+        "Hash": 256,
+        "Move Overhead": 20,
+        "Ponder": false
+      },
+      "prepared_repertoire": true
+    },
+    "games": 8,
+    "time_control": {
+      "base_seconds": 30,
+      "increment_seconds": 0
+    },
+    "draw_policy": "played",
+    "openings": {
+      "pgn": null,
+      "seed": 20261101
+    },
+    "max_plies": 2000,
+    "output_dir": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\results\\arena\\arthur-v7-connected-pilot-20261103-043315",
+    "identities": [
+      {
+        "id": "arthur-v7-connected",
+        "label": "Arthur v7 · preparação conectada (experimental)",
+        "owner": "Arthur",
+        "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+        "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+        "threads": 2,
+        "hashMB": 256,
+        "book": true,
+        "syzygy": true,
+        "notes": "Experimental: 29 respostas conectadas, verificadas em profundidade 26. Mesmo motor NNUE19 da v5. Piloto em validação; ganho de força não comprovado.",
+        "engineId": "arthur-v5-nnue19",
+        "preparedRepertoire": "openings/arthur-v7-connected.json",
+        "preparedSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d",
+        "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+        "preparationSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+      },
+      {
+        "id": "arthur-v6-prepared",
+        "label": "Arthur v6 · preparação NNUE19",
+        "owner": "Arthur",
+        "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+        "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+        "threads": 2,
+        "hashMB": 256,
+        "book": true,
+        "syzygy": true,
+        "notes": "Experimental: mesmo motor/rede da v5, com 10 respostas preparadas pela NNUE19 e verificadas em profundidade 26. MultiPV coerente; perda estimada de até 5 cp na publicação. Inclui históricos de partidas 25+0. Ganho de vitórias ainda em teste.",
+        "engineId": "arthur-v5-nnue19",
+        "preparedRepertoire": "openings/arthur-v6-prepared.json",
+        "preparedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+        "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+        "preparationSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d"
+      }
+    ]
+  }
+}

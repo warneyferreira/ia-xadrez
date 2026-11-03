@@ -1,0 +1,101 @@
+{
+  "match_id": "arthur-v7-vs-base-25plus0-20261103",
+  "candidate_a": {
+    "name": "Arthur v7 · preparação conectada (experimental)",
+    "command": [
+      "C:\\Users\\godinho\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "-u",
+      "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\scripts\\prepared_engine.py",
+      "--site-packages",
+      "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\arena\\.venv\\Lib\\site-packages",
+      "--engine",
+      "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\arthur-v5-nnue19\\stockfish.exe",
+      "--repertoire",
+      "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\openings\\arthur-v7-connected.json",
+      "--sha256",
+      "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d"
+    ],
+    "options": {
+      "Threads": 2,
+      "Hash": 256,
+      "Move Overhead": 20,
+      "Ponder": false
+    },
+    "prepared_repertoire": true
+  },
+  "candidate_b": {
+    "name": "Vanderlei · base do repositório",
+    "command": [
+      "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\bin\\baseline-effdc3fd3\\stockfish.exe"
+    ],
+    "options": {
+      "Threads": 2,
+      "Hash": 256,
+      "Move Overhead": 20,
+      "Ponder": false
+    },
+    "prepared_repertoire": false
+  },
+  "games": 2,
+  "time_control": {
+    "base_seconds": 1500,
+    "increment_seconds": 0
+  },
+  "draw_policy": "played",
+  "openings": {
+    "pgn": null,
+    "seed": 20261101
+  },
+  "max_plies": 2000,
+  "output_dir": "C:\\Users\\godinho\\OneDrive\\Documentos\\ChatGPT\\CHESS CHALLENGE\\results\\arena\\arthur-v7-vs-base-25plus0-20261103",
+  "identities": [
+    {
+      "id": "arthur-v7-connected",
+      "label": "Arthur v7 · preparação conectada (experimental)",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: 29 respostas verificadas em profundidade 26. Piloto contra v6: 0V/8E/0D, sem falhas; 20 lances preparados contra 8. Ganho de força em 25+0 ainda não demonstrado.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v7-connected.json",
+      "preparedSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d",
+      "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+      "preparationSha256": "899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d",
+      "buildManifest": {
+        "id": "arthur-v5-nnue19",
+        "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+        "stockfishTree": "d7a7cc1a683e14a356e1bbdb046d5cd01a85804c",
+        "repository": "https://github.com/official-stockfish/Stockfish.git",
+        "architecture": "x86-64-avxvnni",
+        "pgo": true,
+        "profileFiles": 26,
+        "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+        "networks": {
+          "nn-d1ee674a62ca.nnue": "d1ee674a62ca754648fb8c2907ff4e92f0c3acff28f59afa0f5bd4e3949538f1"
+        },
+        "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5"
+      }
+    },
+    {
+      "id": "vanderlei-base",
+      "label": "Vanderlei · base do repositório",
+      "owner": "Vanderlei (referência)",
+      "engine": "bin/baseline-effdc3fd3/stockfish.exe",
+      "sourceCommit": "effdc3fd3f6de6e75fe1374a51a7a7eed66f880b",
+      "threads": 2,
+      "hashMB": 128,
+      "book": false,
+      "syzygy": false,
+      "notes": "Referência pública. Não reproduz configurações pessoais não enviadas pelo Vanderlei.",
+      "binarySha256": "0667b5f2747583ad79af88c85b99b4ac584066efeb1f995d98704f8302a2f477",
+      "preparationSha256": null,
+      "buildManifest": null
+    }
+  ]
+}

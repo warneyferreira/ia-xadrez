@@ -71,3 +71,38 @@ permanecer ligado; a execução local não consome tokens GPT.
 
 Os resultados de força permanecem pendentes até as partidas serem concluídas.
 Não interpretar cadastro automático de experimento como promoção à release.
+
+## Publicação e piloto concluídos em 03/11
+
+24 posições examinadas: 19 novas respostas aceitas e cinco rejeitadas.
+O livro final contém **29 entradas**, preservando integralmente as dez v6.
+Todas as novas entradas têm profundidade 26 nas duas confirmações e diferença
+estimada máxima de 5 cp. SHA:
+`899fefd0668b66203a3e217cefe69b1db18d3b9030318b18953a7f7de492f63d`.
+O mesmo SHA foi conferido no objeto Git e na conversão de checkout Windows.
+
+**Piloto: 0 vitórias, 8 empates e 0 derrotas**, sem falhas ou jogos incompletos.
+V7 usou 20 respostas preparadas em 481 lances (4,16%); v6 usou oito em 479
+(1,67%). Isso comprova maior cobertura nesse piloto, **não maior força**.
+Oito partidas da mesma posição inicial não sustentam estimativa de Elo.
+
+Passaram os 36 testes Python e três testes do catálogo Bun. O servidor local
+foi iniciado explicitamente com v7; a API confirmou perfil e livro ativo.
+Os aliases e candidatos anteriores foram preservados.
+
+[Manifesto](evidence/2026-11-03-connected-v7/evidence.json),
+[observações da preparação](evidence/2026-11-03-connected-v7/observations.json),
+[relatório do piloto](evidence/2026-11-03-connected-v7/pilot-report.json) e
+[PGN](evidence/2026-11-03-connected-v7/pilot-games.pgn).
+
+## Próxima comparação: 25+0 da posição inicial
+
+Dois jogos v7 contra baseline, um de cada cor, da posição inicial normal.
+Ambos 2 threads, Hash 256 MB, sem Ponder ou Syzygy, política `played`.
+Apenas v7 tem o repertório. Objetivo: observar o sistema no ritmo de torneio
+sem impor uma abertura que pule suas respostas iniciais. É um único par,
+portanto triagem operacional, ainda insuficiente para provar superioridade.
+Limite de relógio total: 100 minutos, mais inicialização/gravação.
+
+[Receita congelada](evidence/2026-11-03-connected-v7/competition-request.json).
+Relatórios serão mantidos em `results/arena/arthur-v7-vs-base-25plus0-20261103`.
