@@ -16,7 +16,8 @@ sys.path.insert(0,str(ROOT/'scripts'))
 from repertoire import Repertoire
 from process_lock import pid_alive
 from prepare_opponent import (fresh_analysis, seed_histories, inherited_entries, terminal_score,
-                              follows_prepared_choices, continuations, verified_choice)
+                              follows_prepared_choices, continuations, verified_choice,
+                              preparation_family, connected_history, order_frontier)
 from unittest.mock import patch
 
 
@@ -189,6 +190,28 @@ class RepertoireTests(unittest.TestCase):
         self.assertFalse(verified_choice(row(25),row(22,25),chess.WHITE,26,5)[1])
         self.assertFalse(verified_choice(row(25),row(22,upperbound=True),chess.WHITE,26,5)[1])
         self.assertFalse(verified_choice(row(25),row(19),chess.WHITE,26,5)[1])
+
+    def test_deep_frontier_prefers_complete_chain_over_disconnected_seed(self):
+        entries={'':{'move':'d2d4'},'d2d4 g8f6':{'move':'c2c4'},
+                 'd2d4 g8f6 c2c4 e7e6':{'move':'g1f3'}}
+        deep='d2d4 g8f6 c2c4 e7e6 g1f3 d7d5'.split()
+        disconnected=deep+['b1c3','f8e7']
+        self.assertTrue(connected_history(deep,entries))
+        self.assertFalse(connected_history(disconnected,entries))
+        frontier=[disconnected,deep[:2],deep]
+        order_frontier(frontier,entries,'depth-balanced',{})
+        self.assertEqual(frontier,[deep,deep[:2],disconnected])
+
+    def test_deep_frontier_balances_sides_and_black_openings(self):
+        entries={'':{'move':'d2d4'}}
+        white=['d2d4','g8f6'];e4=['e2e4'];d4=['d2d4']
+        frontier=[white,e4,d4]
+        order_frontier(frontier,entries,'depth-balanced',{'white':3,'black:e2e4':2})
+        self.assertEqual(frontier,[d4,e4,white])
+        self.assertEqual(preparation_family(white),'white')
+        self.assertEqual(preparation_family(e4),'black:e2e4')
+        order_frontier(frontier,entries,'breadth',{})
+        self.assertEqual([len(h) for h in frontier],[1,1,2])
 
 
 if __name__=='__main__':unittest.main()

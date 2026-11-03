@@ -90,6 +90,26 @@ def follows_prepared_choices(history, entries):
     return True
 
 
+def preparation_family(history):
+    # White has one chosen first move; Black must cover several opponents.
+    return 'white' if len(history)%2==0 else 'black:'+history[0]
+
+
+def connected_history(history, entries):
+    return all(entries.get(' '.join(history[:ply]),{}).get('move')==history[ply]
+               for ply in range(len(history)%2,len(history),2))
+
+
+def order_frontier(frontier, entries, mode, visits):
+    if mode=='depth-balanced':
+        # Follow verified chains, but give each color/opening family a turn.
+        # A deep seed with missing ancestors must not jump ahead of a real path.
+        frontier.sort(key=lambda h:(not connected_history(h,entries),
+                                    visits.get(preparation_family(h),0),-len(h)))
+    else:
+        frontier.sort(key=lambda h:(not follows_prepared_choices(h,entries),len(h)))
+
+
 def continuations(opponent, board, own_move, *, seconds, branches, predicted=None):
     """Expand alternative replies, including the previously verified prediction."""
     child=board.copy();child.push_uci(own_move)
@@ -131,6 +151,8 @@ def main():
     parser.add_argument('--extend-repertoire',type=Path,help='preserva respostas verificadas do mesmo motor e estuda novas continuações')
     parser.add_argument('--branch-replies',type=int,default=1,help='quantidade de respostas alternativas para expandir cada nó (1–3)')
     parser.add_argument('--branch-seconds',type=float,default=3,help='orçamento offline para encontrar continuações adversárias')
+    parser.add_argument('--exploration',choices=['breadth','depth-balanced'],default='breadth')
+    parser.add_argument('--max-ply',type=int,default=22,help='último meio-lance a preparar (2–22)')
     args = parser.parse_args()
     times=[args.teacher_seconds,args.verify_seconds,args.branch_seconds,*args.reply_seconds]
     if args.output.exists() or not 1<=args.positions<=200 or any(not math.isfinite(t) or not 0<t<=60 for t in times):
@@ -139,6 +161,8 @@ def main():
         parser.error('Intervalo das sementes deve estar entre 1 e 22 meios-lances.')
     if not 18<=args.verify_depth<=36 or not 0<=args.max_loss_cp<=100 or not 1<=args.branch_replies<=3:
         parser.error('Use profundidade 18–36, perda máxima 0–100 cp e 1–3 respostas.')
+    if not 2<=args.max_ply<=22 or (args.exploration=='depth-balanced' and not args.extend_repertoire):
+        parser.error('Use limite 2–22; expansão profunda exige repertório anterior verificado.')
     entries, observations = {}, []
     inherited_sha=None
     if args.extend_repertoire:
@@ -150,17 +174,17 @@ def main():
         frontier=seed_histories(args.seed_pgn,args.seed_min_ply,args.seed_max_ply)+frontier
     acquire(args.output)
     args.output.mkdir(parents=True)
-    seen=set()
+    seen=set();visits={}
     try:
         with chess.engine.SimpleEngine.popen_uci(str(args.engine.resolve())) as teacher, chess.engine.SimpleEngine.popen_uci(str(args.opponent.resolve())) as opponent:
             teacher.configure({'Threads':2,'Hash':256})
             opponent.configure({'Threads':2,'Hash':256})
             while frontier and len(observations)<args.positions:
                 if args.extend_repertoire:
-                    frontier.sort(key=lambda h:(not follows_prepared_choices(h,entries),len(h)))
+                    order_frontier(frontier,entries,args.exploration,visits)
                 moves=frontier.pop(0)
                 key=' '.join(moves)
-                if key in seen or len(moves)>22: continue
+                if key in seen or len(moves)>args.max_ply: continue
                 seen.add(key)
                 board=chess.Board()
                 for uci in moves: board.push_uci(uci)
@@ -173,6 +197,11 @@ def main():
                         seconds=args.branch_seconds,branches=args.branch_replies,predicted=inherited.get('ponder')))
                     continue
                 color=board.turn
+                family=preparation_family(moves)
+                visits[family]=visits.get(family,0)+1
+                atomic_json(args.output/'progress.json',{'completed':len(observations),'planned':args.positions,
+                    'accepted':len(entries),'inherited':inherited_count,'acceptedNew':len(entries)-inherited_count,
+                    'queued':len(frontier),'currentPly':len(moves),'family':family,'phase':'analyzing','familyVisits':visits})
                 infos=fresh_analysis(teacher,board,chess.engine.Limit(time=args.teacher_seconds),multipv=min(3,board.legal_moves.count()),game=object())
                 best=max(score(info,color) for info in infos)
                 choices=[]
@@ -218,7 +247,7 @@ def main():
                         frontier.extend(continuations(opponent,board,selected['move'],
                             seconds=args.branch_seconds,branches=args.branch_replies,
                             predicted=replies[-1]['move'] if replies else None))
-                atomic_json(args.output/'progress.json',{'completed':len(observations),'planned':args.positions,'accepted':len(entries),'inherited':inherited_count,'acceptedNew':len(entries)-inherited_count,'queued':len(frontier)})
+                atomic_json(args.output/'progress.json',{'completed':len(observations),'planned':args.positions,'accepted':len(entries),'inherited':inherited_count,'acceptedNew':len(entries)-inherited_count,'queued':len(frontier),'currentPly':len(moves),'family':family,'phase':'verified','familyVisits':visits})
                 atomic_json(args.output/'observations.json',{'rows':observations})
                 print(json.dumps({'position':len(observations),'ply':len(moves),'move':selected['move'],'gapCp':gap,'accepted':accepted,'bookEntries':len(entries)}),flush=True)
             data={'schema':1,'maxPly':max(24,max((len(h.split()) for h in entries),default=0)),'entries':entries,'metadata':{
@@ -234,6 +263,7 @@ def main():
                 'inheritedRepertoireSha256':inherited_sha,'inheritedEntries':inherited_count,
                 'expansionPolicy':'connected-own-turns-with-inherited-bridges-v1',
                 'branchReplies':args.branch_replies,'branchSeconds':args.branch_seconds,
+                'exploration':args.exploration,'maxStudyPly':args.max_ply,'familyVisits':visits,
                 'status':'EXPERIMENTAL: preparação específica; buscas limitadas e amostra não provam vantagem em 25+0.'}}
             atomic_json(args.output/'repertoire.json',data)
     finally: release()

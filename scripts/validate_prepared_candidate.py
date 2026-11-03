@@ -21,6 +21,14 @@ from diagnostics import match_report
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def completed_dependency(folder):
+    report=match_report(folder)
+    if (report['status']!='finished' or report['failures'] or report['unfinishedGames'] or
+        report['warnings'] or report['recordedGames']!=report['plannedGames']):
+        raise ValueError('A bateria anterior não terminou integralmente sem falhas; pesquisa adiada.')
+    return report
+
+
 def checked_preparation(folder, reference, root, planned, depth=26, maximum_loss=5):
     progress=json.loads((folder/'progress.json').read_text(encoding='utf8'))
     data=json.loads((folder/'repertoire.json').read_text(encoding='utf8'))
@@ -86,16 +94,58 @@ def main():
     parser.add_argument('--name',required=True)
     parser.add_argument('--reference',default='arthur-v6-prepared')
     parser.add_argument('--planned',type=int,default=24)
+    parser.add_argument('--deepen-after',type=Path,help='aguarda esta bateria terminar e prepara uma extensão profunda antes do piloto')
     args=parser.parse_args();folder=args.preparation.resolve()
     if not folder.is_relative_to(ROOT/'results/research'):parser.error('Use a pasta de pesquisa deste projeto.')
+    if not 1<=args.planned<=200:parser.error('Planeje de 1 a 200 posições.')
+    after=args.deepen_after.resolve() if args.deepen_after else None
+    if after and (not after.is_relative_to(ROOT/'results/arena') or not (after/'config.json').is_file() or folder.exists()):
+        parser.error('Use bateria existente deste projeto e pasta de preparação nova.')
+    registry=json.loads((ROOT/'candidates/registry.json').read_bytes())
+    if (not re.fullmatch('[a-z0-9-]+',args.id) or
+        any(c['id']==args.id for c in registry['candidates']) or
+        (ROOT/'openings'/f'{args.id}.json').exists()):parser.error('Use ID novo e válido; não sobrescrever candidato/livro.')
+    reference=next((c for c in registry['candidates'] if c['id']==args.reference),None)
+    if not reference or not reference.get('preparedRepertoire'):parser.error('Referência precisa ser um candidato com repertório verificado.')
+    frozen_paths=[ROOT/reference['engine'],ROOT/reference['preparedRepertoire'],
+                  ROOT/'scripts/prepare_opponent.py',ROOT/'arena/repertoire.py',
+                  ROOT/'bin/baseline-effdc3fd3/stockfish.exe',ROOT/'scripts/prepared_engine.py']
+    frozen={str(path):digest(path) for path in frozen_paths}
     queue_lock=reserve_queue()
     state={'pid':os.getpid(),'stage':'waiting','candidate':args.id}
     def update(stage,message,**extra):
         state.update(stage=stage,message=message,updatedAt=dt.datetime.now(dt.timezone.utc).isoformat(),**extra)
         atomic_json(folder/'pipeline.json',state)
+        atomic_json(folder.parent/(folder.name+'.pipeline.json'),state)
         atomic_json(ROOT/'results/arena/research-queue.json',state)
         print(json.dumps(state,ensure_ascii=False),flush=True)
     try:
+        if after:
+            update('waiting','Aguardando os duelos 25+0. A pesquisa profunda só começará depois; nenhuma engine adicional está rodando.',after=after.name)
+            for _ in range(1440):
+                active=active_run()
+                if (after/'summary.json').exists() and not active:break
+                if not active:raise RuntimeError('A bateria anterior parou sem resumo; pesquisa adiada.')
+                if Path(active.get('output_dir','')).resolve()!=after:
+                    raise RuntimeError('Outra atividade está ocupando a máquina; pesquisa adiada.')
+                time.sleep(10)
+            else:raise TimeoutError('Espera de quatro horas encerrada; os duelos não foram interrompidos.')
+            dependency=completed_dependency(after)
+            if any(digest(Path(path))!=sha for path,sha in frozen.items()):
+                raise RuntimeError('Motor, livro ou preparador mudou durante a espera. Reagende com referências conferidas.')
+            current=json.loads((ROOT/'candidates/registry.json').read_bytes())
+            if next(c for c in current['candidates'] if c['id']==args.reference)!=reference:
+                raise RuntimeError('O candidato de referência mudou durante a espera; pesquisa adiada.')
+            update('preparing','Estudando continuações mais longas e equilibrando brancas e respostas de pretas. Sem GPT.',sourceSha256=frozen,dependencySha256=dependency['sourceSha256'])
+            preparation=[sys.executable,'-X','utf8','-u',str(ROOT/'scripts/prepare_opponent.py'),
+                '--engine',str(ROOT/reference['engine']),'--extend-repertoire',str(ROOT/reference['preparedRepertoire']),
+                '--opponent',str(ROOT/'bin/baseline-effdc3fd3/stockfish.exe'),'--output',str(folder),
+                '--positions',str(args.planned),'--teacher-seconds','3','--reply-seconds','5','15',
+                '--verify-seconds','2','--verify-depth','26','--max-loss-cp','5',
+                '--branch-replies','2','--branch-seconds','3','--exploration','depth-balanced','--max-ply','22',
+                '--seed-pgn',str(after/'games.pgn'),'--seed-min-ply','6','--seed-max-ply','22']
+            with (folder.parent/(folder.name+'.prepare.log')).open('x',encoding='utf8') as log:
+                run_owned(preparation,log,7200,{**os.environ,'PYTHONUTF8':'1'})
         update('waiting','Preparando respostas offline; depois haverá um piloto automático de oito partidas.')
         for _ in range(1440):  # até duas horas, sem manter um modelo GPT executando
             active=active_run()
@@ -119,7 +169,7 @@ def main():
             'output_dir':str(target),'identities':identities}
         config_path=folder/'pilot-config.json'
         config_path.write_text(json.dumps(config,ensure_ascii=False,indent=2),encoding='utf8')
-        update('pilot','Candidato experimental cadastrado. Comparando v7 e v6 em oito partidas rápidas; não é prova de Elo.',match=str(target),entries=len(Repertoire(ROOT/candidate['preparedRepertoire']).entries))
+        update('pilot',f"Comparando {candidate['label']} e {reference['label']} em oito partidas rápidas; não é prova de Elo.",match=str(target),entries=len(Repertoire(ROOT/candidate['preparedRepertoire']).entries))
         with (folder/'pilot.log').open('w',encoding='utf8') as log:
             run_owned([sys.executable,'-X','utf8','-u',str(ROOT/'arena/run_match.py'),str(config_path)],log,900,{**os.environ,'PYTHONUTF8':'1'})
         report=match_report(target)

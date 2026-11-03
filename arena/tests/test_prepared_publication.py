@@ -8,7 +8,8 @@ import chess
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'scripts'))
-from validate_prepared_candidate import publish,checked_preparation
+from validate_prepared_candidate import publish,checked_preparation,completed_dependency
+from unittest.mock import patch
 
 
 class PublicationTests(unittest.TestCase):
@@ -65,6 +66,17 @@ class PublicationTests(unittest.TestCase):
         self.row['forcedDepth']=26;self.row['forcedBound']=True
         self.write('preparation/observations.json',{'rows':[self.row]})
         with self.assertRaisesRegex(ValueError,'confirmações'):self.check()
+
+    def test_queue_requires_all_prior_games_and_consistent_events(self):
+        good={'status':'finished','failures':0,'unfinishedGames':0,'warnings':[],
+              'recordedGames':2,'plannedGames':2}
+        with patch('validate_prepared_candidate.match_report',return_value=good):
+            self.assertEqual(completed_dependency(self.root),good)
+        for change in ({'recordedGames':1},{'failures':1},{'warnings':['PGN inconsistente']},
+                       {'unfinishedGames':1},{'status':'running'}):
+            with patch('validate_prepared_candidate.match_report',return_value={**good,**change}):
+                with self.assertRaisesRegex(ValueError,'não terminou'):
+                    completed_dependency(self.root)
 
 
 if __name__=='__main__':unittest.main()
