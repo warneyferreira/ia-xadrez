@@ -54,5 +54,27 @@ comparações extras ficam na pesquisa offline ([FAQ oficial](https://official-s
 - O `--dry-run` validou os oito casos sem iniciar um motor.
 - Uma tentativa de análise durante a bateria foi recusada pelo lock antes
   de criar diretório de saída ou iniciar Stockfish.
-- A análise nativa **ainda não foi executada**. Não há candidato novo,
-  Elo medido ou ganho de vitórias decorrente deste estudo.
+- A primeira análise nativa foi executada após a conclusão da bateria,
+  nos quatro primeiros casos previamente selecionados; resultados abaixo.
+
+## Resultado da primeira revisão executada
+
+Quatro casos do conjunto previamente fixado foram analisados em profundidade
+26, usando v5 nativa, 1 thread e Hash 128 MB. Todas as oito buscas atingiram
+a profundidade pedida. Sem alteração do candidato.
+
+| Caso | Melhor busca normal | Melhor alternativa do outro grupo | Interpretação |
+|---|---|---|---|
+| Antes de 11.exd5 | exd5, +27 cp | O-O-O, -698 cp | Evitar toda captura aqui perde muito; recapturar era necessário. |
+| Antes de 14.Rad1 | Kh1, +15 cp | Bxa6, -610 cp | Capturar indiscriminadamente também piora. |
+| Antes de 22.axb5 | axb5, +4 cp | Nd4, +7 cp | Buscas limitadas discordam ligeiramente; não demonstra ganho ao conservar peças. |
+| Antes de 26.h5 | Rxg4, 0 cp | Kg1, 0 cp | Ambas as linhas analisadas mantêm avaliação de empate. |
+
+Os valores são estimativas do motor nessas buscas, não probabilidades de
+vitória. A alternativa sem captura no lance atual pode trocar peças depois.
+Conclusão restrita: **rejeitar um bônus cego para conservar peças**. Nenhum
+dos quatro casos demonstrou uma vantagem vencedora que o v6 teria deixado
+de converter. O conjunto é exploratório, retirado de uma única partida;
+não é um teste de força nem uma prova global sobre todas as trocas.
+
+[Resultados completos](evidence/2026-11-01-middlegame/depth26-report.json).

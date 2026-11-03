@@ -1,0 +1,509 @@
+{
+  "schema": "chess-arena-diagnostics-v1",
+  "generatedAt": "2026-11-01T18:34:11.830284+00:00",
+  "matchId": "match-2026-11-01T15-35-02-878Z-710a41",
+  "status": "finished",
+  "plannedGames": 4,
+  "recordedGames": 4,
+  "unfinishedGames": 0,
+  "currentGame": null,
+  "failures": 0,
+  "timeControl": {
+    "base_seconds": 1500,
+    "increment_seconds": 0
+  },
+  "scores": {
+    "Arthur v6 · preparação NNUE19": {
+      "wins": 0,
+      "draws": 4,
+      "losses": 0,
+      "competitionPoints": 4,
+      "preparedMoves": 4,
+      "movesWithPGN": 253,
+      "evaluatedMoves": 199,
+      "preparedCoveragePercent": 1.58
+    },
+    "Vanderlei · base do repositório": {
+      "wins": 0,
+      "draws": 4,
+      "losses": 0,
+      "competitionPoints": 4,
+      "preparedMoves": 0,
+      "movesWithPGN": 252,
+      "evaluatedMoves": 202,
+      "preparedCoveragePercent": 0.0
+    }
+  },
+  "identities": [
+    {
+      "id": "arthur-v6-prepared",
+      "label": "Arthur v6 · preparação NNUE19",
+      "owner": "Arthur",
+      "engine": "bin/arthur-v5-nnue19/stockfish.exe",
+      "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+      "threads": 2,
+      "hashMB": 256,
+      "book": true,
+      "syzygy": true,
+      "notes": "Experimental: mesmo motor/rede da v5, com 10 respostas preparadas pela NNUE19 e verificadas em profundidade 26. MultiPV coerente; perda estimada de até 5 cp na publicação. Inclui históricos de partidas 25+0. Ganho de vitórias ainda em teste.",
+      "engineId": "arthur-v5-nnue19",
+      "preparedRepertoire": "openings/arthur-v6-prepared.json",
+      "preparedSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+      "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+      "buildManifest": {
+        "id": "arthur-v5-nnue19",
+        "sourceCommit": "ff7cee4244ec96ea488c402669e3674c0574dce6",
+        "stockfishTree": "d7a7cc1a683e14a356e1bbdb046d5cd01a85804c",
+        "repository": "https://github.com/official-stockfish/Stockfish.git",
+        "architecture": "x86-64-avxvnni",
+        "pgo": true,
+        "profileFiles": 26,
+        "compiler": "x86_64-w64-mingw32-c++-posix (GCC) 13-posix",
+        "networks": {
+          "nn-d1ee674a62ca.nnue": "d1ee674a62ca754648fb8c2907ff4e92f0c3acff28f59afa0f5bd4e3949538f1"
+        },
+        "binarySha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5"
+      },
+      "preparationSha256": "fc49a6e8683dc32e9675ac70668d77c0c53dfa0d960011ffb4238fca60e8869d",
+      "controllerSha256": "5e1d408f8f53ce1177811f1fc134ba9b6016225cda1a3b215b7434156760f881"
+    },
+    {
+      "id": "vanderlei-base",
+      "label": "Vanderlei · base do repositório",
+      "owner": "Vanderlei (referência)",
+      "engine": "bin/baseline-effdc3fd3/stockfish.exe",
+      "sourceCommit": "effdc3fd3f6de6e75fe1374a51a7a7eed66f880b",
+      "threads": 2,
+      "hashMB": 128,
+      "book": false,
+      "syzygy": false,
+      "notes": "Referência pública. Não reproduz configurações pessoais não enviadas pelo Vanderlei.",
+      "binarySha256": "0667b5f2747583ad79af88c85b99b4ac584066efeb1f995d98704f8302a2f477",
+      "buildManifest": null,
+      "preparationSha256": null,
+      "controllerSha256": null
+    }
+  ],
+  "developmentOverlap": false,
+  "drawPolicy": "played",
+  "games": [
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Vanderlei · base do repositório",
+      "result": "1/2-1/2",
+      "termination": "insufficient material",
+      "opening": "Holdout 03 - Siciliana",
+      "plies": 143,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/8/8/8/2k1K3/2N5/8/8 b - - 0 72",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 3,
+        "Vanderlei · base do repositório": 0
+      },
+      "threefoldOnBoard": false,
+      "sides": {
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 72,
+          "evaluatedMoves": 56,
+          "forcedReplies": 2,
+          "slowestMoves": [
+            {
+              "ply": 23,
+              "san": "Be2",
+              "seconds": 209.606,
+              "percentInitialClock": 13.97,
+              "remainingSeconds": 1060.784,
+              "fenAfter": "r2qkb1r/1p1n1p2/p2p1np1/3Pp2p/8/1N2BP2/PPPQB1PP/R3K2R b KQkq - 1 12"
+            },
+            {
+              "ply": 35,
+              "san": "c3",
+              "seconds": 184.998,
+              "percentInitialClock": 12.33,
+              "remainingSeconds": 600.746,
+              "fenAfter": "r1q2rk1/3n1pb1/pp1p1np1/3Pp1B1/P7/1NP2P1P/1P1QB2P/3R1RK1 b - - 0 18"
+            },
+            {
+              "ply": 17,
+              "san": "Qd2",
+              "seconds": 115.452,
+              "percentInitialClock": 7.7,
+              "remainingSeconds": 1320.408,
+              "fenAfter": "rn1qkb1r/1p3pp1/p2pbn2/4p2p/4P3/1NN1BP2/PPPQ2PP/R3KB1R b KQkq - 1 9"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 20,
+          "lastOwnCp": {
+            "ply": 143,
+            "san": "Nxc3",
+            "cp": 0,
+            "depth": 51
+          },
+          "lastClockSeconds": 106.714,
+          "recordedMoveSeconds": 1393.286,
+          "medianMoveSeconds": 8.563500000000001
+        },
+        "Vanderlei · base do repositório": {
+          "moves": 71,
+          "evaluatedMoves": 58,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 28,
+              "san": "h4",
+              "seconds": 122.18,
+              "percentInitialClock": 8.15,
+              "remainingSeconds": 1035.801,
+              "fenAfter": "r2qk2r/3n1pb1/pp1p1np1/3Pp3/7p/1N2BP2/PPPQB1PP/3R1RK1 w kq - 0 15"
+            },
+            {
+              "ply": 10,
+              "san": "a6",
+              "seconds": 76.548,
+              "percentInitialClock": 5.1,
+              "remainingSeconds": 1423.452,
+              "fenAfter": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6"
+            },
+            {
+              "ply": 24,
+              "san": "Bg7",
+              "seconds": 57.638,
+              "percentInitialClock": 3.84,
+              "remainingSeconds": 1185.338,
+              "fenAfter": "r2qk2r/1p1n1pb1/p2p1np1/3Pp2p/8/1N2BP2/PPPQB1PP/R3K2R w KQkq - 2 13"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 4,
+          "lastOwnCp": {
+            "ply": 142,
+            "san": "Nc3+",
+            "cp": 0,
+            "depth": 56
+          },
+          "lastClockSeconds": 136.07999999999998,
+          "recordedMoveSeconds": 1363.922,
+          "medianMoveSeconds": 16.519
+        }
+      }
+    },
+    {
+      "white": "Vanderlei · base do repositório",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "insufficient material",
+      "opening": "Holdout 03 - Siciliana",
+      "plies": 135,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/8/8/8/4K1kN/8/8/8 b - - 0 68",
+      "finalMaterial": {
+        "Vanderlei · base do repositório": 3,
+        "Arthur v6 · preparação NNUE19": 0
+      },
+      "threefoldOnBoard": false,
+      "sides": {
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 67,
+          "evaluatedMoves": 47,
+          "forcedReplies": 1,
+          "slowestMoves": [
+            {
+              "ply": 52,
+              "san": "Qd7",
+              "seconds": 95.42,
+              "percentInitialClock": 6.36,
+              "remainingSeconds": 694.954,
+              "fenAfter": "r4bk1/3q2pp/p1Np2b1/1p1P1rP1/5B2/1P6/P1PQ1R2/1K3R2 w - - 5 27"
+            },
+            {
+              "ply": 46,
+              "san": "Rf7",
+              "seconds": 93.551,
+              "percentInitialClock": 6.24,
+              "remainingSeconds": 833.369,
+              "fenAfter": "r5k1/2q1brpp/p1Np2b1/1p1P2P1/5B2/8/PPPQ4/1K1R1R2 w - - 1 24"
+            },
+            {
+              "ply": 32,
+              "san": "Qc7",
+              "seconds": 70.303,
+              "percentInitialClock": 4.69,
+              "remainingSeconds": 1093.069,
+              "fenAfter": "r4rk1/2q1bppp/p2p4/Np1PpbPn/8/4BP2/PPPQ3P/1K1R1B1R w - - 3 17"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 4,
+          "lastOwnCp": {
+            "ply": 134,
+            "san": "Kg4",
+            "cp": 0,
+            "depth": 65
+          },
+          "lastClockSeconds": 149.075,
+          "recordedMoveSeconds": 1350.929,
+          "medianMoveSeconds": 15.25
+        },
+        "Vanderlei · base do repositório": {
+          "moves": 68,
+          "evaluatedMoves": 54,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 21,
+              "san": "g5",
+              "seconds": 141.825,
+              "percentInitialClock": 9.45,
+              "remainingSeconds": 1074.73,
+              "fenAfter": "r2q1rk1/1p1nbppp/p2pbn2/4p1P1/4P3/1NN1BP2/PPPQ3P/R3KB1R b KQ - 0 11"
+            },
+            {
+              "ply": 37,
+              "san": "Rg1",
+              "seconds": 140.47899999999998,
+              "percentInitialClock": 9.37,
+              "remainingSeconds": 665.976,
+              "fenAfter": "r4rk1/2q1b1pp/p1Np1p2/1p1PpbP1/7P/4BPn1/PPPQ4/1K1R1BR1 b - - 2 19"
+            },
+            {
+              "ply": 11,
+              "san": "f3",
+              "seconds": 120.507,
+              "percentInitialClock": 8.03,
+              "remainingSeconds": 1319.693,
+              "fenAfter": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N2P2/PPP3PP/R1BQKB1R b KQkq - 0 6"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 32,
+          "lastOwnCp": {
+            "ply": 135,
+            "san": "Nxh4",
+            "cp": 0,
+            "depth": 57
+          },
+          "lastClockSeconds": 113.626,
+          "recordedMoveSeconds": 1386.374,
+          "medianMoveSeconds": 10.798
+        }
+      }
+    },
+    {
+      "white": "Arthur v6 · preparação NNUE19",
+      "black": "Vanderlei · base do repositório",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "Holdout 09 - Inglesa",
+      "plies": 89,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/1pp4R/2n2p2/7k/p3r2N/P3P1K1/1P6/8 b - - 11 45",
+      "finalMaterial": {
+        "Arthur v6 · preparação NNUE19": 11,
+        "Vanderlei · base do repositório": 12
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 45,
+          "evaluatedMoves": 34,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 89,
+              "san": "Rh7+",
+              "seconds": 158.846,
+              "percentInitialClock": 10.59,
+              "remainingSeconds": 188.13,
+              "fenAfter": "8/1pp4R/2n2p2/7k/p3r2N/P3P1K1/1P6/8 b - - 11 45"
+            },
+            {
+              "ply": 21,
+              "san": "O-O",
+              "seconds": 148.497,
+              "percentInitialClock": 9.9,
+              "remainingSeconds": 1109.541,
+              "fenAfter": "r1bq1rk1/ppp2ppp/2n2n2/3p4/2P1p2N/P2P2P1/1P2PPBP/R1BQ1RK1 b - - 1 11"
+            },
+            {
+              "ply": 9,
+              "san": "Nd5",
+              "seconds": 116.035,
+              "percentInitialClock": 7.74,
+              "remainingSeconds": 1383.965,
+              "fenAfter": "r1bqk2r/pppp1ppp/2n2n2/3Np3/1bP5/5NP1/PP1PPP1P/R1BQKB1R b KQkq - 2 5"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 12,
+          "lastOwnCp": {
+            "ply": 89,
+            "san": "Rh7+",
+            "cp": 0,
+            "depth": 71
+          },
+          "lastClockSeconds": 188.13,
+          "recordedMoveSeconds": 1311.871,
+          "medianMoveSeconds": 22.181
+        },
+        "Vanderlei · base do repositório": {
+          "moves": 44,
+          "evaluatedMoves": 30,
+          "forcedReplies": 2,
+          "slowestMoves": [
+            {
+              "ply": 54,
+              "san": "a5",
+              "seconds": 95.093,
+              "percentInitialClock": 6.34,
+              "remainingSeconds": 682.968,
+              "fenAfter": "4r1k1/1pp2p2/2n5/p5N1/8/P3P1P1/1P3K2/2R5 w - - 0 28"
+            },
+            {
+              "ply": 52,
+              "san": "Re8",
+              "seconds": 75.995,
+              "percentInitialClock": 5.07,
+              "remainingSeconds": 778.062,
+              "fenAfter": "4r1k1/ppp2p2/2n5/6N1/8/P3P1P1/1P4K1/2R5 w - - 1 27"
+            },
+            {
+              "ply": 10,
+              "san": "e4",
+              "seconds": 58.95,
+              "percentInitialClock": 3.93,
+              "remainingSeconds": 1441.05,
+              "fenAfter": "r1bqk2r/pppp1ppp/2n2n2/3N4/1bP1p3/5NP1/PP1PPP1P/R1BQKB1R w KQkq - 0 6"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 3,
+          "lastOwnCp": {
+            "ply": 88,
+            "san": "Kh5",
+            "cp": 0,
+            "depth": 79
+          },
+          "lastClockSeconds": 391.069,
+          "recordedMoveSeconds": 1108.931,
+          "medianMoveSeconds": 24.942
+        }
+      }
+    },
+    {
+      "white": "Vanderlei · base do repositório",
+      "black": "Arthur v6 · preparação NNUE19",
+      "result": "1/2-1/2",
+      "termination": "threefold repetition",
+      "opening": "Holdout 09 - Inglesa",
+      "plies": 138,
+      "evaluationSource": "native search; exact PV only; no extra analysis",
+      "finalFen": "8/1p3Q2/p2p2pk/PP5p/5P1P/6P1/2q3K1/8 w - - 25 70",
+      "finalMaterial": {
+        "Vanderlei · base do repositório": 14,
+        "Arthur v6 · preparação NNUE19": 14
+      },
+      "threefoldOnBoard": true,
+      "sides": {
+        "Arthur v6 · preparação NNUE19": {
+          "moves": 69,
+          "evaluatedMoves": 62,
+          "forcedReplies": 1,
+          "slowestMoves": [
+            {
+              "ply": 68,
+              "san": "Re8",
+              "seconds": 65.733,
+              "percentInitialClock": 4.38,
+              "remainingSeconds": 546.494,
+              "fenAfter": "4r1k1/1p3p2/p1bp1qp1/7p/4PP1P/1P4P1/P2Q2BK/4R3 w - - 6 35"
+            },
+            {
+              "ply": 10,
+              "san": "e4",
+              "seconds": 62.935,
+              "percentInitialClock": 4.2,
+              "remainingSeconds": 1437.065,
+              "fenAfter": "r1bqk2r/pppp1ppp/2n2n2/3N4/1bP1p3/5NP1/PP1PPP1P/R1BQKB1R w KQkq - 0 6"
+            },
+            {
+              "ply": 34,
+              "san": "h5",
+              "seconds": 58.472,
+              "percentInitialClock": 3.9,
+              "remainingSeconds": 1054.04,
+              "fenAfter": "r3r1k1/ppp2pp1/3p1q2/3P1b1p/8/1P1pP1P1/P2Q1PBP/2R2RK1 w - - 0 18"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 0,
+          "lastOwnCp": {
+            "ply": 138,
+            "san": "Qc2+",
+            "cp": 0,
+            "depth": 52
+          },
+          "lastClockSeconds": 77.717,
+          "recordedMoveSeconds": 1422.287,
+          "medianMoveSeconds": 19.696
+        },
+        "Vanderlei · base do repositório": {
+          "moves": 69,
+          "evaluatedMoves": 60,
+          "forcedReplies": 0,
+          "slowestMoves": [
+            {
+              "ply": 13,
+              "san": "Bg2",
+              "seconds": 92.37299999999999,
+              "percentInitialClock": 6.16,
+              "remainingSeconds": 1299.341,
+              "fenAfter": "r1bqk2r/ppp2ppp/2np1n2/3N4/1bP1p2N/6P1/PP1PPPBP/R1BQK2R b KQkq - 1 7"
+            },
+            {
+              "ply": 9,
+              "san": "Nd5",
+              "seconds": 85.365,
+              "percentInitialClock": 5.69,
+              "remainingSeconds": 1414.635,
+              "fenAfter": "r1bqk2r/pppp1ppp/2n2n2/3Np3/1bP5/5NP1/PP1PPP1P/R1BQKB1R b KQkq - 2 5"
+            },
+            {
+              "ply": 35,
+              "san": "Rfe1",
+              "seconds": 75.733,
+              "percentInitialClock": 5.05,
+              "remainingSeconds": 919.162,
+              "fenAfter": "r3r1k1/ppp2pp1/3p1q2/3P1b1p/8/1P1pP1P1/P2Q1PBP/2R1R1K1 b - - 1 18"
+            }
+          ],
+          "evaluationSwings": [],
+          "peakOwnCp": 11,
+          "lastOwnCp": {
+            "ply": 137,
+            "san": "Kg2",
+            "cp": 0,
+            "depth": 46
+          },
+          "lastClockSeconds": 106.608,
+          "recordedMoveSeconds": 1393.39,
+          "medianMoveSeconds": 19.14
+        }
+      }
+    }
+  ],
+  "warnings": [],
+  "sourceSha256": {
+    "config.json": "ebe2680d28b4b1ce058d754dd8a752a040c249214602f4d5419b47140536e553",
+    "events.jsonl": "af13de90682135d95d7f6a903e7c5b596d18f6c4fd4dea99768f6f35f364d7cd",
+    "games.pgn": "5c3b05a821692d505f1abc1a6fe430731b27420e2fc81e13811f262fc743f65a",
+    "summary.json": "533ce024f36e257092d0f0072ddf255e5aa55a1d518e9b660871ce84162bdd5b",
+    "progress.json": "5f43cdb39f74b509636ca46a330db9d3f5e434985147bda37bcf2f6715d7ac64"
+  },
+  "interpretation": [
+    "Ler o relatório não treina a rede nem executa buscas adicionais.",
+    "Queda de avaliação entre buscas próprias é uma prioridade de revisão, não prova de erro: a resposta adversária também mudou a posição.",
+    "Avaliações são estimativas das buscas registradas; ausência de avaliação não significa lance ruim. Material final não decide o vencedor.",
+    "Livro e escalas de motores diferentes não são tratados como uma mesma série de avaliações. Este relatório não estima Elo."
+  ]
+}

@@ -1,0 +1,689 @@
+{
+  "datasetSha256": "99b95b2308092babc723a9655aa858353bcf120d82d7b7313c9bda6691be2d84",
+  "engineSha256": "f6641281c02c421114cfdeb0cc4b07ab63a1e516661d8930b3dd3bc45673d9a5",
+  "threads": 1,
+  "hashMB": 128,
+  "depth": 26,
+  "rows": [
+    {
+      "id": "e21ef302039ebc08",
+      "nativeBest": {
+        "move": "e4d5",
+        "san": "exd5",
+        "depth": 26,
+        "cp": 27,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 11.675,
+        "lineSan": [
+          "exd5",
+          "g6",
+          "Be2",
+          "Bg7",
+          "O-O",
+          "Qc7",
+          "Rad1",
+          "O-O"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "nodes": 3637580,
+        "capture": true
+      },
+      "bestCapture": {
+        "move": "e4d5",
+        "san": "exd5",
+        "depth": 26,
+        "cp": 27,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 11.675,
+        "lineSan": [
+          "exd5",
+          "g6",
+          "Be2",
+          "Bg7",
+          "O-O",
+          "Qc7",
+          "Rad1",
+          "O-O"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "nodes": 3637580,
+        "capture": true
+      },
+      "bestNonCapture": {
+        "move": "e1c1",
+        "san": "O-O-O",
+        "depth": 26,
+        "cp": -698,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 20.293,
+        "lineSan": [
+          "O-O-O",
+          "Be6",
+          "Bd3",
+          "Rc8",
+          "Kb1",
+          "Be7",
+          "c4",
+          "Nb8"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "nodes": 5335366,
+        "capture": false
+      },
+      "requestedDepth": 26,
+      "comparable": true,
+      "estimatedNonCaptureLossCp": 725,
+      "searchDisagreement": false,
+      "interpretation": "Busca limitada; sem captura no primeiro lance não significa preservar peças na continuação. Nenhum lance é aplicado ao candidato."
+    },
+    {
+      "id": "7241754d925b6ebe",
+      "nativeBest": {
+        "move": "g1h1",
+        "san": "Kh1",
+        "depth": 26,
+        "cp": 15,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 12.973,
+        "lineSan": [
+          "Kh1",
+          "O-O",
+          "Rad1",
+          "b5",
+          "Na5",
+          "Nb6",
+          "c4",
+          "Nxc4"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "nodes": 5648638,
+        "capture": false
+      },
+      "bestCapture": {
+        "move": "e2a6",
+        "san": "Bxa6",
+        "depth": 26,
+        "cp": -610,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 6.205,
+        "lineSan": [
+          "Bxa6",
+          "Rxa6",
+          "c4",
+          "O-O",
+          "a4",
+          "Nc5",
+          "Nxc5",
+          "bxc5"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 0,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          }
+        },
+        "nodes": 2833817,
+        "capture": true
+      },
+      "bestNonCapture": {
+        "move": "g1h1",
+        "san": "Kh1",
+        "depth": 26,
+        "cp": 15,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 12.973,
+        "lineSan": [
+          "Kh1",
+          "O-O",
+          "Rad1",
+          "b5",
+          "Na5",
+          "Nb6",
+          "c4",
+          "Nxc4"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 2,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          },
+          "black": {
+            "N": 2,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 7
+          }
+        },
+        "nodes": 5648638,
+        "capture": false
+      },
+      "requestedDepth": 26,
+      "comparable": true,
+      "estimatedNonCaptureLossCp": 0,
+      "searchDisagreement": false,
+      "interpretation": "Busca limitada; sem captura no primeiro lance não significa preservar peças na continuação. Nenhum lance é aplicado ao candidato."
+    },
+    {
+      "id": "11d8e9c7547a80ea",
+      "nativeBest": {
+        "move": "a4b5",
+        "san": "axb5",
+        "depth": 26,
+        "cp": 4,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 3.55,
+        "lineSan": [
+          "axb5",
+          "axb5",
+          "Bxb5",
+          "Ra2",
+          "Rf2",
+          "Nc5",
+          "Nxc5",
+          "Qxc5"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          },
+          "black": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 5
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 0,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 5
+          },
+          "black": {
+            "N": 0,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 3
+          }
+        },
+        "nodes": 1943916,
+        "capture": true
+      },
+      "bestCapture": {
+        "move": "a4b5",
+        "san": "axb5",
+        "depth": 26,
+        "cp": 4,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 3.55,
+        "lineSan": [
+          "axb5",
+          "axb5",
+          "Bxb5",
+          "Ra2",
+          "Rf2",
+          "Nc5",
+          "Nxc5",
+          "Qxc5"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          },
+          "black": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 5
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 0,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 5
+          },
+          "black": {
+            "N": 0,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 3
+          }
+        },
+        "nodes": 1943916,
+        "capture": true
+      },
+      "bestNonCapture": {
+        "move": "b3d4",
+        "san": "Nd4",
+        "depth": 26,
+        "cp": 7,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 2.687,
+        "lineSan": [
+          "Nd4",
+          "Qc5",
+          "axb5",
+          "axb5",
+          "Kh1",
+          "Ra2",
+          "Nc6",
+          "Rxb2"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 6
+          },
+          "black": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 5
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 4
+          },
+          "black": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 1,
+            "P": 4
+          }
+        },
+        "nodes": 1414245,
+        "capture": false
+      },
+      "requestedDepth": 26,
+      "comparable": true,
+      "estimatedNonCaptureLossCp": 0,
+      "searchDisagreement": true,
+      "interpretation": "Busca limitada; sem captura no primeiro lance não significa preservar peças na continuação. Nenhum lance é aplicado ao candidato."
+    },
+    {
+      "id": "1fdb87adabf32eef",
+      "nativeBest": {
+        "move": "b4g4",
+        "san": "Rxg4",
+        "depth": 26,
+        "cp": 0,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 0.215,
+        "lineSan": [
+          "Rxg4",
+          "Rhxh2+",
+          "Kg1",
+          "fxg4",
+          "Rd1",
+          "Rag2+",
+          "Kf1",
+          "Rf2+"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 0,
+            "P": 3
+          },
+          "black": {
+            "N": 1,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 1,
+            "Q": 0,
+            "P": 2
+          },
+          "black": {
+            "N": 0,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "nodes": 145614,
+        "capture": true
+      },
+      "bestCapture": {
+        "move": "b4g4",
+        "san": "Rxg4",
+        "depth": 26,
+        "cp": 0,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 0.215,
+        "lineSan": [
+          "Rxg4",
+          "Rhxh2+",
+          "Kg1",
+          "fxg4",
+          "Rd1",
+          "Rag2+",
+          "Kf1",
+          "Rf2+"
+        ],
+        "linePlies": 8,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 0,
+            "P": 3
+          },
+          "black": {
+            "N": 1,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 1,
+            "Q": 0,
+            "P": 2
+          },
+          "black": {
+            "N": 0,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "nodes": 145614,
+        "capture": true
+      },
+      "bestNonCapture": {
+        "move": "h1g1",
+        "san": "Kg1",
+        "depth": 26,
+        "cp": 0,
+        "mate": null,
+        "complete": true,
+        "wallSeconds": 0.538,
+        "lineSan": [
+          "Kg1",
+          "Rhxh2",
+          "Rf3",
+          "Rag2+",
+          "Kf1",
+          "Rc2",
+          "Kg1"
+        ],
+        "linePlies": 7,
+        "piecesBefore": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 0,
+            "P": 3
+          },
+          "black": {
+            "N": 1,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "piecesAfterLine": {
+          "white": {
+            "N": 1,
+            "B": 1,
+            "R": 2,
+            "Q": 0,
+            "P": 2
+          },
+          "black": {
+            "N": 1,
+            "B": 0,
+            "R": 2,
+            "Q": 0,
+            "P": 1
+          }
+        },
+        "nodes": 377895,
+        "capture": false
+      },
+      "requestedDepth": 26,
+      "comparable": true,
+      "estimatedNonCaptureLossCp": 0,
+      "searchDisagreement": false,
+      "interpretation": "Busca limitada; sem captura no primeiro lance não significa preservar peças na continuação. Nenhum lance é aplicado ao candidato."
+    }
+  ],
+  "note": "Resultados de pesquisa não alteram o motor nem comprovam ganho de força."
+}

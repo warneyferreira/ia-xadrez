@@ -15,7 +15,9 @@ sys.path.insert(0,str(ROOT/'arena'))
 sys.path.insert(0,str(ROOT/'scripts'))
 from repertoire import Repertoire
 from process_lock import pid_alive
-from prepare_opponent import fresh_analysis, seed_histories, inherited_entries, terminal_score
+from prepare_opponent import (fresh_analysis, seed_histories, inherited_entries, terminal_score,
+                              follows_prepared_choices, continuations, verified_choice)
+from unittest.mock import patch
 
 
 def entry(moves,move,ponder=None):
@@ -163,6 +165,30 @@ class RepertoireTests(unittest.TestCase):
         self.assertEqual(terminal_score(board,chess.WHITE),-10000)
         self.assertEqual(terminal_score(board,chess.BLACK),10000)
         self.assertEqual(terminal_score(chess.Board('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1'),chess.WHITE),0)
+
+    def test_connected_priority_obeys_our_color_not_opponent_book(self):
+        entries={'':{'move':'d2d4'},'d2d4':{'move':'g8f6'}}
+        self.assertTrue(follows_prepared_choices(['d2d4','d7d5'],entries))
+        self.assertFalse(follows_prepared_choices(['e2e4','e7e5'],entries))
+        self.assertTrue(follows_prepared_choices(['e2e4'],entries))
+        self.assertFalse(follows_prepared_choices(['d2d4','d7d5','c2c4'],entries))
+
+    def test_inherited_bridge_expands_alternatives_and_preserves_history(self):
+        board=chess.Board();board.push_uci('e2e4');original=board.fen()
+        def row(move):return {'pv':[chess.Move.from_uci(move)]}
+        with patch('prepare_opponent.fresh_analysis',return_value=[row('g1f3'),row('f1c4')]) as analysis:
+            children=continuations(object(),board,'e7e5',seconds=3,branches=2,predicted='b1c3')
+        self.assertEqual(children,[['e2e4','e7e5',m] for m in ['g1f3','f1c4','b1c3']])
+        self.assertEqual(board.fen(),original)
+        self.assertEqual(analysis.call_args.kwargs['multipv'],2)
+
+    def test_publication_rejects_incomplete_requested_depth_and_bounds(self):
+        def row(cp,depth=26,**extra):
+            return {'score':chess.engine.PovScore(chess.engine.Cp(cp),chess.WHITE),'depth':depth,**extra}
+        self.assertEqual(verified_choice(row(25),row(22),chess.WHITE,26,5),(3,True))
+        self.assertFalse(verified_choice(row(25),row(22,25),chess.WHITE,26,5)[1])
+        self.assertFalse(verified_choice(row(25),row(22,upperbound=True),chess.WHITE,26,5)[1])
+        self.assertFalse(verified_choice(row(25),row(19),chess.WHITE,26,5)[1])
 
 
 if __name__=='__main__':unittest.main()

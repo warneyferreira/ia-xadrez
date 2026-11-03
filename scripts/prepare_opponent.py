@@ -81,6 +81,39 @@ def inherited_entries(path, engine_sha, minimum_depth, maximum_loss):
     return book.entries,book.sha256
 
 
+def follows_prepared_choices(history, entries):
+    """Only our previous turns constrain reachability; the opponent is free."""
+    for ply in range(len(history) % 2, len(history), 2):
+        ancestor=entries.get(' '.join(history[:ply]))
+        if ancestor and ancestor['move'] != history[ply]:
+            return False
+    return True
+
+
+def continuations(opponent, board, own_move, *, seconds, branches, predicted=None):
+    """Expand alternative replies, including the previously verified prediction."""
+    child=board.copy();child.push_uci(own_move)
+    if child.is_game_over() or child.is_repetition(2):return []
+    infos=fresh_analysis(opponent,child,chess.engine.Limit(time=seconds),
+                         multipv=min(branches,child.legal_moves.count()),game=object())
+    replies=list(dict.fromkeys([i['pv'][0].uci() for i in infos]+([predicted] if predicted else [])))
+    histories=[]
+    for reply in replies:
+        after=child.copy();after.push_uci(reply)
+        if not after.is_game_over() and not after.is_repetition(2):
+            histories.append([m.uci() for m in after.move_stack])
+    return histories
+
+
+def verified_choice(check, forced, color, minimum_depth, maximum_loss):
+    """Publication requires both complete searches at the requested depth."""
+    gap=score(check,color)-score(forced,color)
+    accepted=(gap<=maximum_loss and
+              min(check.get('depth',0),forced.get('depth',0))>=minimum_depth and
+              not any(i.get('lowerbound') or i.get('upperbound') for i in [check,forced]))
+    return gap,accepted
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--engine', type=Path, default=ROOT/'bin/arthur-v2/stockfish.exe')
@@ -96,12 +129,16 @@ def main():
     parser.add_argument('--seed-min-ply',type=int,default=8)
     parser.add_argument('--seed-max-ply',type=int,default=12)
     parser.add_argument('--extend-repertoire',type=Path,help='preserva respostas verificadas do mesmo motor e estuda novas continuações')
+    parser.add_argument('--branch-replies',type=int,default=1,help='quantidade de respostas alternativas para expandir cada nó (1–3)')
+    parser.add_argument('--branch-seconds',type=float,default=3,help='orçamento offline para encontrar continuações adversárias')
     args = parser.parse_args()
-    times=[args.teacher_seconds,args.verify_seconds,*args.reply_seconds]
+    times=[args.teacher_seconds,args.verify_seconds,args.branch_seconds,*args.reply_seconds]
     if args.output.exists() or not 1<=args.positions<=200 or any(not math.isfinite(t) or not 0<t<=60 for t in times):
         parser.error('Use saída nova, 1–200 posições e tempos de 0 a 60 s.')
     if not 1<=args.seed_min_ply<=args.seed_max_ply<=22:
         parser.error('Intervalo das sementes deve estar entre 1 e 22 meios-lances.')
+    if not 18<=args.verify_depth<=36 or not 0<=args.max_loss_cp<=100 or not 1<=args.branch_replies<=3:
+        parser.error('Use profundidade 18–36, perda máxima 0–100 cp e 1–3 respostas.')
     entries, observations = {}, []
     inherited_sha=None
     if args.extend_repertoire:
@@ -113,13 +150,14 @@ def main():
         frontier=seed_histories(args.seed_pgn,args.seed_min_ply,args.seed_max_ply)+frontier
     acquire(args.output)
     args.output.mkdir(parents=True)
-    seen=set(entries)
+    seen=set()
     try:
         with chess.engine.SimpleEngine.popen_uci(str(args.engine.resolve())) as teacher, chess.engine.SimpleEngine.popen_uci(str(args.opponent.resolve())) as opponent:
             teacher.configure({'Threads':2,'Hash':256})
             opponent.configure({'Threads':2,'Hash':256})
             while frontier and len(observations)<args.positions:
-                if args.extend_repertoire: frontier.sort(key=len)
+                if args.extend_repertoire:
+                    frontier.sort(key=lambda h:(not follows_prepared_choices(h,entries),len(h)))
                 moves=frontier.pop(0)
                 key=' '.join(moves)
                 if key in seen or len(moves)>22: continue
@@ -127,6 +165,13 @@ def main():
                 board=chess.Board()
                 for uci in moves: board.push_uci(uci)
                 if board.is_game_over() or board.is_repetition(2): continue
+                if key in entries:
+                    # An inherited answer is a bridge, not a dead end. Previously
+                    # skipping it prevented the root book from growing at all.
+                    inherited=entries[key]
+                    frontier.extend(continuations(opponent,board,inherited['move'],
+                        seconds=args.branch_seconds,branches=args.branch_replies,predicted=inherited.get('ponder')))
+                    continue
                 color=board.turn
                 infos=fresh_analysis(teacher,board,chess.engine.Limit(time=args.teacher_seconds),multipv=min(3,board.legal_moves.count()),game=object())
                 best=max(score(info,color) for info in infos)
@@ -155,10 +200,7 @@ def main():
                 # Confirma a qualidade da escolha contra uma busca independente sem MultiPV.
                 check=fresh_analysis(teacher,board,chess.engine.Limit(depth=args.verify_depth),game=object())
                 forced=fresh_analysis(teacher,board,chess.engine.Limit(depth=args.verify_depth),root_moves=[chess.Move.from_uci(selected['move'])],game=object())
-                gap=score(check,color)-score(forced,color)
-                accepted=(gap<=args.max_loss_cp and min(check.get('depth',0),forced.get('depth',0))>=18
-                          and not check.get('lowerbound') and not check.get('upperbound')
-                          and not forced.get('lowerbound') and not forced.get('upperbound'))
+                gap,accepted=verified_choice(check,forced,color,args.verify_depth,args.max_loss_cp)
                 row={'history':moves,'bestCp':best,'choices':choices,'selected':selected['move'],'gapCp':gap,'accepted':accepted,
                      'checkDepth':check.get('depth'),'forcedDepth':forced.get('depth'),
                      'checkBound':bool(check.get('lowerbound') or check.get('upperbound')),
@@ -172,6 +214,10 @@ def main():
                     # Crescimento controlado por profundidade; no máximo duas respostas por posição.
                     for reply in dict.fromkeys(r['move'] for r in replies):
                         frontier.append([*moves,selected['move'],reply])
+                    if args.branch_replies>1:
+                        frontier.extend(continuations(opponent,board,selected['move'],
+                            seconds=args.branch_seconds,branches=args.branch_replies,
+                            predicted=replies[-1]['move'] if replies else None))
                 atomic_json(args.output/'progress.json',{'completed':len(observations),'planned':args.positions,'accepted':len(entries),'inherited':inherited_count,'acceptedNew':len(entries)-inherited_count,'queued':len(frontier)})
                 atomic_json(args.output/'observations.json',{'rows':observations})
                 print(json.dumps({'position':len(observations),'ply':len(moves),'move':selected['move'],'gapCp':gap,'accepted':accepted,'bookEntries':len(entries)}),flush=True)
@@ -186,6 +232,8 @@ def main():
                 'seedPgnSha256':hashlib.sha256(args.seed_pgn.read_bytes()).hexdigest() if args.seed_pgn else None,
                 'seedPlyRange':[args.seed_min_ply,args.seed_max_ply],
                 'inheritedRepertoireSha256':inherited_sha,'inheritedEntries':inherited_count,
+                'expansionPolicy':'connected-own-turns-with-inherited-bridges-v1',
+                'branchReplies':args.branch_replies,'branchSeconds':args.branch_seconds,
                 'status':'EXPERIMENTAL: preparação específica; buscas limitadas e amostra não provam vantagem em 25+0.'}}
             atomic_json(args.output/'repertoire.json',data)
     finally: release()
