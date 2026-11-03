@@ -16,7 +16,7 @@ export type SearchResult = {
   pv?: string[];
   ponderHit?: boolean;
   ponderMillis?: number;
-  source?: 'search' | 'forced' | 'ponder-hit' | 'book';
+  source?: 'search' | 'forced' | 'proven-mate' | 'ponder-hit' | 'book';
   preparationSha256?: string;
 };
 export type SearchInfo = Omit<SearchResult, 'bestmove'>;

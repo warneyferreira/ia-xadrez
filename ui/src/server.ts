@@ -392,7 +392,7 @@ function tournamentSnapshot(): Record<string, unknown> {
     running: tournamentState.running,
     pending: tournamentState.pending,
     search: liveTournamentSearch,
-    controller: { version: 'tournament-v1', forcedMoves: true, ...tournamentBrain.snapshot() },
+    controller: { version: 'tournament-v2-exact-mate', forcedMoves: true, ...tournamentBrain.snapshot() },
     engineConfiguration: {
       name: args['candidate-name'],
       threads: engineThreads,

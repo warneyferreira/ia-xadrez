@@ -29,6 +29,7 @@ type State = {
     hits: number;
     attempts: number;
     forcedReplies: number;
+    immediateMates?: number;
   };
   engineConfiguration: { name: string; threads: number; hashMB: number; tournamentCriticalTime?: boolean };
   running: string | null;
@@ -94,7 +95,7 @@ function sync(next: State) {
   el('time-policy').textContent =
     `Margem de operação: ${((next.timePolicy.operationMillis ?? next.timePolicy.overheadMillis) / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
   el('engine-configuration').textContent =
-    `${next.engineConfiguration.name} · ${next.engineConfiguration.threads} threads · Hash ${next.engineConfiguration.hashMB} MB${next.engineConfiguration.tournamentCriticalTime ? ' · tempo crítico experimental ativo' : ''}. Lance único legal tem resposta imediata.`;
+    `${next.engineConfiguration.name} · ${next.engineConfiguration.threads} threads · Hash ${next.engineConfiguration.hashMB} MB${next.engineConfiguration.tournamentCriticalTime ? ' · tempo crítico experimental ativo' : ''}. Lance único legal tem resposta imediata.${next.controller.immediateMates !== undefined ? ` Mates em um confirmados sem busca: ${next.controller.immediateMates}.` : ''}`;
   el('ponder-status').textContent = next.controller.thinking
     ? `Pensando durante a vez adversária · previsão ${next.controller.expected} · profundidade ${next.controller.depth ?? '…'}. Aguardando o lance real.`
     : next.controller.enabled
@@ -121,11 +122,13 @@ function sync(next: State) {
     ? `${next.pending.bestmove.slice(0, 2)} → ${next.pending.bestmove.slice(2, 4)}${next.pending.bestmove[4] ? ` = ${next.pending.bestmove[4].toUpperCase()}` : ''}`
     : '—';
   el('engine-detail').textContent = next.pending
-    ? next.pending.source === 'book'
-      ? `${san} · resposta preparada offline; sem nova busca. Confira a jogada no tabuleiro.`
-      : next.pending.source === 'forced'
-        ? `${san} · único lance legal; sem gastar tempo em nova busca.`
-        : `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}${next.pending.source === 'ponder-hit' ? ` · cálculo antecipado reaproveitado (${((next.pending.ponderMillis ?? 0) / 1000).toFixed(1)} s)` : ''}`
+    ? next.pending.source === 'proven-mate'
+      ? `${san} · mate em uma jogada confirmado pelas regras. Execute no tabuleiro e confirme; a partida ainda não foi encerrada.`
+      : next.pending.source === 'book'
+        ? `${san} · resposta preparada offline; sem nova busca. Confira a jogada no tabuleiro.`
+        : next.pending.source === 'forced'
+          ? `${san} · único lance legal; sem gastar tempo em nova busca.`
+          : `${san} · profundidade ${next.pending.depth}${next.pending.nps ? ` · ${next.pending.nps.toLocaleString('pt-BR')} nós/s` : ''}${next.pending.source === 'ponder-hit' ? ` · cálculo antecipado reaproveitado (${((next.pending.ponderMillis ?? 0) / 1000).toFixed(1)} s)` : ''}`
     : next.search && next.phase === 'engine-thinking'
       ? `Calculando agora · profundidade ${next.search.depth} · ${(next.search.nodes ?? 0).toLocaleString('pt-BR')} nós`
       : 'Aguardando a vez da nossa IA.';

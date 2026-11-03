@@ -1,7 +1,7 @@
 import { Chess } from 'chess.js';
 import { Engine, type ClockSearch, type PonderSearch, type SearchInfo, type SearchResult } from './engine.ts';
 
-export type BrainOptions = { ponder: boolean; forcedMoves: boolean };
+export type BrainOptions = { ponder: boolean; forcedMoves: boolean; immediateMates?: boolean };
 type Forecast = { moves: string; expected: string; handle: PonderSearch };
 
 /** Controlador de torneio: toda previsão é conferida contra o histórico real. */
@@ -13,6 +13,7 @@ export class TournamentBrain {
     hits: 0,
     misses: 0,
     forcedReplies: 0,
+    immediateMates: 0,
     ponderMillis: 0,
     discardedPonderMillis: 0,
   };
@@ -48,10 +49,13 @@ export class TournamentBrain {
   async stop() {
     const pending = this.forecast?.handle.result;
     this.cancel();
+    const generation = this.generation;
     if (pending) {
       const reply = await pending.catch(() => undefined);
-      this.stats.ponderMillis += reply?.ponderMillis ?? 0;
-      this.stats.discardedPonderMillis += reply?.ponderMillis ?? 0;
+      if (generation === this.generation) {
+        this.stats.ponderMillis += reply?.ponderMillis ?? 0;
+        this.stats.discardedPonderMillis += reply?.ponderMillis ?? 0;
+      }
     }
   }
 
@@ -62,6 +66,7 @@ export class TournamentBrain {
       hits: 0,
       misses: 0,
       forcedReplies: 0,
+      immediateMates: 0,
       ponderMillis: 0,
       discardedPonderMillis: 0,
     };
@@ -74,8 +79,10 @@ export class TournamentBrain {
     const generation = this.generation;
     if (old) {
       const reply = await old.catch(() => undefined);
-      this.stats.ponderMillis += reply?.ponderMillis ?? 0;
-      this.stats.discardedPonderMillis += reply?.ponderMillis ?? 0;
+      if (generation === this.generation) {
+        this.stats.ponderMillis += reply?.ponderMillis ?? 0;
+        this.stats.discardedPonderMillis += reply?.ponderMillis ?? 0;
+      }
     }
     if (generation !== this.generation) return;
     if (!this.options.ponder || !predicted || game.isGameOver()) return;
@@ -116,10 +123,30 @@ export class TournamentBrain {
   ): Promise<SearchResult> {
     if (game.isGameOver()) throw new Error('A partida já terminou.');
     const generation = ++this.generation;
+    const positionFen = game.fen();
     const moves = game.history({ verbose: true }).map((m) => m.lan);
     const legal = game.moves({ verbose: true });
-    if (this.options.forcedMoves && legal.length === 1) {
-      await this.stop();
+    // SAN is computed from legal moves on this exact board, not an engine
+    // forecast. '#' proves checkmate after this move, including promotions.
+    const mate = this.options.immediateMates !== false ? legal.find((m) => m.san.endsWith('#')) : undefined;
+    if (mate || (this.options.forcedMoves && legal.length === 1)) {
+      const stopping = this.stop();
+      const afterStop = this.generation;
+      const expectedFen = game.fen();
+      await stopping;
+      if (afterStop !== this.generation || game.fen() !== expectedFen)
+        throw new Error('Busca cancelada: a posição mudou.');
+      if (mate) {
+        this.stats.immediateMates++;
+        return {
+          bestmove: mate.lan,
+          depth: 0,
+          score: { unit: 'mate', value: 1 },
+          nodes: 0,
+          pv: [mate.lan],
+          source: 'proven-mate',
+        };
+      }
       this.stats.forcedReplies++;
       return { bestmove: legal[0]!.lan, depth: 0, score: null, nodes: 0, source: 'forced' };
     }
@@ -142,6 +169,8 @@ export class TournamentBrain {
       this.live = null;
       this.stats.hits++;
       const reply = await forecast.handle.result;
+      if (generation !== this.generation || game.fen() !== positionFen)
+        throw new Error('Busca cancelada: a posição mudou.');
       this.stats.ponderMillis += reply.ponderMillis ?? 0;
       if (reply.source === 'book') this.stats.discardedPonderMillis += reply.ponderMillis ?? 0;
       return { ...reply, source: reply.source === 'book' ? 'book' : 'ponder-hit' };
@@ -152,6 +181,8 @@ export class TournamentBrain {
     await stopping;
     if (afterStop !== this.generation) throw new Error('Busca cancelada.');
     const reply = await this.engine.searchWithClocks(moves, limits, onInfo);
+    if (afterStop !== this.generation || game.fen() !== positionFen)
+      throw new Error('Busca cancelada: a posição mudou.');
     return { ...reply, source: reply.source === 'book' ? 'book' : 'search' };
   }
 }
