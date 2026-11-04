@@ -91,7 +91,10 @@ function sync(next: State) {
   );
   el('total-clock').textContent = clock(next.elapsedMillis);
   el('physical-time-control').textContent =
-    `${Math.floor(next.initialMillis / 60000)}+0 · ${next.initialMillis === 1500000 ? 'OFICIAL' : 'ENSAIO'}`;
+    `${Math.floor(next.initialMillis / 60000)} min por equipe · ${next.initialMillis === 1500000 ? 'sem incremento' : 'ensaio sem incremento'}`;
+  el('playing-as').textContent = next.engineColor
+    ? `${next.engineConfiguration.name} joga de ${next.engineColor === 'white' ? 'brancas' : 'pretas'}.`
+    : `IA selecionada: ${next.engineConfiguration.name}. Escolha a cor antes de preparar.`;
   el('time-policy').textContent =
     `Margem de operação: ${((next.timePolicy.operationMillis ?? next.timePolicy.overheadMillis) / 1000).toFixed(1)} s por lance · ${next.timePolicy.observedMoves ? 'ajustada às suas confirmações' : 'estimativa inicial'}. A busca reserva tempo para mover a peça e pressionar o relógio.`;
   el('engine-configuration').textContent =

@@ -24,6 +24,7 @@
         <div id="physical-board" class="board"></div>
         <section class="board-status" role="status">
           <p id="phase" class="status">Prepare a partida para começar.</p>
+          <p id="playing-as" class="muted" aria-live="polite"></p>
           <p id="running-side" class="muted">Relógios parados</p>
           <p id="error" class="error" hidden></p>
           <p id="arena-reservation" class="muted" role="status"></p>
@@ -36,7 +37,7 @@
       <aside class="panel analysis-panel">
         <div class="section-heading">
           <h1>Operação de torneio</h1>
-          <span id="physical-time-control" class="badge">25+0 · OFICIAL</span>
+          <span id="physical-time-control" class="badge">25 min por equipe</span>
         </div>
         <details id="setup-details" open class="game-settings">
           <summary>1. Preparação da rodada</summary>
@@ -49,7 +50,7 @@
             >
             <label
               >Tempo por equipe<select id="initial-time">
-                <option value="1500000" selected>25 minutos · campeonato</option>
+                <option value="1500000" selected>25 minutos por equipe</option>
                 <option value="900000">15 minutos · ensaio</option>
               </select></label
             >
